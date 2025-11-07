@@ -59,7 +59,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def from_url(cls, url, *, loop=None, stream=True):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        try:
+            data = await asyncio.wait_for(
+                loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream)),
+                timeout=60.0  # 60 second timeout
+            )
+        except asyncio.TimeoutError:
+            raise Exception("A busca demorou muito tempo. Tente novamente.")
 
         if 'entries' in data:
             data = data['entries'][0]
@@ -121,10 +127,12 @@ async def play_next(ctx):
     if next_song:
         voice_client = ctx.voice_client
         if voice_client and voice_client.is_connected():
-            voice_client.play(
-                next_song,
-                after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop)
-            )
+            def after_playing(error):
+                if error:
+                    print(f'Erro ao reproduzir: {error}')
+                asyncio.run_coroutine_threadsafe(play_next(ctx), asyncio.get_event_loop())
+            
+            voice_client.play(next_song, after=after_playing)
             next_song.volume = queue.volume
             
             embed = discord.Embed(
@@ -241,10 +249,13 @@ async def play(ctx, *, url_or_search: str):
             if not ctx.voice_client.is_playing():
                 queue.current = player
                 player.volume = queue.volume
-                ctx.voice_client.play(
-                    player,
-                    after=lambda e: asyncio.run_coroutine_threadsafe(play_next(ctx), bot.loop)
-                )
+                
+                def after_playing(error):
+                    if error:
+                        print(f'Erro ao reproduzir: {error}')
+                    asyncio.run_coroutine_threadsafe(play_next(ctx), asyncio.get_event_loop())
+                
+                ctx.voice_client.play(player, after=after_playing)
                 
                 embed = discord.Embed(
                     title='🎵 Tocando Agora',
@@ -275,8 +286,11 @@ async def play(ctx, *, url_or_search: str):
                 
                 await ctx.send(embed=embed)
                 
+        except asyncio.TimeoutError:
+            await ctx.send('❌ A busca demorou muito tempo. Tente novamente.')
         except Exception as e:
-            await ctx.send(f'❌ Erro ao carregar a música: {str(e)}')
+            print(f'Erro ao carregar música: {str(e)}')
+            await ctx.send('❌ Não foi possível carregar a música. Verifique a URL ou tente outra busca.')
 
 
 @bot.command(name='pause', aliases=['pausar'])

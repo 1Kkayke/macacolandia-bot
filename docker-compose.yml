@@ -7,8 +7,6 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    volumes:
-      - ./bot.py:/app/bot.py
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - PREFIX=${PREFIX}
