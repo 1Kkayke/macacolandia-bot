@@ -54,5 +54,5 @@ echo 🚀 Iniciando o bot...
 echo.
 
 REM Run the bot
-python bot.py
+python run.py
 pause

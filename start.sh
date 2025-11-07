@@ -56,4 +56,4 @@ echo "🚀 Iniciando o bot..."
 echo ""
 
 # Run the bot
-python3 bot.py
+python3 run.py

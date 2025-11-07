@@ -190,7 +190,19 @@ Você verá uma mensagem confirmando que o bot está online:
 
 ```
 macacolandia-bot/
-├── bot.py              # Arquivo principal do bot
+├── src/                    # Código fonte principal
+│   ├── __init__.py        # Inicializador do pacote
+│   ├── bot.py             # Ponto de entrada do bot
+│   ├── config.py          # Configurações e variáveis de ambiente
+│   ├── music/             # Módulo de música
+│   │   ├── __init__.py
+│   │   ├── source.py      # Classe YTDLSource (streaming de áudio)
+│   │   └── queue.py       # Classe MusicQueue (gerenciamento de fila)
+│   └── cogs/              # Comandos organizados em cogs
+│       ├── __init__.py
+│       ├── general.py     # Comandos gerais (help, etc)
+│       └── music.py       # Comandos de música
+├── run.py              # Script principal para iniciar o bot
 ├── requirements.txt    # Dependências do projeto
 ├── .env.example       # Exemplo de arquivo de configuração
 ├── .gitignore         # Arquivos ignorados pelo Git
