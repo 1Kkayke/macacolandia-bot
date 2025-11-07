@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: macacolandia-music-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - PREFIX=${PREFIX}
