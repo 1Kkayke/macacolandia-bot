@@ -8,7 +8,7 @@ load_dotenv()
 
 # Bot configuration
 TOKEN = os.getenv('DISCORD_TOKEN')
-PREFIX = os.getenv('PREFIX', '!')
+PREFIX = os.getenv('PREFIX', '/')
 
 # YouTube DL options
 YTDL_FORMAT_OPTIONS = {

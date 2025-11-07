@@ -12,7 +12,7 @@ load_dotenv()
 
 # Bot configuration
 TOKEN = os.getenv('DISCORD_TOKEN')
-PREFIX = os.getenv('PREFIX', '!')
+PREFIX = os.getenv('PREFIX', '/')
 
 # Discord intents
 intents = discord.Intents.default()
@@ -120,7 +120,7 @@ async def play_next(ctx):
     queue = get_queue(ctx.guild.id)
     
     if queue.is_empty():
-        await ctx.send('🎵 A fila acabou! Use `!play` para adicionar mais músicas.')
+        await ctx.send(f'🎵 A fila acabou! Use `{PREFIX}play` para adicionar mais músicas.')
         return
 
     next_song = queue.get_next()

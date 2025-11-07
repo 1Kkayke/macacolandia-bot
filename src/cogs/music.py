@@ -5,6 +5,7 @@ from discord.ext import commands
 import asyncio
 from src.music.source import YTDLSource
 from src.music.queue import MusicQueue
+from src.config import PREFIX
 
 
 # Dictionary to store music queues for each guild
@@ -29,7 +30,7 @@ class Music(commands.Cog):
         queue = get_queue(ctx.guild.id)
         
         if queue.is_empty():
-            await ctx.send('🎵 A fila acabou! Use `!play` para adicionar mais músicas.')
+            await ctx.send(f'🎵 A fila acabou! Use `{PREFIX}play` para adicionar mais músicas.')
             return
 
         next_song = queue.get_next()
