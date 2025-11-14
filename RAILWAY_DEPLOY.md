@@ -35,7 +35,7 @@ git push origin main
 1. No projeto criado, clique em **"Variables"**
 2. Adicione as seguintes variáveis:
    - `DISCORD_TOKEN` = `seu_token_do_discord_aqui`
-   - `PREFIX` = `!`
+   - `PREFIX` = `/`
 
 **IMPORTANTE:** Use o token que você tem no arquivo `.env` local!
 

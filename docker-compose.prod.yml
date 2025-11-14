@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: macacolandia-bot
+    restart: unless-stopped
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - PREFIX=${PREFIX:-!}
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

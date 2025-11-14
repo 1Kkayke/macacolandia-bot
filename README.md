@@ -85,7 +85,7 @@ cp .env.example .env
 4. Edite o arquivo `.env` e adicione seu token do Discord:
 ```env
 DISCORD_TOKEN=seu_token_aqui
-PREFIX=!
+PREFIX=/
 ```
 
 ### Como Obter o Token do Bot
