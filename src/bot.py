@@ -8,6 +8,10 @@ from src.config import TOKEN, PREFIX
 
 async def load_cogs(bot):
     """Load all cogs"""
+    # Remove existing cogs to prevent duplicates
+    for cog_name in list(bot.cogs.keys()):
+        await bot.remove_cog(cog_name)
+    
     await bot.load_extension('src.cogs.general')
     await bot.load_extension('src.cogs.music')
 

@@ -3,7 +3,7 @@
 import discord
 import asyncio
 import yt_dlp as youtube_dl
-from src.config import YTDL_FORMAT_OPTIONS, FFMPEG_OPTIONS
+from src.config import YTDL_FORMAT_OPTIONS, FFMPEG_OPTIONS, FFMPEG_EXECUTABLE
 
 
 # Create YouTube DL instance
@@ -38,4 +38,4 @@ class YTDLSource(discord.PCMVolumeTransformer):
             data = data['entries'][0]
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **FFMPEG_OPTIONS), data=data)
+        return cls(discord.FFmpegPCMAudio(filename, executable=FFMPEG_EXECUTABLE, **FFMPEG_OPTIONS), data=data)

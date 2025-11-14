@@ -40,7 +40,7 @@ class Music(commands.Cog):
                 def after_playing(error):
                     if error:
                         print(f'Erro ao reproduzir: {error}')
-                    asyncio.run_coroutine_threadsafe(self.play_next(ctx), asyncio.get_event_loop())
+                    asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop)
                 
                 voice_client.play(next_song, after=after_playing)
                 next_song.volume = queue.volume
@@ -96,7 +96,7 @@ class Music(commands.Cog):
                     def after_playing(error):
                         if error:
                             print(f'Erro ao reproduzir: {error}')
-                        asyncio.run_coroutine_threadsafe(self.play_next(ctx), asyncio.get_event_loop())
+                        asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop)
                     
                     ctx.voice_client.play(player, after=after_playing)
                     
