@@ -322,25 +322,39 @@ class Games(commands.Cog):
             
             msg = await ctx.send(embed=embed)
             
-            # Add reactions
-            await msg.add_reaction('⬇️')  # Hit
-            await msg.add_reaction('🛑')  # Stand
+            # Try to add reactions, fall back to text input if forbidden
+            use_reactions = True
+            try:
+                await msg.add_reaction('⬇️')  # Hit
+                await msg.add_reaction('🛑')  # Stand
+            except discord.Forbidden:
+                use_reactions = False
+                await ctx.send('💡 Digite `hit` para pedir carta ou `stand` para parar.')
             
-            def check(reaction, user):
-                return user == ctx.author and str(reaction.emoji) in ['⬇️', '🛑'] and reaction.message.id == msg.id
+            if use_reactions:
+                def check(reaction, user):
+                    return user == ctx.author and str(reaction.emoji) in ['⬇️', '🛑'] and reaction.message.id == msg.id
+            else:
+                def check_msg(m):
+                    return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ['hit', 'stand', 'h', 's']
             
             # Player's turn
             while game.can_player_hit():
                 try:
-                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=check)
+                    if use_reactions:
+                        reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=check)
+                        action = 'hit' if str(reaction.emoji) == '⬇️' else 'stand'
+                    else:
+                        response = await self.bot.wait_for('message', timeout=30.0, check=check_msg)
+                        action = 'hit' if response.content.lower() in ['hit', 'h'] else 'stand'
                     
-                    if str(reaction.emoji) == '⬇️':
+                    if action == 'hit':
                         # Hit
                         game.player_hit()
                         
                         embed = discord.Embed(
                             title='🃏 Blackjack',
-                            description='Use ⬇️ para pedir carta (hit) ou 🛑 para parar (stand)',
+                            description='Use ⬇️ para pedir carta (hit) ou 🛑 para parar (stand)' if use_reactions else 'Digite `hit` ou `stand`',
                             color=discord.Color.blue()
                         )
                         
@@ -348,12 +362,17 @@ class Games(commands.Cog):
                         embed.add_field(name='🂠 Mão do Dealer', value=game.get_dealer_hand_str(hide_second=True), inline=False)
                         
                         await msg.edit(embed=embed)
-                        await msg.remove_reaction(reaction, user)
+                        
+                        if use_reactions:
+                            try:
+                                await msg.remove_reaction(reaction, user)
+                            except discord.Forbidden:
+                                pass  # Ignore if can't remove reactions
                         
                         if game.player_hand.is_busted():
                             break
                     
-                    elif str(reaction.emoji) == '🛑':
+                    elif action == 'stand':
                         # Stand
                         break
                 
