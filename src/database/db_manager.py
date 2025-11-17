@@ -35,11 +35,18 @@ class DatabaseManager:
                 total_won INTEGER DEFAULT 0,
                 total_lost INTEGER DEFAULT 0,
                 games_played INTEGER DEFAULT 0,
+                games_won INTEGER DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 last_daily TIMESTAMP,
                 streak INTEGER DEFAULT 0
             )
         ''')
+        
+        # Add games_won column if it doesn't exist (for existing databases)
+        cursor.execute("PRAGMA table_info(users)")
+        columns = [column[1] for column in cursor.fetchall()]
+        if 'games_won' not in columns:
+            cursor.execute('ALTER TABLE users ADD COLUMN games_won INTEGER DEFAULT 0')
         
         # Transactions table
         cursor.execute('''
@@ -196,10 +203,11 @@ class DatabaseManager:
             cursor.execute('''
                 UPDATE users 
                 SET games_played = games_played + 1,
+                    games_won = games_won + ?,
                     total_won = total_won + ?,
                     total_lost = total_lost + ?
                 WHERE user_id = ?
-            ''', (max(0, net_change), max(0, -net_change), user_id))
+            ''', (1 if won else 0, max(0, net_change), max(0, -net_change), user_id))
             
             # Commit all changes atomically
             conn.commit()

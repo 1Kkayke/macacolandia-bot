@@ -40,6 +40,9 @@ Thumbs.db
 # Logs
 *.log
 
+# Lock files
+bot.lock
+
 # FFmpeg
 ffmpeg/
 ffprobe/

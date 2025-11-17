@@ -2,6 +2,8 @@
 
 import discord
 from discord.ext import commands
+import socket
+import os
 from src.config import PREFIX
 
 
@@ -78,6 +80,26 @@ class General(commands.Cog):
         )
         
         embed.set_footer(text=f'Use {PREFIX}<comando> para executar | Aposta mínima: 10 🪙')
+        await ctx.send(embed=embed)
+    
+    @commands.command(name='ping', aliases=['latencia', 'lat'])
+    async def ping(self, ctx):
+        """Mostra latência e informações do bot"""
+        latency = round(self.bot.latency * 1000)
+        
+        embed = discord.Embed(
+            title='🏓 Pong!',
+            color=discord.Color.green()
+        )
+        embed.add_field(name='Latência', value=f'{latency}ms', inline=True)
+        embed.add_field(name='Servidores', value=len(self.bot.guilds), inline=True)
+        embed.add_field(name='Host', value=socket.gethostname(), inline=True)
+        embed.add_field(
+            name='⚠️ Comandos Triplicando?',
+            value='Verifique se há múltiplas instâncias do bot rodando!\nPare Railway/Dokploy ou sua máquina local.',
+            inline=False
+        )
+        
         await ctx.send(embed=embed)
 
 

@@ -3,59 +3,117 @@
 import discord
 from discord.ext import commands
 import asyncio
+import os
+import sys
+import socket
 from src.config import TOKEN, PREFIX
+
+# Lock file to prevent multiple instances
+LOCK_FILE = 'bot.lock'
+# Get hostname to identify where bot is running
+HOSTNAME = socket.gethostname()
 
 
 async def load_cogs(bot):
     """Load all cogs"""
-    # Remove existing cogs to prevent duplicates
-    for cog_name in list(bot.cogs.keys()):
-        await bot.remove_cog(cog_name)
+    # Get list of loaded extensions
+    loaded = list(bot.extensions.keys())
     
-    await bot.load_extension('src.cogs.general')
-    await bot.load_extension('src.cogs.music')
-    await bot.load_extension('src.cogs.economy')
-    await bot.load_extension('src.cogs.games')
-    await bot.load_extension('src.cogs.fun')
+    # Unload all cogs first to prevent duplicates
+    for extension in loaded:
+        try:
+            await bot.unload_extension(extension)
+        except:
+            pass
+    
+    # Load cogs
+    cogs_to_load = [
+        'src.cogs.general',
+        'src.cogs.music',
+        'src.cogs.economy',
+        'src.cogs.games',
+        'src.cogs.fun'
+    ]
+    
+    for cog in cogs_to_load:
+        try:
+            await bot.load_extension(cog)
+            print(f'✅ Carregado: {cog}')
+        except Exception as e:
+            print(f'❌ Erro ao carregar {cog}: {e}')
 
 
 async def main():
     """Main function to run the bot"""
-    # Discord intents
-    intents = discord.Intents.default()
-    intents.message_content = True
-    intents.voice_states = True
-
-    # Bot instance
-    bot = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None)
-
-    @bot.event
-    async def on_ready():
-        print(f'🤖 Bot conectado como {bot.user.name}')
-        print(f'📊 ID: {bot.user.id}')
-        print(f'🎮 Bot Macacolândia está online!')
-        print('------')
-        await bot.change_presence(activity=discord.Game(name=f'{PREFIX}help | Música 🎵 Cassino 🎰'))
-
-    @bot.event
-    async def on_command_error(ctx, error):
-        if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(f'❌ Argumento faltando! Use `{PREFIX}help` para ver os comandos.')
-        elif isinstance(error, commands.CommandNotFound):
-            await ctx.send(f'❌ Comando não encontrado! Use `{PREFIX}help` para ver os comandos disponíveis.')
-        else:
-            await ctx.send(f'❌ Ocorreu um erro: {str(error)}')
-
-    # Load cogs
-    await load_cogs(bot)
-
-    # Run the bot
-    if not TOKEN:
-        print('❌ ERRO: Token do Discord não encontrado!')
-        print('Por favor, crie um arquivo .env com seu DISCORD_TOKEN')
-        return
+    # Check for lock file
+    if os.path.exists(LOCK_FILE):
+        print('⚠️  Bot já está rodando! Pare a instância anterior primeiro.')
+        print(f'   Se o bot não estiver rodando, delete o arquivo: {LOCK_FILE}')
+        sys.exit(1)
     
-    await bot.start(TOKEN)
+    # Create lock file
+    with open(LOCK_FILE, 'w') as f:
+        f.write(str(os.getpid()))
+    
+    try:
+        # Discord intents
+        intents = discord.Intents.default()
+        intents.message_content = True
+        intents.voice_states = True
+
+        # Bot instance
+        bot = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None)
+
+        @bot.event
+        async def on_ready():
+            # Check if bot is already connected (reconnection)
+            if hasattr(bot, '_ready_called'):
+                print('🔄 Bot reconectado')
+                return
+            
+            bot._ready_called = True
+            print(f'🤖 Bot conectado como {bot.user.name}')
+            print(f'📊 ID: {bot.user.id}')
+            print(f'🎮 Bot Macacolândia está online!')
+            print(f'📍 Servidores: {len(bot.guilds)}')
+            print(f'🖥️  Executando em: {HOSTNAME}')
+            print('------')
+            
+            # Check for multiple instances
+            app_info = await bot.application_info()
+            print(f'⚠️  AVISO: Se comandos estiverem triplicando, você tem múltiplas instâncias rodando!')
+            print(f'   Verifique Railway, Dokploy e sua máquina local.')
+            print('------')
+            
+            await bot.change_presence(activity=discord.Game(name=f'{PREFIX}help | Música 🎵 Cassino 🎰'))
+
+        @bot.event
+        async def on_command_error(ctx, error):
+            if isinstance(error, commands.MissingRequiredArgument):
+                await ctx.send(f'❌ Argumento faltando! Use `{PREFIX}help` para ver os comandos.')
+            elif isinstance(error, commands.CommandNotFound):
+                pass  # Silencia comando não encontrado para reduzir spam
+            elif isinstance(error, commands.CommandOnCooldown):
+                await ctx.send(f'⏰ Aguarde {error.retry_after:.1f}s para usar este comando novamente.')
+            else:
+                print(f'Erro no comando {ctx.command}: {error}')
+                await ctx.send(f'❌ Ocorreu um erro: {str(error)}')
+
+        # Load cogs
+        await load_cogs(bot)
+
+        # Run the bot
+        if not TOKEN:
+            print('❌ ERRO: Token do Discord não encontrado!')
+            print('Por favor, crie um arquivo .env com seu DISCORD_TOKEN')
+            return
+        
+        await bot.start(TOKEN)
+    
+    finally:
+        # Remove lock file on exit
+        if os.path.exists(LOCK_FILE):
+            os.remove(LOCK_FILE)
 
 
 if __name__ == '__main__':
