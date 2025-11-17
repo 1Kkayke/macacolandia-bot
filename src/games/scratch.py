@@ -1,0 +1,103 @@
+"""Scratch card game implementation"""
+
+import random
+from typing import Tuple, List
+
+
+class ScratchCardGame:
+    """Instant win scratch card game"""
+    
+    # Prize pool with probabilities
+    PRIZES = [
+        {'multiplier': 0, 'label': 'Perdeu', 'emoji': '❌', 'weight': 45},
+        {'multiplier': 0.5, 'label': 'Metade', 'emoji': '💸', 'weight': 20},
+        {'multiplier': 1.0, 'label': 'Empate', 'emoji': '🤝', 'weight': 15},
+        {'multiplier': 2.0, 'label': 'Dobro', 'emoji': '💰', 'weight': 10},
+        {'multiplier': 3.0, 'label': 'Triplo', 'emoji': '💎', 'weight': 5},
+        {'multiplier': 5.0, 'label': 'x5', 'emoji': '🌟', 'weight': 3},
+        {'multiplier': 10.0, 'label': 'x10', 'emoji': '⭐', 'weight': 1.5},
+        {'multiplier': 25.0, 'label': 'x25', 'emoji': '🎊', 'weight': 0.4},
+        {'multiplier': 100.0, 'label': 'JACKPOT!', 'emoji': '🎰', 'weight': 0.1},
+    ]
+    
+    CARD_SIZE = 9  # 3x3 grid
+    
+    @staticmethod
+    def generate_card() -> List[dict]:
+        """Generate a scratch card with random prizes"""
+        prizes = []
+        weights = [p['weight'] for p in ScratchCardGame.PRIZES]
+        
+        for _ in range(ScratchCardGame.CARD_SIZE):
+            prize = random.choices(ScratchCardGame.PRIZES, weights=weights, k=1)[0]
+            prizes.append(prize)
+        
+        return prizes
+    
+    @staticmethod
+    def calculate_best_prize(card: List[dict]) -> Tuple[bool, float, dict]:
+        """
+        Get the best prize from the card
+        Returns: (won, multiplier, prize_info)
+        """
+        best_prize = max(card, key=lambda p: p['multiplier'])
+        won = best_prize['multiplier'] > 0
+        return won, best_prize['multiplier'], best_prize
+    
+    @staticmethod
+    def format_card_hidden() -> str:
+        """Format hidden scratch card"""
+        card = "```\n"
+        card += "┌─────────┐\n"
+        card += "│ ❓ ❓ ❓ │\n"
+        card += "│ ❓ ❓ ❓ │\n"
+        card += "│ ❓ ❓ ❓ │\n"
+        card += "└─────────┘\n"
+        card += "```"
+        return card
+    
+    @staticmethod
+    def format_card_revealed(card: List[dict], highlight_index: int = -1) -> str:
+        """Format revealed scratch card"""
+        card_str = "```\n"
+        card_str += "┌─────────┐\n"
+        
+        for row in range(3):
+            card_str += "│ "
+            for col in range(3):
+                index = row * 3 + col
+                prize = card[index]
+                emoji = prize['emoji']
+                
+                if index == highlight_index:
+                    card_str += f">{emoji}< "
+                else:
+                    card_str += f"{emoji} "
+            
+            card_str += "│\n"
+        
+        card_str += "└─────────┘\n"
+        card_str += "```"
+        return card_str
+    
+    @staticmethod
+    def format_prizes_list() -> str:
+        """Format list of possible prizes"""
+        prizes_text = "**Prêmios Possíveis:**\n"
+        for prize in ScratchCardGame.PRIZES:
+            if prize['multiplier'] > 0:
+                prizes_text += f"{prize['emoji']} {prize['label']} - {prize['multiplier']}x\n"
+        return prizes_text
+    
+    @staticmethod
+    def get_prize_distribution() -> str:
+        """Get prize distribution info"""
+        total_weight = sum(p['weight'] for p in ScratchCardGame.PRIZES)
+        
+        text = "**Chances:**\n"
+        for prize in ScratchCardGame.PRIZES:
+            if prize['multiplier'] >= 1.0:
+                chance = (prize['weight'] / total_weight) * 100
+                text += f"{prize['emoji']} {prize['label']}: {chance:.1f}%\n"
+        
+        return text
