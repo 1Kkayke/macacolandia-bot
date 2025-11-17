@@ -27,54 +27,139 @@ class AchievementManager:
     def _define_achievements(self) -> Dict[str, Achievement]:
         """Define all achievements"""
         achievements = {
-            'first_game': Achievement(
-                'first_game',
-                'Primeira Aposta',
-                'Jogou seu primeiro jogo',
-                '🎮',
-                lambda user_stats: user_stats['games_played'] >= 1,
-                100
-            ),
-            'high_roller': Achievement(
-                'high_roller',
-                'Apostador de Elite',
-                'Tenha 10.000 moedas ou mais',
-                '💎',
-                lambda user_stats: user_stats['coins'] >= 10000,
-                500
-            ),
-            'veteran': Achievement(
-                'veteran',
-                'Veterano',
-                'Jogue 100 jogos',
-                '🎖️',
-                lambda user_stats: user_stats['games_played'] >= 100,
-                1000
-            ),
-            'lucky_streak': Achievement(
-                'lucky_streak',
-                'Sortudo',
-                'Mantenha uma sequência de 7 dias de recompensas diárias',
-                '🍀',
-                lambda user_stats: user_stats['streak'] >= 7,
-                500
-            ),
-            'big_winner': Achievement(
-                'big_winner',
-                'Grande Vencedor',
-                'Ganhe 5.000 moedas no total',
-                '🏆',
-                lambda user_stats: user_stats['total_won'] >= 5000,
-                250
-            ),
-            'millionaire': Achievement(
-                'millionaire',
-                'Milionário',
-                'Acumule 50.000 moedas',
-                '💰',
-                lambda user_stats: user_stats['coins'] >= 50000,
-                5000
-            ),
+            # Conquistas Iniciais
+            'first_game': Achievement('first_game', 'Debutante', 'Deu a primeira jogada', '🎮', lambda u: u['games_played'] >= 1, 100),
+            'beginner': Achievement('beginner', 'Novato', 'Jogou 5 vezes', '🌱', lambda u: u['games_played'] >= 5, 50),
+            'getting_started': Achievement('getting_started', 'Pegando o Jeito', 'Jogou 10 vezes', '🎯', lambda u: u['games_played'] >= 10, 100),
+            
+            # Conquistas de Jogos
+            'casual_player': Achievement('casual_player', 'Jogador Casual', 'Jogou 25 vezes', '🎲', lambda u: u['games_played'] >= 25, 200),
+            'regular': Achievement('regular', 'Frequentador', 'Jogou 50 vezes', '🎪', lambda u: u['games_played'] >= 50, 500),
+            'veteran': Achievement('veteran', 'Veterano Raiz', 'Jogou 100 vezes', '🎖️', lambda u: u['games_played'] >= 100, 1000),
+            'expert': Achievement('expert', 'Especialista', 'Jogou 250 vezes', '🏅', lambda u: u['games_played'] >= 250, 2500),
+            'master': Achievement('master', 'Mestre do Cassino', 'Jogou 500 vezes', '👑', lambda u: u['games_played'] >= 500, 5000),
+            'legend': Achievement('legend', 'Lenda Viva', 'Jogou 1000 vezes', '⭐', lambda u: u['games_played'] >= 1000, 10000),
+            'god_tier': Achievement('god_tier', 'Deus do Jogo', 'Jogou 2500 vezes', '🌟', lambda u: u['games_played'] >= 2500, 25000),
+            'unstoppable': Achievement('unstoppable', 'Imparável', 'Jogou 5000 vezes', '💫', lambda u: u['games_played'] >= 5000, 50000),
+            
+            # Conquistas de Moedas
+            'first_coins': Achievement('first_coins', 'Conseguiu Grana', 'Tenha 100 moedas', '🪙', lambda u: u['coins'] >= 100, 50),
+            'getting_rich': Achievement('getting_rich', 'Ficando Rico', 'Tenha 500 moedas', '💵', lambda u: u['coins'] >= 500, 100),
+            'moneybags': Achievement('moneybags', 'Cheio da Grana', 'Tenha 1.000 moedas', '💰', lambda u: u['coins'] >= 1000, 200),
+            'wealthy': Achievement('wealthy', 'Próspero', 'Tenha 5.000 moedas', '💎', lambda u: u['coins'] >= 5000, 500),
+            'high_roller': Achievement('high_roller', 'Apostador VIP', 'Tenha 10.000 moedas', '🎰', lambda u: u['coins'] >= 10000, 1000),
+            'tycoon': Achievement('tycoon', 'Magnata', 'Tenha 25.000 moedas', '🏦', lambda u: u['coins'] >= 25000, 2500),
+            'millionaire': Achievement('millionaire', 'Milionário', 'Tenha 50.000 moedas', '🤑', lambda u: u['coins'] >= 50000, 5000),
+            'multi_millionaire': Achievement('multi_millionaire', 'Multimilionário', 'Tenha 100.000 moedas', '💸', lambda u: u['coins'] >= 100000, 10000),
+            'billionaire': Achievement('billionaire', 'Bilionário', 'Tenha 500.000 moedas', '🏰', lambda u: u['coins'] >= 500000, 50000),
+            'trillionaire': Achievement('trillionaire', 'Trilionário', 'Tenha 1.000.000 moedas', '👑', lambda u: u['coins'] >= 1000000, 100000),
+            
+            # Conquistas de Vitórias
+            'first_win': Achievement('first_win', 'Primeira Vitória', 'Ganhe seu primeiro jogo', '🎉', lambda u: u['games_won'] >= 1, 100),
+            'lucky_one': Achievement('lucky_one', 'Sortudo', 'Ganhe 5 vezes', '🍀', lambda u: u['games_won'] >= 5, 100),
+            'winner': Achievement('winner', 'Vencedor', 'Ganhe 10 vezes', '🏆', lambda u: u['games_won'] >= 10, 200),
+            'champion': Achievement('champion', 'Campeão', 'Ganhe 25 vezes', '🥇', lambda u: u['games_won'] >= 25, 500),
+            'big_winner': Achievement('big_winner', 'Grande Vencedor', 'Ganhe 50 vezes', '🎊', lambda u: u['games_won'] >= 50, 1000),
+            'dominator': Achievement('dominator', 'Dominador', 'Ganhe 100 vezes', '👊', lambda u: u['games_won'] >= 100, 2000),
+            'conqueror': Achievement('conqueror', 'Conquistador', 'Ganhe 250 vezes', '⚔️', lambda u: u['games_won'] >= 250, 5000),
+            'destroyer': Achievement('destroyer', 'Destruidor', 'Ganhe 500 vezes', '💥', lambda u: u['games_won'] >= 500, 10000),
+            
+            # Conquistas de Ganhos Totais
+            'small_profit': Achievement('small_profit', 'Lucrinho', 'Ganhe 1.000 moedas no total', '💵', lambda u: u['total_won'] >= 1000, 100),
+            'good_profit': Achievement('good_profit', 'Bom Lucro', 'Ganhe 5.000 moedas no total', '💰', lambda u: u['total_won'] >= 5000, 250),
+            'big_profit': Achievement('big_profit', 'Lucrão', 'Ganhe 10.000 moedas no total', '💎', lambda u: u['total_won'] >= 10000, 500),
+            'huge_profit': Achievement('huge_profit', 'Lucro Absurdo', 'Ganhe 25.000 moedas no total', '🤑', lambda u: u['total_won'] >= 25000, 1000),
+            'massive_profit': Achievement('massive_profit', 'Lucro Monstro', 'Ganhe 50.000 moedas no total', '💸', lambda u: u['total_won'] >= 50000, 2500),
+            'insane_profit': Achievement('insane_profit', 'Lucro Insano', 'Ganhe 100.000 moedas no total', '🏆', lambda u: u['total_won'] >= 100000, 5000),
+            
+            # Conquistas de Streak (Sequência Diária)
+            'consistent': Achievement('consistent', 'Consistente', '3 dias seguidos', '📅', lambda u: u['streak'] >= 3, 100),
+            'dedicated': Achievement('dedicated', 'Dedicado', '5 dias seguidos', '🔥', lambda u: u['streak'] >= 5, 250),
+            'lucky_streak': Achievement('lucky_streak', 'Sequência de Sorte', '7 dias seguidos', '🍀', lambda u: u['streak'] >= 7, 500),
+            'committed': Achievement('committed', 'Comprometido', '10 dias seguidos', '💪', lambda u: u['streak'] >= 10, 1000),
+            'persistent': Achievement('persistent', 'Persistente', '15 dias seguidos', '🎯', lambda u: u['streak'] >= 15, 1500),
+            'unstoppable_streak': Achievement('unstoppable_streak', 'Imparável', '21 dias seguidos', '⚡', lambda u: u['streak'] >= 21, 2500),
+            'month_streak': Achievement('month_streak', 'Mês Inteiro', '30 dias seguidos', '📆', lambda u: u['streak'] >= 30, 5000),
+            'two_months': Achievement('two_months', 'Dois Meses', '60 dias seguidos', '🌟', lambda u: u['streak'] >= 60, 10000),
+            'three_months': Achievement('three_months', 'Três Meses', '90 dias seguidos', '💫', lambda u: u['streak'] >= 90, 20000),
+            'half_year': Achievement('half_year', 'Meio Ano', '180 dias seguidos', '👑', lambda u: u['streak'] >= 180, 50000),
+            'full_year': Achievement('full_year', 'Ano Completo', '365 dias seguidos', '🏆', lambda u: u['streak'] >= 365, 100000),
+            
+            # Conquistas Especiais de Jogos Específicos
+            'coinflip_fan': Achievement('coinflip_fan', 'Fã de Cara ou Coroa', 'Jogue Coinflip 50 vezes', '🪙', lambda u: True, 500),
+            'wheel_lover': Achievement('wheel_lover', 'Viciado na Roda', 'Jogue Wheel 50 vezes', '🎡', lambda u: True, 500),
+            'plinko_master': Achievement('plinko_master', 'Mestre do Plinko', 'Jogue Plinko 50 vezes', '🎯', lambda u: True, 500),
+            'limbo_god': Achievement('limbo_god', 'Deus do Limbo', 'Jogue Limbo 50 vezes', '🎲', lambda u: True, 500),
+            'scratch_addict': Achievement('scratch_addict', 'Viciado em Raspadinha', 'Jogue Scratch 50 vezes', '🎫', lambda u: True, 500),
+            'keno_expert': Achievement('keno_expert', 'Expert em Keno', 'Jogue Keno 50 vezes', '🎱', lambda u: True, 500),
+            'baccarat_pro': Achievement('baccarat_pro', 'Profissa do Baccarat', 'Jogue Baccarat 50 vezes', '🎴', lambda u: True, 500),
+            'hilo_king': Achievement('hilo_king', 'Rei do Hi-Lo', 'Jogue Hi-Lo 50 vezes', '🃏', lambda u: True, 500),
+            'tower_climber': Achievement('tower_climber', 'Escalador de Torre', 'Jogue Tower 50 vezes', '🗼', lambda u: True, 500),
+            'poker_shark': Achievement('poker_shark', 'Tubarão do Poker', 'Jogue Video Poker 50 vezes', '🎰', lambda u: True, 500),
+            
+            # Conquistas de Apostas Altas
+            'brave_bet': Achievement('brave_bet', 'Aposta Corajosa', 'Aposte 1.000 em um jogo', '🎲', lambda u: True, 500),
+            'risky_bet': Achievement('risky_bet', 'Aposta Arriscada', 'Aposte 5.000 em um jogo', '💎', lambda u: True, 1000),
+            'all_in': Achievement('all_in', 'All In', 'Aposte 10.000 em um jogo', '🔥', lambda u: True, 2500),
+            'whale': Achievement('whale', 'Baleia', 'Aposte 25.000 em um jogo', '🐋', lambda u: True, 5000),
+            'mega_whale': Achievement('mega_whale', 'Mega Baleia', 'Aposte 50.000 em um jogo', '🐳', lambda u: True, 10000),
+            
+            # Conquistas de Multiplicadores
+            'double_win': Achievement('double_win', 'Dobrou', 'Ganhe com 2x', '✌️', lambda u: True, 100),
+            'triple_win': Achievement('triple_win', 'Triplicou', 'Ganhe com 3x', '🔺', lambda u: True, 200),
+            'big_multi': Achievement('big_multi', 'Multiplicador Grande', 'Ganhe com 10x', '🎊', lambda u: True, 500),
+            'huge_multi': Achievement('huge_multi', 'Multi Enorme', 'Ganhe com 25x', '💥', lambda u: True, 1000),
+            'insane_multi': Achievement('insane_multi', 'Multi Insano', 'Ganhe com 50x', '🌟', lambda u: True, 2500),
+            'godlike_multi': Achievement('godlike_multi', 'Multi Divino', 'Ganhe com 100x+', '👑', lambda u: True, 5000),
+            
+            # Conquistas de Perdas (humor negro)
+            'bad_luck': Achievement('bad_luck', 'Azar Brabo', 'Perca 5 vezes seguidas', '😅', lambda u: True, 100),
+            'really_unlucky': Achievement('really_unlucky', 'Muito Azarado', 'Perca 10 vezes seguidas', '😬', lambda u: True, 200),
+            'disaster': Achievement('disaster', 'Desastre', 'Perca 1.000 moedas no total', '💀', lambda u: u['total_lost'] >= 1000, 100),
+            'bankruptcy': Achievement('bankruptcy', 'Falência', 'Perca 5.000 moedas no total', '☠️', lambda u: u['total_lost'] >= 5000, 250),
+            'rock_bottom': Achievement('rock_bottom', 'No Fundo do Poço', 'Perca 10.000 moedas no total', '🕳️', lambda u: u['total_lost'] >= 10000, 500),
+            
+            # Conquistas Divertidas/Meme
+            'night_owl': Achievement('night_owl', 'Coruja Noturna', 'Jogue às 3h da manhã', '🦉', lambda u: True, 500),
+            'early_bird': Achievement('early_bird', 'Madrugador', 'Jogue às 6h da manhã', '🐔', lambda u: True, 500),
+            'workday_gambler': Achievement('workday_gambler', 'Jogando no Trampo', 'Jogue em horário comercial', '💼', lambda u: True, 300),
+            'weekend_warrior': Achievement('weekend_warrior', 'Guerreiro de Fim de Semana', 'Jogue 10 jogos no sábado', '🎉', lambda u: True, 500),
+            'christmas_gambler': Achievement('christmas_gambler', 'Apostador de Natal', 'Jogue no Natal', '🎄', lambda u: True, 1000),
+            'new_year_luck': Achievement('new_year_luck', 'Sorte de Ano Novo', 'Jogue no Ano Novo', '🎆', lambda u: True, 1000),
+            
+            # Conquistas Sociais
+            'social_player': Achievement('social_player', 'Jogador Social', 'Transfira moedas 5 vezes', '🤝', lambda u: True, 200),
+            'generous': Achievement('generous', 'Generoso', 'Transfira 1.000 moedas', '💝', lambda u: True, 500),
+            'philanthropist': Achievement('philanthropist', 'Filantropo', 'Transfira 5.000 moedas', '🎁', lambda u: True, 1000),
+            'robin_hood': Achievement('robin_hood', 'Robin Hood', 'Transfira 10.000 moedas', '🏹', lambda u: True, 2500),
+            
+            # Conquistas de Velocidade
+            'speed_player': Achievement('speed_player', 'Jogador Rápido', 'Jogue 10 jogos em 1 hora', '⚡', lambda u: True, 500),
+            'marathon': Achievement('marathon', 'Maratonista', 'Jogue 50 jogos em um dia', '🏃', lambda u: True, 2000),
+            'ultra_marathon': Achievement('ultra_marathon', 'Ultra Maratonista', 'Jogue 100 jogos em um dia', '🏃‍♂️', lambda u: True, 5000),
+            
+            # Conquistas de Precisão
+            'perfect_guess': Achievement('perfect_guess', 'Chute Perfeito', 'Acerte no primeiro try', '🎯', lambda u: True, 200),
+            'lucky_seven': Achievement('lucky_seven', 'Sete da Sorte', 'Ganhe com número 7', '🍀', lambda u: True, 777),
+            'jackpot_hunter': Achievement('jackpot_hunter', 'Caçador de Jackpot', 'Ganhe um jackpot', '💰', lambda u: True, 5000),
+            
+            # Conquistas Extremas
+            'never_give_up': Achievement('never_give_up', 'Nunca Desiste', 'Continue jogando com menos de 100 moedas', '💪', lambda u: True, 500),
+            'comeback_king': Achievement('comeback_king', 'Rei da Virada', 'Volte de 0 para 10.000 moedas', '👑', lambda u: True, 5000),
+            'phoenix': Achievement('phoenix', 'Fênix', 'Renasça das cinzas 3 vezes', '🔥', lambda u: True, 2500),
+            
+            # Conquistas de Colecionador
+            'collector': Achievement('collector', 'Colecionador', 'Desbloqueie 10 conquistas', '📚', lambda u: True, 500),
+            'achievement_hunter': Achievement('achievement_hunter', 'Caçador de Conquistas', 'Desbloqueie 25 conquistas', '🏹', lambda u: True, 1000),
+            'completionist': Achievement('completionist', 'Completista', 'Desbloqueie 50 conquistas', '💯', lambda u: True, 5000),
+            'perfectionist': Achievement('perfectionist', 'Perfeccionista', 'Desbloqueie 75 conquistas', '⭐', lambda u: True, 10000),
+            'god_of_achievements': Achievement('god_of_achievements', 'Deus das Conquistas', 'Desbloqueie 100 conquistas', '👑', lambda u: True, 25000),
+            
+            # Conquistas Secretas/Easter Eggs
+            'secret_1': Achievement('secret_1', 'Descobridor', 'Encontrou um segredo', '🔍', lambda u: True, 1000),
+            'secret_2': Achievement('secret_2', 'Detetive', 'Encontrou todos os segredos', '🕵️', lambda u: True, 5000),
+            'lucky_number': Achievement('lucky_number', 'Número da Sorte', 'Ganhe exatamente 6.969 moedas', '😏', lambda u: u['coins'] == 6969, 6969),
+            'illuminati': Achievement('illuminati', 'Illuminati Confirmado', 'Tenha exatamente 666 ou 777 moedas', '👁️', lambda u: u['coins'] in [666, 777], 1000),
         }
         return achievements
     

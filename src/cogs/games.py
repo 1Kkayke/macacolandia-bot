@@ -7,6 +7,7 @@ from src.database.db_manager import DatabaseManager
 from src.economy.economy_manager import EconomyManager
 from src.core.achievements import AchievementManager
 from src.core.checks import ensure_not_playing, start_game, end_game
+from src.core.mensagens import MensagensCasuais as MSG
 from src.games.roulette import RouletteGame
 from src.games.slots import SlotsGame
 from src.games.dice import DiceGame
@@ -15,6 +16,16 @@ from src.games.tigrinho import TigrinhoGame
 from src.games.mines import MinesGame
 from src.games.crash import CrashGame
 from src.games.double import DoubleGame
+from src.games.coinflip import CoinFlipGame
+from src.games.wheel import WheelGame
+from src.games.keno import KenoGame
+from src.games.plinko import PlinkoGame
+from src.games.baccarat import BaccaratGame
+from src.games.hilo import HiLoGame
+from src.games.limbo import LimboGame
+from src.games.tower import TowerGame
+from src.games.scratch import ScratchCardGame
+from src.games.videopoker import VideoPokerGame
 from src.config import PREFIX
 
 
@@ -30,7 +41,7 @@ class Games(commands.Cog):
     async def check_balance(self, ctx, amount: int) -> bool:
         """Check if user can afford the bet"""
         if not self.economy.can_afford(str(ctx.author.id), ctx.author.name, amount):
-            await ctx.send(f'❌ Saldo insuficiente! Use `{PREFIX}saldo` para ver seu saldo.')
+            await ctx.send(MSG.saldo_insuficiente())
             return False
         return True
     
@@ -45,7 +56,7 @@ class Games(commands.Cog):
             return
         
         if bet_amount < 10:
-            await ctx.send('❌ A aposta mínima é 10 🪙!')
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -72,7 +83,7 @@ class Games(commands.Cog):
             )
             
             if not success:
-                await ctx.send('❌ Erro ao processar aposta!')
+                await ctx.send(MSG.erro_processar())
                 return
             
             # Create result embed
@@ -125,7 +136,7 @@ class Games(commands.Cog):
             return
         
         if bet_amount < 10:
-            await ctx.send('❌ A aposta mínima é 10 🪙!')
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -149,7 +160,7 @@ class Games(commands.Cog):
             )
             
             if not success:
-                await ctx.send('❌ Erro ao processar aposta!')
+                await ctx.send(MSG.erro_processar())
                 return
             
             # Create result embed
@@ -204,7 +215,7 @@ class Games(commands.Cog):
             return
         
         if bet_amount < 10:
-            await ctx.send('❌ A aposta mínima é 10 🪙!')
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -249,7 +260,7 @@ class Games(commands.Cog):
             )
             
             if not success:
-                await ctx.send('❌ Erro ao processar aposta!')
+                await ctx.send(MSG.erro_processar())
                 return
             
             # Create result embed
@@ -296,7 +307,7 @@ class Games(commands.Cog):
             return
         
         if bet_amount < 10:
-            await ctx.send('❌ A aposta mínima é 10 🪙!')
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -445,7 +456,7 @@ class Games(commands.Cog):
             return
         
         if bet_amount < 10:
-            await ctx.send('❌ A aposta mínima é 10 🪙!')
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -457,7 +468,7 @@ class Games(commands.Cog):
             # Create spinning animation
             embed = discord.Embed(
                 title='🐅 Tigrinho - Fortune Tiger',
-                description='🎰 Girando...',
+                description=MSG.girando(),
                 color=discord.Color.gold()
             )
             
@@ -472,7 +483,7 @@ class Games(commands.Cog):
                 await asyncio.sleep(0.8)
                 embed = discord.Embed(
                     title='🐅 Tigrinho - Fortune Tiger',
-                    description='🎰 Girando...',
+                    description=MSG.girando(),
                     color=discord.Color.gold()
                 )
                 grid_display = TigrinhoGame.format_spinning_frame(i)
@@ -494,7 +505,7 @@ class Games(commands.Cog):
             )
             
             if not success:
-                await ctx.send('❌ Erro ao processar aposta!')
+                await ctx.send(MSG.erro_processar())
                 return
             
             # Create final result embed
@@ -546,7 +557,7 @@ class Games(commands.Cog):
             return
         
         if bet_amount < 10:
-            await ctx.send('❌ A aposta mínima é 10 🪙!')
+            await ctx.send(MSG.aposta_minima())
             return
         
         if target_multiplier < 1.1 or target_multiplier > 100:
@@ -609,7 +620,7 @@ class Games(commands.Cog):
             )
             
             if not success:
-                await ctx.send('❌ Erro ao processar aposta!')
+                await ctx.send(MSG.erro_processar())
                 return
             
             # Show final result
@@ -668,7 +679,7 @@ class Games(commands.Cog):
             return
         
         if bet_amount < 10:
-            await ctx.send('❌ A aposta mínima é 10 🪙!')
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not DoubleGame.validate_color(bet_color):
@@ -736,7 +747,7 @@ class Games(commands.Cog):
             )
             
             if not success:
-                await ctx.send('❌ Erro ao processar aposta!')
+                await ctx.send(MSG.erro_processar())
                 return
             
             # Show final result
@@ -799,7 +810,7 @@ class Games(commands.Cog):
             return
         
         if bet_amount < 10:
-            await ctx.send('❌ A aposta mínima é 10 🪙!')
+            await ctx.send(MSG.aposta_minima())
             return
         
         difficulty_lower = difficulty.lower()
@@ -1020,61 +1031,617 @@ class Games(commands.Cog):
         finally:
             end_game(ctx.author.id)
     
+    @commands.command(name='coinflip', aliases=['moeda', 'cara', 'coroa', 'flip'])
+    async def coinflip(self, ctx, bet_amount: int, choice: str):
+        """
+        Joga cara ou coroa
+        Uso: /coinflip <valor> <escolha>
+        Escolhas: cara, coroa, heads, tails
+        """
+        if not await ensure_not_playing(ctx):
+            return
+        
+        if bet_amount < 10:
+            await ctx.send(MSG.aposta_minima())
+            return
+        
+        if not CoinFlipGame.validate_choice(choice):
+            await ctx.send(MSG.escolha_invalida() + ' Use: cara, coroa, heads ou tails')
+            return
+        
+        if not await self.check_balance(ctx, bet_amount):
+            return
+        
+        start_game(ctx.author.id, 'coinflip')
+        
+        try:
+            # Show flipping animation
+            embed = discord.Embed(
+                title='🪙 Cara ou Coroa',
+                description='Girando a moeda...',
+                color=discord.Color.blue()
+            )
+            msg = await ctx.send(embed=embed)
+            
+            for frame in CoinFlipGame.get_animation_frames():
+                await asyncio.sleep(0.4)
+                embed.description = f'{frame} Girando...'
+                await msg.edit(embed=embed)
+            
+            # Flip coin
+            result = CoinFlipGame.flip()
+            won, multiplier = CoinFlipGame.check_win(result, choice)
+            
+            # Process bet
+            success, net_change = self.economy.process_bet(
+                str(ctx.author.id),
+                ctx.author.name,
+                bet_amount,
+                'coinflip',
+                won,
+                multiplier
+            )
+            
+            if not success:
+                await ctx.send(MSG.erro_processar())
+                return
+            
+            # Show result
+            embed = discord.Embed(
+                title=f'🪙 Cara ou Coroa - {ctx.author.display_name}',
+                color=discord.Color.green() if won else discord.Color.red()
+            )
+            
+            embed.add_field(name='Resultado', value=CoinFlipGame.format_result(result), inline=False)
+            embed.add_field(name='Sua Escolha', value=choice.title(), inline=True)
+            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            
+            if won:
+                embed.add_field(
+                    name='🎉 GANHOU!',
+                    value=f'+{net_change:,} 🪙 ({multiplier}x)',
+                    inline=False
+                )
+            else:
+                embed.add_field(
+                    name='❌ Perdeu',
+                    value=f'{net_change:,} 🪙',
+                    inline=False
+                )
+            
+            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            
+            await msg.edit(embed=embed)
+            
+            # Check achievements
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
+        
+        finally:
+            end_game(ctx.author.id)
+    
+    @commands.command(name='wheel', aliases=['roda', 'fortune'])
+    async def wheel(self, ctx, bet_amount: int):
+        """
+        Joga Roda da Fortuna
+        Uso: /wheel <valor>
+        """
+        if not await ensure_not_playing(ctx):
+            return
+        
+        if bet_amount < 10:
+            await ctx.send(MSG.aposta_minima())
+            return
+        
+        if not await self.check_balance(ctx, bet_amount):
+            return
+        
+        start_game(ctx.author.id, 'wheel')
+        
+        try:
+            # Show spinning animation
+            embed = discord.Embed(
+                title='🎡 Roda da Fortuna',
+                description=MSG.girando(),
+                color=discord.Color.purple()
+            )
+            msg = await ctx.send(embed=embed)
+            
+            for _ in range(3):
+                await asyncio.sleep(0.6)
+            
+            # Spin wheel
+            segment = WheelGame.spin()
+            won, multiplier, description = WheelGame.calculate_win(segment)
+            
+            # Process bet
+            success, net_change = self.economy.process_bet(
+                str(ctx.author.id),
+                ctx.author.name,
+                bet_amount,
+                'wheel',
+                won,
+                multiplier
+            )
+            
+            if not success:
+                await ctx.send(MSG.erro_processar())
+                return
+            
+            # Show result
+            embed = discord.Embed(
+                title=f'🎡 Roda da Fortuna - {ctx.author.display_name}',
+                color=discord.Color.green() if won else discord.Color.red()
+            )
+            
+            embed.add_field(name='Resultado', value=WheelGame.format_result(segment), inline=False)
+            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            
+            if won:
+                embed.add_field(
+                    name='🎉 Prêmio!',
+                    value=f'+{net_change:,} 🪙 ({multiplier}x)',
+                    inline=False
+                )
+            else:
+                embed.add_field(
+                    name='❌ Sem prêmio',
+                    value=f'{net_change:,} 🪙',
+                    inline=False
+                )
+            
+            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            
+            await msg.edit(embed=embed)
+            
+            # Check achievements
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
+        
+        finally:
+            end_game(ctx.author.id)
+    
+
+    @commands.command(name='plinko', aliases=['pl'])
+    async def plinko(self, ctx, bet_amount: int, risk: str = 'medio'):
+        """Plinko - bola cai por pinos. Uso: /plinko <valor> [risco]"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10 or not PlinkoGame.validate_risk(risk) or not await self.check_balance(ctx, bet_amount):
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not PlinkoGame.validate_risk(risk): await ctx.send(MSG.escolha_invalida() + ' Use: baixo, medio ou alto')
+            return
+        start_game(ctx.author.id, 'plinko')
+        try:
+            embed = discord.Embed(title='🎯 Plinko', description=f'{PlinkoGame.get_risk_description(risk)}\n\nSoltando a bola...', color=discord.Color.blue())
+            msg = await ctx.send(embed=embed)
+            await asyncio.sleep(1.5)
+            slot = PlinkoGame.drop_ball()
+            won, multiplier = PlinkoGame.calculate_win(slot, risk)
+            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'plinko', won, multiplier)
+            if not success: await ctx.send(MSG.erro_processar()); return
+            embed = discord.Embed(title=f'🎯 Plinko - {ctx.author.display_name}', description=PlinkoGame.format_board(slot, risk), color=discord.Color.green() if won else discord.Color.red())
+            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Slot', value=f'**{slot}** ({multiplier}x)', inline=True)
+            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙', inline=False)
+            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            await msg.edit(embed=embed)
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+        finally:
+            end_game(ctx.author.id)
+
+    @commands.command(name='limbo', aliases=['lb'])
+    async def limbo(self, ctx, bet_amount: int, target: float):
+        """Limbo - resultado precisa passar o alvo. Uso: /limbo <valor> <multiplicador>"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10 or not LimboGame.validate_target(target) or not await self.check_balance(ctx, bet_amount):
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not LimboGame.validate_target(target): await ctx.send(f'❌ Multiplicador entre {LimboGame.MIN_TARGET}x e {LimboGame.MAX_TARGET}x!')
+            return
+        start_game(ctx.author.id, 'limbo')
+        try:
+            win_chance = LimboGame.calculate_win_chance(target)
+            embed = discord.Embed(title='🎲 Limbo', description=f'{LimboGame.get_risk_level(target)}\nAlvo: **{target}x**\nChance: ~{win_chance:.1f}%\n\nGerando...', color=discord.Color.blue())
+            msg = await ctx.send(embed=embed)
+            await asyncio.sleep(1.2)
+            result = LimboGame.generate_result()
+            won, multiplier = LimboGame.check_win(result, target)
+            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'limbo', won, multiplier)
+            if not success: await ctx.send(MSG.erro_processar()); return
+            embed = discord.Embed(title=f'🎲 Limbo - {ctx.author.display_name}', description=LimboGame.format_result(result, target, won), color=discord.Color.green() if won else discord.Color.red())
+            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Alvo', value=f'{target}x', inline=True)
+            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            await msg.edit(embed=embed)
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+        finally:
+            end_game(ctx.author.id)
+
+    @commands.command(name='scratch', aliases=['raspadinha', 'sc'])
+    async def scratch(self, ctx, bet_amount: int):
+        """Raspadinha - cartão instantâneo. Uso: /scratch <valor>"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10 or not await self.check_balance(ctx, bet_amount):
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            return
+        start_game(ctx.author.id, 'scratch')
+        try:
+            embed = discord.Embed(title='🎫 Raspadinha', description='Raspando...', color=discord.Color.gold())
+            embed.add_field(name='Cartão', value=ScratchCardGame.format_card_hidden(), inline=False)
+            msg = await ctx.send(embed=embed)
+            await asyncio.sleep(1.5)
+            card = ScratchCardGame.generate_card()
+            won, multiplier, best_prize = ScratchCardGame.calculate_best_prize(card)
+            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'scratch', won, multiplier)
+            if not success: await ctx.send(MSG.erro_processar()); return
+            best_index = card.index(best_prize)
+            embed = discord.Embed(title=f'🎫 Raspadinha - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
+            embed.add_field(name='Cartão', value=ScratchCardGame.format_card_revealed(card, best_index), inline=False)
+            embed.add_field(name='Prêmio', value=f'{best_prize["emoji"]} {best_prize["label"]}', inline=True)
+            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            await msg.edit(embed=embed)
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+        finally:
+            end_game(ctx.author.id)
+
+    @commands.command(name='keno', aliases=['kn'])
+    async def keno(self, ctx, bet_amount: int, *numbers: int):
+        """Keno - loteria. Uso: /keno <valor> <num1> <num2> ... (1-10 números entre 1-40)"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10:
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            return
+        numbers_list = list(numbers)
+        if not KenoGame.validate_numbers(numbers_list, len(numbers_list)):
+            await ctx.send(f'❌ Escolha de {KenoGame.MIN_NUMBERS} a {KenoGame.MAX_NUMBERS} números únicos entre 1 e {KenoGame.NUMBER_RANGE}!'); return
+        if not await self.check_balance(ctx, bet_amount): return
+        start_game(ctx.author.id, 'keno')
+        try:
+            embed = discord.Embed(title='🎱 Keno', description=f'Seus números: {KenoGame.format_numbers(numbers_list)}\n\nSorteando...', color=discord.Color.blue())
+            msg = await ctx.send(embed=embed)
+            await asyncio.sleep(1.5)
+            drawn = KenoGame.draw_numbers()
+            matches = KenoGame.check_matches(numbers_list, drawn)
+            won, multiplier = KenoGame.calculate_win(len(numbers_list), matches)
+            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'keno', won, multiplier)
+            if not success: await ctx.send(MSG.erro_processar()); return
+            embed = discord.Embed(title=f'🎱 Keno - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
+            embed.add_field(name='Seus Números', value=KenoGame.format_numbers(numbers_list, drawn), inline=False)
+            embed.add_field(name='Sorteados', value=KenoGame.format_numbers(drawn), inline=False)
+            embed.add_field(name='Acertos', value=f'**{matches}/{len(numbers_list)}**', inline=True)
+            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            await msg.edit(embed=embed)
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+        finally:
+            end_game(ctx.author.id)
+
+
+
+    @commands.command(name='baccarat', aliases=['bac'])
+    async def baccarat(self, ctx, bet_amount: int, bet_type: str):
+        """Baccarat - jogue contra a banca. Uso: /baccarat <valor> <jogador|banca|empate>"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10 or not BaccaratGame.validate_bet(bet_type) or not await self.check_balance(ctx, bet_amount):
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not BaccaratGame.validate_bet(bet_type): await ctx.send('❌ Aposta inválida! Use: jogador, banca ou empate')
+            return
+        start_game(ctx.author.id, 'baccarat')
+        try:
+            embed = discord.Embed(title='🎴 Baccarat', description='Distribuindo cartas...', color=discord.Color.blue())
+            msg = await ctx.send(embed=embed)
+            await asyncio.sleep(1.2)
+            winner, player_hand, banker_hand, player_value, banker_value = BaccaratGame.play_game()
+            won, multiplier = BaccaratGame.calculate_win(winner, bet_type)
+            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'baccarat', won, multiplier)
+            if not success: await ctx.send(MSG.erro_processar()); return
+            embed = discord.Embed(title=f'🎴 Baccarat - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
+            embed.add_field(name='Jogador', value=BaccaratGame.format_hand(player_hand, player_value), inline=False)
+            embed.add_field(name='Banca', value=BaccaratGame.format_hand(banker_hand, banker_value), inline=False)
+            embed.add_field(name='Vencedor', value=winner.title(), inline=True)
+            embed.add_field(name='Sua Aposta', value=bet_type.title(), inline=True)
+            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            await msg.edit(embed=embed)
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+        finally:
+            end_game(ctx.author.id)
+
+    @commands.command(name='hilo', aliases=['highlow', 'hl'])
+    async def hilo(self, ctx, bet_amount: int, guess: str):
+        """Hi-Lo - próxima carta maior ou menor. Uso: /hilo <valor> <alto|baixo|igual>"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10 or not HiLoGame.validate_guess(guess) or not await self.check_balance(ctx, bet_amount):
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not HiLoGame.validate_guess(guess): await ctx.send('❌ Escolha inválida! Use: alto, baixo ou igual')
+            return
+        start_game(ctx.author.id, 'hilo')
+        try:
+            current = HiLoGame.draw_card()
+            embed = discord.Embed(title='🎴 Hi-Lo', description=f'Carta atual: {HiLoGame.format_card(current)}\n\n{HiLoGame.get_odds(current)}\n\nSua escolha: **{guess.title()}**\n\nRevelando próxima carta...', color=discord.Color.blue())
+            msg = await ctx.send(embed=embed)
+            await asyncio.sleep(1.5)
+            next_card = HiLoGame.draw_card()
+            won, multiplier = HiLoGame.compare_cards(current, next_card, guess)
+            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'hilo', won, multiplier)
+            if not success: await ctx.send(MSG.erro_processar()); return
+            embed = discord.Embed(title=f'🎴 Hi-Lo - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
+            embed.add_field(name='Carta Anterior', value=HiLoGame.format_card(current), inline=True)
+            embed.add_field(name='Nova Carta', value=HiLoGame.format_card(next_card), inline=True)
+            embed.add_field(name='Sua Escolha', value=guess.title(), inline=True)
+            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            await msg.edit(embed=embed)
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+        finally:
+            end_game(ctx.author.id)
+
+    @commands.command(name='tower', aliases=['torre', 'tw'])
+    async def tower(self, ctx, bet_amount: int, difficulty: str = 'medio'):
+        """Tower - suba a torre interativo. Uso: /tower <valor> [dificuldade]"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10 or not TowerGame.validate_difficulty(difficulty) or not await self.check_balance(ctx, bet_amount):
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not TowerGame.validate_difficulty(difficulty): await ctx.send('❌ Dificuldade inválida! Use: facil, medio, dificil, extremo')
+            return
+        start_game(ctx.author.id, 'tower')
+        try:
+            game = TowerGame(difficulty)
+            embed = discord.Embed(title='🗼 Tower', description=f'{TowerGame.get_difficulty_info(difficulty)}\n\nEscolha um tile (0-{game.tiles_per_level-1}) ou digite `sair` para sacar', color=discord.Color.blue())
+            embed.add_field(name='Torre', value=f'```\n{game.format_tower()}\n```', inline=False)
+            embed.add_field(name='Multiplicador', value=f'{game.get_multiplier():.2f}x', inline=True)
+            await ctx.send(embed=embed)
+            
+            while not game.game_over:
+                def check(m): return m.author == ctx.author and m.channel == ctx.channel
+                try:
+                    response = await self.bot.wait_for('message', timeout=60.0, check=check)
+                    content = response.content.lower().strip()
+                    if content in ['sair', 'cashout']:
+                        multiplier = game.cash_out()
+                        success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', True, multiplier)
+                        embed = discord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='✅ Cash out!', color=discord.Color.green())
+                        embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
+                        embed.add_field(name='🎉 GANHOU!', value=f'+{net_change:,} 🪙 ({multiplier:.2f}x)', inline=False)
+                        user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+                        embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                        await ctx.send(embed=embed)
+                        break
+                    try:
+                        tile_index = int(content)
+                        is_safe, current_mult = game.choose_tile(tile_index)
+                        if not is_safe:
+                            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', False, 0)
+                            embed = discord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='💥 Tile errado!', color=discord.Color.red())
+                            embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
+                            embed.add_field(name='❌ Perdeu', value=f'{net_change:,} 🪙', inline=False)
+                            user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+                            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                            await ctx.send(embed=embed)
+                            break
+                        else:
+                            if game.won:
+                                success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', True, current_mult)
+                                embed = discord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='🏆 Topo alcançado!', color=discord.Color.gold())
+                                embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
+                                embed.add_field(name='🏆 VITÓRIA!', value=f'+{net_change:,} 🪙 ({current_mult:.2f}x)', inline=False)
+                                user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+                                embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                                await ctx.send(embed=embed)
+                                break
+                            embed = discord.Embed(title='🗼 Tower', description=f'✅ Seguro! Nível {game.current_level}\n\nEscolha próximo tile ou `sair`', color=discord.Color.blue())
+                            embed.add_field(name='Torre', value=f'```\n{game.format_tower()}\n```', inline=False)
+                            embed.add_field(name='Multiplicador', value=f'{current_mult:.2f}x', inline=True)
+                            embed.add_field(name='Ganho Potencial', value=f'{int(bet_amount * current_mult):,} 🪙', inline=True)
+                            await ctx.send(embed=embed)
+                    except ValueError:
+                        await ctx.send('❌ Use um número válido ou `sair`!')
+                except asyncio.TimeoutError:
+                    if game.current_level > 0:
+                        multiplier = game.cash_out()
+                        success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', True, multiplier)
+                        await ctx.send(f'⏰ Tempo esgotado! Cash out automático: +{net_change:,} 🪙')
+                    else:
+                        await ctx.send('⏰ Tempo esgotado!')
+                    break
+            
+            new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+            if new_achievements:
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+        finally:
+            end_game(ctx.author.id)
+
+    @commands.command(name='videopoker', aliases=['poker', 'vp'])
+    async def videopoker(self, ctx, bet_amount: int):
+        """Video Poker - Jacks or Better. Uso: /videopoker <valor>"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10 or not await self.check_balance(ctx, bet_amount):
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            return
+        start_game(ctx.author.id, 'videopoker')
+        try:
+            game = VideoPokerGame()
+            hand = game.deal()
+            embed = discord.Embed(title='🎰 Video Poker', description='Digite os números das cartas para segurar (0-4) separados por espaço.\nExemplo: `0 2 4` ou `todas` ou `nenhuma`', color=discord.Color.blue())
+            embed.add_field(name='Sua Mão', value=game.format_hand_with_positions(), inline=False)
+            await ctx.send(embed=embed)
+            
+            def check(m): return m.author == ctx.author and m.channel == ctx.channel
+            try:
+                response = await self.bot.wait_for('message', timeout=30.0, check=check)
+                content = response.content.lower().strip()
+                if content in ['todas', 'all']:
+                    game.hold_cards([0, 1, 2, 3, 4])
+                elif content in ['nenhuma', 'none', '']:
+                    game.hold_cards([])
+                else:
+                    try:
+                        positions = [int(x) for x in content.split()]
+                        if not game.hold_cards(positions):
+                            await ctx.send('❌ Posições inválidas!'); return
+                    except ValueError:
+                        await ctx.send('❌ Digite números válidos!'); return
+                
+                final_hand = game.draw()
+                hand_name, multiplier = game.evaluate_hand()
+                won = multiplier > 0
+                success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'videopoker', won, multiplier)
+                if not success: await ctx.send(MSG.erro_processar()); return
+                
+                embed = discord.Embed(title=f'🎰 Video Poker - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
+                embed.add_field(name='Mão Final', value=game.format_hand(show_held=True), inline=False)
+                embed.add_field(name='Resultado', value=hand_name, inline=True)
+                embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+                embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+                user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+                embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                await ctx.send(embed=embed)
+                
+                new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+                if new_achievements:
+                    await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+            except asyncio.TimeoutError:
+                await ctx.send('⏰ Tempo esgotado!')
+        finally:
+            end_game(ctx.author.id)
+
+
     @commands.command(name='jogos', aliases=['games', 'listgames'])
     async def list_games(self, ctx):
         """Lista todos os jogos disponíveis"""
         embed = discord.Embed(
             title='🎰 Jogos de Cassino Disponíveis',
-            description='Teste sua sorte e ganhe moedas!',
+            description='Teste sua sorte e ganhe moedas! 18 jogos disponíveis!',
             color=discord.Color.purple()
         )
         
+        # Original games
         embed.add_field(
             name='🐅 Tigrinho (Fortune Tiger)',
-            value=f'`{PREFIX}tigrinho <valor>`\nSlot 3x3 com múltiplas linhas de pagamento!',
-            inline=False
+            value=f'`{PREFIX}tigrinho <valor>`\nSlot 3x3 com múltiplas linhas!',
+            inline=True
         )
         
         embed.add_field(
             name='🚀 Crash',
-            value=f'`{PREFIX}crash <valor> [multiplicador]`\nMultiplicador cresce até crashar!',
-            inline=False
+            value=f'`{PREFIX}crash <valor> [mult]`\nMultiplicador até crashar!',
+            inline=True
         )
         
         embed.add_field(
             name='🎡 Double',
-            value=f'`{PREFIX}double <valor> <cor>`\nAposta em cores: vermelho (2x), preto (2x), branco (14x)',
-            inline=False
+            value=f'`{PREFIX}double <valor> <cor>`\nVermelho/Preto (2x), Branco (14x)',
+            inline=True
         )
         
         embed.add_field(
             name='💣 Mines',
-            value=f'`{PREFIX}mines <valor> [dificuldade]`\nCampo minado interativo! Dificuldades: facil, medio, dificil, extremo',
-            inline=False
+            value=f'`{PREFIX}mines <valor> [dif]`\nCampo minado interativo!',
+            inline=True
         )
         
         embed.add_field(
             name='🎰 Roleta',
-            value=f'`{PREFIX}roleta <valor> <tipo> <aposta>`\nTipos: numero, cor, paridade, altura',
-            inline=False
+            value=f'`{PREFIX}roleta <valor> <tipo> <aposta>`\nRoleta europeia clássica',
+            inline=True
         )
         
         embed.add_field(
             name='🎰 Caça-Níqueis',
-            value=f'`{PREFIX}slots <valor>`\nCombine 3 símbolos para ganhar!',
-            inline=False
+            value=f'`{PREFIX}slots <valor>`\nCombine 3 símbolos!',
+            inline=True
         )
         
         embed.add_field(
             name='🎲 Dados',
-            value=f'`{PREFIX}dados <valor> <tipo>`\nTipos: acima, abaixo, sete, alto, baixo, 1-6',
-            inline=False
+            value=f'`{PREFIX}dados <valor> <tipo>`\nAcima, abaixo, número...',
+            inline=True
         )
         
         embed.add_field(
             name='🃏 Blackjack',
-            value=f'`{PREFIX}blackjack <valor>`\nChegue a 21 sem estourar!',
-            inline=False
+            value=f'`{PREFIX}blackjack <valor>`\nChegue a 21!',
+            inline=True
+        )
+        
+        # New games
+        embed.add_field(
+            name='🪙 Cara ou Coroa',
+            value=f'`{PREFIX}coinflip <valor> <cara|coroa>`\nSimples e rápido!',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🎡 Roda da Fortuna',
+            value=f'`{PREFIX}wheel <valor>`\nGire para ganhar prêmios!',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🎯 Plinko',
+            value=f'`{PREFIX}plinko <valor> [risco]`\nBola cai por pinos!',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🎲 Limbo',
+            value=f'`{PREFIX}limbo <valor> <alvo>`\nPasse o multiplicador!',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🎫 Raspadinha',
+            value=f'`{PREFIX}scratch <valor>`\nCartão instantâneo!',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🎱 Keno',
+            value=f'`{PREFIX}keno <valor> <nums...>`\nLoteria de números!',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🎴 Baccarat',
+            value=f'`{PREFIX}baccarat <valor> <tipo>`\nJogador, banca ou empate',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🎴 Hi-Lo',
+            value=f'`{PREFIX}hilo <valor> <alto|baixo|igual>`\nPróxima carta!',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🗼 Tower',
+            value=f'`{PREFIX}tower <valor> [dif]`\nSuba a torre!',
+            inline=True
+        )
+        
+        embed.add_field(
+            name='🎰 Video Poker',
+            value=f'`{PREFIX}videopoker <valor>`\nJacks or Better!',
+            inline=True
         )
         
         embed.set_footer(text='Aposta mínima: 10 🪙 | Use /saldo para ver suas moedas')
