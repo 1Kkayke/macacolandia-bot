@@ -11,17 +11,17 @@ class VideoPokerGame:
     RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
     SUITS = ['♠', '♥', '♦', '♣']
     
-    # Hand rankings and payouts
+    # Hand rankings and payouts (translated to PT-BR)
     HAND_RANKS = {
-        'Royal Flush': 800,
-        'Straight Flush': 50,
-        'Four of a Kind': 25,
-        'Full House': 9,
-        'Flush': 6,
-        'Straight': 4,
-        'Three of a Kind': 3,
-        'Two Pair': 2,
-        'Jacks or Better': 1,
+        'Royal Flush': 800,           # Royal Flush (mantém termo internacional)
+        'Straight Flush': 50,         # Sequência de Flush
+        'Quadra': 25,                 # Four of a Kind
+        'Full House': 9,              # Full House (mantém termo)
+        'Flush': 6,                   # Flush (mantém termo)
+        'Sequência': 4,               # Straight
+        'Trinca': 3,                  # Three of a Kind
+        'Dois Pares': 2,              # Two Pair
+        'Valete ou Melhor': 1,        # Jacks or Better
     }
     
     def __init__(self):
@@ -109,9 +109,9 @@ class VideoPokerGame:
         if is_flush and is_straight:
             return 'Straight Flush', VideoPokerGame.HAND_RANKS['Straight Flush']
         
-        # Four of a Kind
+        # Four of a Kind (Quadra)
         if counts == [4, 1]:
-            return 'Four of a Kind', VideoPokerGame.HAND_RANKS['Four of a Kind']
+            return 'Quadra', VideoPokerGame.HAND_RANKS['Quadra']
         
         # Full House
         if counts == [3, 2]:
@@ -121,26 +121,26 @@ class VideoPokerGame:
         if is_flush:
             return 'Flush', VideoPokerGame.HAND_RANKS['Flush']
         
-        # Straight
+        # Straight (Sequência)
         if is_straight:
-            return 'Straight', VideoPokerGame.HAND_RANKS['Straight']
+            return 'Sequência', VideoPokerGame.HAND_RANKS['Sequência']
         
-        # Three of a Kind
+        # Three of a Kind (Trinca)
         if counts == [3, 1, 1]:
-            return 'Three of a Kind', VideoPokerGame.HAND_RANKS['Three of a Kind']
+            return 'Trinca', VideoPokerGame.HAND_RANKS['Trinca']
         
-        # Two Pair
+        # Two Pair (Dois Pares)
         if counts == [2, 2, 1]:
-            return 'Two Pair', VideoPokerGame.HAND_RANKS['Two Pair']
+            return 'Dois Pares', VideoPokerGame.HAND_RANKS['Dois Pares']
         
-        # Jacks or Better (pair of J, Q, K, or A)
+        # Jacks or Better (Valete ou Melhor)
         if counts == [2, 1, 1, 1]:
             for rank, count in rank_counts.items():
                 if count == 2 and rank in ['J', 'Q', 'K', 'A']:
-                    return 'Jacks or Better', VideoPokerGame.HAND_RANKS['Jacks or Better']
+                    return 'Valete ou Melhor', VideoPokerGame.HAND_RANKS['Valete ou Melhor']
         
-        # No winning hand
-        return 'High Card', 0.0
+        # No winning hand (Nada)
+        return 'Nada', 0.0
     
     @staticmethod
     def format_card(card: Dict[str, str]) -> str:
