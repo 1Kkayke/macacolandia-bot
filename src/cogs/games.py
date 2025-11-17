@@ -77,7 +77,7 @@ class Games(commands.Cog):
             
             # Create result embed
             embed = discord.Embed(
-                title='🎰 Roleta Europeia',
+                title=f'🎰 Roleta Europeia - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -154,7 +154,7 @@ class Games(commands.Cog):
             
             # Create result embed
             embed = discord.Embed(
-                title='🎰 Caça-Níqueis',
+                title=f'🎰 Caça-Níqueis - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -254,7 +254,7 @@ class Games(commands.Cog):
             
             # Create result embed
             embed = discord.Embed(
-                title='🎲 Dados',
+                title=f'🎲 Dados - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -405,7 +405,7 @@ class Games(commands.Cog):
             
             # Show final result
             embed = discord.Embed(
-                title='🃏 Blackjack - Resultado',
+                title=f'🃏 Blackjack - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red() if result != 'push' else discord.Color.blue()
             )
             
@@ -499,7 +499,7 @@ class Games(commands.Cog):
             
             # Create final result embed
             embed = discord.Embed(
-                title='🐅 Tigrinho - Fortune Tiger',
+                title=f'🐅 Tigrinho - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -615,7 +615,7 @@ class Games(commands.Cog):
             # Show final result
             if won:
                 embed = discord.Embed(
-                    title='🚀 Crash - Cash Out!',
+                    title=f'🚀 Crash - {ctx.author.display_name}',
                     description=f'✅ Você sacou em **{target_multiplier:.2f}x**!',
                     color=discord.Color.green()
                 )
@@ -631,7 +631,7 @@ class Games(commands.Cog):
                 )
             else:
                 embed = discord.Embed(
-                    title='🚀 Crash',
+                    title=f'🚀 Crash - {ctx.author.display_name}',
                     description=CrashGame.format_crash(crash_point),
                     color=discord.Color.red()
                 )
@@ -741,7 +741,7 @@ class Games(commands.Cog):
             
             # Show final result
             embed = discord.Embed(
-                title='🎡 Double - Resultado',
+                title=f'🎡 Double - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -858,8 +858,8 @@ class Games(commands.Cog):
                         )
                         
                         embed = discord.Embed(
-                            title='💣 Mines - Cash Out!',
-                            description=f'Você sacou com segurança!',
+                            title=f'💣 Mines - {ctx.author.display_name}',
+                            description=f'✅ Você sacou com segurança!',
                             color=discord.Color.green()
                         )
                         
@@ -907,7 +907,7 @@ class Games(commands.Cog):
                                 )
                                 
                                 embed = discord.Embed(
-                                    title='💣 Mines - BOOM!',
+                                    title=f'💣 Mines - {ctx.author.display_name}',
                                     description='💥 Você acertou uma mina!',
                                     color=discord.Color.red()
                                 )
@@ -962,8 +962,8 @@ class Games(commands.Cog):
                                     )
                                     
                                     embed = discord.Embed(
-                                        title='💣 Mines - LIMPEZA PERFEITA!',
-                                        description='🎉 Você revelou todos os tiles seguros!',
+                                        title=f'💣 Mines - {ctx.author.display_name}',
+                                        description='🏆 Você revelou todos os tiles seguros!',
                                         color=discord.Color.gold()
                                     )
                                     

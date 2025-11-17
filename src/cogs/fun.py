@@ -80,7 +80,7 @@ class Fun(commands.Cog):
                 self.economy.add_coins(str(ctx.author.id), 50, 'Trivia correta')
                 
                 embed = discord.Embed(
-                    title='✅ Resposta Correta!',
+                    title=f'✅ Resposta Correta - {ctx.author.display_name}',
                     description=f'Parabéns! Você ganhou **50 🪙**',
                     color=discord.Color.green()
                 )
@@ -93,7 +93,7 @@ class Fun(commands.Cog):
             else:
                 # Wrong
                 embed = discord.Embed(
-                    title='❌ Resposta Incorreta',
+                    title=f'❌ Resposta Incorreta - {ctx.author.display_name}',
                     description='Mais sorte na próxima vez!',
                     color=discord.Color.red()
                 )
