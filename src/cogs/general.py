@@ -15,46 +15,69 @@ class General(commands.Cog):
     async def help_command(self, ctx):
         """Mostra todos os comandos disponíveis"""
         embed = discord.Embed(
-            title='🎵 Bot de Música Macacolândia - Comandos',
-            description='Aqui estão todos os comandos disponíveis:',
+            title='🎮 Bot Macacolândia - Comandos',
+            description='Bot completo de música, cassino e diversão!',
             color=discord.Color.blue()
         )
         
         embed.add_field(
-            name='🎵 Reprodução',
+            name='🎵 Música',
             value=(
                 f'`{PREFIX}play <url/busca>` - Toca uma música\n'
-                f'`{PREFIX}pause` - Pausa a música atual\n'
-                f'`{PREFIX}resume` - Retoma a música pausada\n'
-                f'`{PREFIX}stop` - Para a música e limpa a fila\n'
-                f'`{PREFIX}skip` - Pula para a próxima música\n'
-                f'`{PREFIX}leave` - Desconecta o bot do canal'
+                f'`{PREFIX}pause` - Pausa a música\n'
+                f'`{PREFIX}skip` - Pula música\n'
+                f'`{PREFIX}queue` - Ver fila\n'
+                f'`{PREFIX}volume <0-100>` - Ajustar volume'
             ),
             inline=False
         )
         
         embed.add_field(
-            name='🔊 Volume',
+            name='💰 Economia',
             value=(
-                f'`{PREFIX}volume <0-100>` - Define o volume\n'
-                f'`{PREFIX}volumeup` - Aumenta o volume em 10%\n'
-                f'`{PREFIX}volumedown` - Diminui o volume em 10%'
+                f'`{PREFIX}saldo` - Ver seu saldo\n'
+                f'`{PREFIX}diario` - Recompensa diária\n'
+                f'`{PREFIX}transferir <@user> <valor>` - Transferir moedas\n'
+                f'`{PREFIX}ranking` - Top 10 jogadores\n'
+                f'`{PREFIX}conquistas` - Ver suas conquistas'
             ),
             inline=False
         )
         
         embed.add_field(
-            name='📋 Fila',
+            name='🎰 Jogos de Cassino',
             value=(
-                f'`{PREFIX}queue` - Mostra a fila de músicas\n'
-                f'`{PREFIX}nowplaying` - Mostra a música atual\n'
-                f'`{PREFIX}clear` - Limpa a fila\n'
-                f'`{PREFIX}shuffle` - Embaralha a fila'
+                f'`{PREFIX}slots <valor>` - Caça-níqueis\n'
+                f'`{PREFIX}roleta <valor> <tipo> <aposta>` - Roleta\n'
+                f'`{PREFIX}dados <valor> <tipo>` - Dados\n'
+                f'`{PREFIX}blackjack <valor>` - Blackjack (21)\n'
+                f'`{PREFIX}coinflip <valor> <cara/coroa>` - Cara ou coroa\n'
+                f'`{PREFIX}jogos` - Listar todos os jogos'
             ),
             inline=False
         )
         
-        embed.set_footer(text=f'Use {PREFIX}comando para executar um comando')
+        embed.add_field(
+            name='🎉 Diversão',
+            value=(
+                f'`{PREFIX}piada` - Piada aleatória\n'
+                f'`{PREFIX}trivia` - Quiz com recompensa\n'
+                f'`{PREFIX}enquete <min> "pergunta" "op1" "op2"` - Criar enquete\n'
+                f'`{PREFIX}8ball <pergunta>` - Bola mágica 8'
+            ),
+            inline=False
+        )
+        
+        embed.add_field(
+            name='📊 Info',
+            value=(
+                f'`{PREFIX}historico` - Ver transações\n'
+                f'`{PREFIX}help` - Este menu de ajuda'
+            ),
+            inline=False
+        )
+        
+        embed.set_footer(text=f'Use {PREFIX}<comando> para executar | Aposta mínima: 10 🪙')
         await ctx.send(embed=embed)
 
 
