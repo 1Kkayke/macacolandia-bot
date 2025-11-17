@@ -16,11 +16,14 @@ Um bot completo para Discord feito em Python com música, jogos de cassino, sist
 - **Shuffle**: Embaralhe sua fila de músicas
 
 ### 🎰 Cassino & Jogos
+- **Tigrinho (Fortune Tiger)**: Slot 3x3 com símbolos temáticos e múltiplas linhas de pagamento
+- **Crash**: Multiplier cresce até crashar - saque antes do crash!
+- **Double**: Aposta em cores (vermelho/preto 2x, branco 14x)
+- **Mines**: Campo minado interativo com múltiplas dificuldades
 - **Roleta Europeia**: Apostas em números, cores, paridade e altura
 - **Caça-Níqueis (Slots)**: Sistema de símbolos com multiplicadores
 - **Dados**: Múltiplos modos de jogo (acima/abaixo, alto/baixo, número específico)
 - **Blackjack (21)**: Jogo interativo de cartas contra o dealer
-- **Cara ou Coroa**: Aposta simples com 2x de retorno
 
 ### 💰 Sistema de Economia
 - **Moedas Virtuais**: Sistema completo de economia interna
@@ -76,6 +79,85 @@ Um bot completo para Discord feito em Python com música, jogos de cassino, sist
 
 ### 🎰 Jogos de Cassino
 
+#### Tigrinho (Fortune Tiger) 🐅
+```
+!tigrinho <valor>
+```
+Slot 3x3 inspirado no Fortune Tiger com símbolos temáticos orientais. Combine símbolos em linhas (horizontal, vertical ou diagonal) para ganhar!
+
+**Símbolos e Multiplicadores:**
+- 🪙 Moeda: 2x
+- 🎋 Bambu: 3x
+- 🏮 Lanterna: 5x
+- 💰 Ouro: 8x
+- 🐉 Dragão: 12x
+- 🎴 Carta: 20x
+- 🐅 Tigre: 50x (raro!)
+- 💎 Diamante: 100x (jackpot!)
+
+**Recursos:**
+- Múltiplas linhas de pagamento (8 linhas)
+- Animação de giro realista
+- Multiplicadores acumulam para múltiplas linhas vencedoras
+
+#### Crash 🚀
+```
+!crash <valor> [multiplicador_alvo]
+```
+O multiplicador começa em 1.0x e cresce até crashar. Defina seu multiplicador alvo para cash out automático antes do crash!
+
+**Como Jogar:**
+- O jogo calcula um ponto de crash aleatório
+- Você define um multiplicador alvo (exemplo: 2.0x)
+- Se o crash acontecer depois do seu alvo, você ganha!
+- Se crashar antes, você perde
+
+**Dicas:**
+- 🟢 Baixo Risco: < 1.5x
+- 🟡 Risco Moderado: 1.5x - 2.0x
+- 🟠 Alto Risco: 2.0x - 5.0x
+- 🔴 Risco Extremo: > 5.0x
+
+#### Double 🎡
+```
+!double <valor> <cor>
+```
+Apostas em cores com diferentes probabilidades e pagamentos.
+
+**Opções de Aposta:**
+- 🔴 **Vermelho**: 2x (46.7% de chance)
+- ⚫ **Preto**: 2x (46.7% de chance)
+- ⚪ **Branco**: 14x (6.7% de chance - raro!)
+
+**Recursos:**
+- Histórico dos últimos 10 resultados
+- Animação de roleta girando
+- Alta emoção com a opção branco!
+
+#### Mines 💣
+```
+!mines <valor> [dificuldade]
+```
+Campo minado interativo! Revele tiles seguros e aumente seu multiplicador. Um único erro e você perde tudo!
+
+**Dificuldades:**
+- `facil`: 3 minas (mais fácil, menor multiplicador)
+- `medio`: 5 minas (balanceado)
+- `dificil`: 8 minas (mais difícil, maior multiplicador)
+- `extremo`: 10 minas (muito difícil, multiplicador máximo!)
+
+**Como Jogar:**
+1. Use `revelar <linha> <coluna>` para revelar um tile (exemplo: `revelar 0 0`)
+2. Cada tile seguro aumenta seu multiplicador
+3. Digite `sair` a qualquer momento para sacar com o multiplicador atual
+4. Acerte uma mina 💣 e perca tudo!
+
+**Estratégia:**
+- Grade 5x5 = 25 tiles
+- Multiplicador cresce exponencialmente
+- Sacar cedo = menor risco, menor recompensa
+- Continuar = maior risco, maior recompensa!
+
 #### Caça-Níqueis
 ```
 !slots <valor>
@@ -112,11 +194,6 @@ Jogo interativo de cartas. Use reações para pedir cartas (⬇️) ou parar (�
 - Blackjack paga 2.5x
 - Vitória normal paga 2x
 - Empate devolve a aposta
-
-#### Cara ou Coroa
-```
-!coinflip <valor> <cara/coroa>
-```
 Apostas simples com 2x de retorno.
 
 ### 🎉 Diversão & Interação
@@ -269,11 +346,14 @@ Você verá uma mensagem confirmando que o bot está online:
 
 #### Jogos de Cassino
 ```
+!tigrinho 100               # Fortune Tiger slot 3x3
+!crash 100 2.5              # Crash com alvo 2.5x
+!double 100 vermelho        # Apostar 100 em vermelho
+!mines 100 medio            # Campo minado médio
 !slots 100                  # Caça-níqueis com 100 moedas
 !roleta 50 cor vermelho     # Apostar 50 na cor vermelha
 !dados 100 acima            # Apostar 100 que soma > 7
 !blackjack 200              # Jogar blackjack com 200
-!coinflip 50 cara           # Apostar 50 em cara
 ```
 
 #### Diversão
@@ -359,6 +439,40 @@ O bot possui um sistema de conquistas que recompensa os jogadores:
 | 💰 Milionário | Acumule 50.000 moedas | 5.000 🪙 |
 
 ## 🎲 Mecânicas dos Jogos
+
+### Tigrinho (Fortune Tiger)
+- **Grade**: 3x3 com 9 posições
+- **Linhas de Pagamento**: 8 linhas (3 horizontais, 3 verticais, 2 diagonais)
+- **Símbolos**: 🪙 🎋 🏮 💰 🐉 🎴 🐅 💎
+- **Pagamento**: Combinações em linhas acumulam multiplicadores
+- **Multiplicadores**: De 2x (Moeda) até 100x (Diamante)
+- **Especial**: Múltiplas linhas vencedoras multiplicam os ganhos!
+
+### Crash
+- **Mecânica**: Multiplicador cresce de 1.0x até crashar
+- **House Edge**: ~1% (crash médio em 1.98x)
+- **Range**: 1.0x até 100x
+- **Distribuição**: Exponencial - crashes baixos são mais comuns
+- **Estratégia**: Defina alvo antes do jogo começar
+
+### Double
+- **Cores**: Vermelho, Preto, Branco
+- **Probabilidades**:
+  - Vermelho: 46.7% (7/15) - Paga 2x
+  - Preto: 46.7% (7/15) - Paga 2x
+  - Branco: 6.7% (1/15) - Paga 14x
+- **Histórico**: Últimos 10 resultados visíveis
+
+### Mines
+- **Grade**: 5x5 (25 tiles)
+- **Dificuldades**:
+  - Fácil: 3 minas (22 seguros)
+  - Médio: 5 minas (20 seguros)
+  - Difícil: 8 minas (17 seguros)
+  - Extremo: 10 minas (15 seguros)
+- **Multiplicador**: Cresce exponencialmente com cada tile revelado
+- **Pagamento**: Pode sacar a qualquer momento antes de acertar mina
+- **Risco vs Recompensa**: Mais tiles = maior multiplicador, maior risco
 
 ### Caça-Níqueis (Slots)
 - **Símbolos**: 🍒 🍋 🍊 🍇 🍉 ⭐ 💎 🎰
