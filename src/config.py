@@ -1,6 +1,7 @@
 """Configuration module for the bot"""
 
 import os
+import platform
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -32,5 +33,10 @@ FFMPEG_OPTIONS = {
     'options': '-vn'
 }
 
-# FFmpeg executable path
-FFMPEG_EXECUTABLE = r'C:\ffmpeg-master-latest-win64-gpl\bin\ffmpeg.exe'
+# FFmpeg executable path - cross-platform support
+if platform.system() == 'Windows':
+    # On Windows, use the local FFmpeg installation if available
+    FFMPEG_EXECUTABLE = os.getenv('FFMPEG_PATH', 'ffmpeg')
+else:
+    # On Linux/Unix (Docker/Dokploy), use system FFmpeg
+    FFMPEG_EXECUTABLE = 'ffmpeg'
