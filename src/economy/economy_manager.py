@@ -41,24 +41,23 @@ class EconomyManager:
     def process_bet(self, user_id: str, username: str, bet_amount: int, 
                    game_type: str, won: bool, multiplier: float = 1.0) -> Tuple[bool, int]:
         """
-        Process a bet outcome
+        Process a bet outcome atomically
         Returns: (success, net_change)
         """
-        if not self.can_afford(user_id, username, bet_amount):
-            return False, 0
+        # Ensure user exists first
+        self.db.get_user(user_id, username)
         
-        # Remove bet amount
-        self.remove_coins(user_id, bet_amount, f'{game_type} - Aposta')
-        
+        # Calculate the net change
         if won:
             winnings = int(bet_amount * multiplier)
-            self.add_coins(user_id, winnings, f'{game_type} - Vitória')
             net_change = winnings - bet_amount
-            
-            # Record game
-            self.db.record_game(user_id, game_type, bet_amount, 'win', net_change)
-            return True, net_change
         else:
-            # Record game
-            self.db.record_game(user_id, game_type, bet_amount, 'loss', -bet_amount)
-            return True, -bet_amount
+            net_change = -bet_amount
+        
+        # Process bet atomically in database
+        success = self.db.process_bet_atomic(user_id, bet_amount, net_change, game_type, won)
+        
+        if not success:
+            return False, 0
+        
+        return True, net_change

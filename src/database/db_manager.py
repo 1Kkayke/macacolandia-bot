@@ -126,6 +126,93 @@ class DatabaseManager:
         conn.close()
         return True
     
+    def process_bet_atomic(self, user_id: str, bet_amount: int, net_change: int, 
+                          game_type: str, won: bool) -> bool:
+        """
+        Process a bet atomically in a single transaction
+        This prevents race conditions when multiple users play simultaneously
+        
+        Args:
+            user_id: User identifier
+            bet_amount: Amount wagered
+            net_change: Net change in balance (negative for loss, positive for win)
+            game_type: Type of game played
+            won: Whether the user won
+        
+        Returns:
+            bool: True if successful, False if insufficient balance or error
+        """
+        conn = self.get_connection()
+        cursor = conn.cursor()
+        
+        try:
+            # Check current balance
+            cursor.execute('SELECT coins FROM users WHERE user_id = ?', (user_id,))
+            user = cursor.fetchone()
+            
+            if not user:
+                conn.close()
+                return False
+            
+            current_balance = user['coins']
+            
+            # Check if user can afford the bet
+            if current_balance < bet_amount:
+                conn.close()
+                return False
+            
+            # Calculate new balance (deduct bet, add winnings if won)
+            new_balance = current_balance + net_change
+            
+            # Ensure balance doesn't go negative
+            if new_balance < 0:
+                conn.close()
+                return False
+            
+            # Update balance
+            cursor.execute('UPDATE users SET coins = ? WHERE user_id = ?', (new_balance, user_id))
+            
+            # Record transactions
+            cursor.execute('''
+                INSERT INTO transactions (user_id, amount, transaction_type, description)
+                VALUES (?, ?, 'spend', ?)
+            ''', (user_id, -bet_amount, f'{game_type} - Aposta'))
+            
+            if won and net_change > 0:
+                winnings = bet_amount + net_change
+                cursor.execute('''
+                    INSERT INTO transactions (user_id, amount, transaction_type, description)
+                    VALUES (?, ?, 'earn', ?)
+                ''', (user_id, winnings, f'{game_type} - Vitória'))
+            
+            # Record game history
+            result_str = 'win' if won else 'loss'
+            cursor.execute('''
+                INSERT INTO game_history (user_id, game_type, bet_amount, result, winnings)
+                VALUES (?, ?, ?, ?, ?)
+            ''', (user_id, game_type, bet_amount, result_str, net_change))
+            
+            # Update user stats
+            cursor.execute('''
+                UPDATE users 
+                SET games_played = games_played + 1,
+                    total_won = total_won + ?,
+                    total_lost = total_lost + ?
+                WHERE user_id = ?
+            ''', (max(0, net_change), max(0, -net_change), user_id))
+            
+            # Commit all changes atomically
+            conn.commit()
+            conn.close()
+            return True
+            
+        except Exception as e:
+            # Rollback on any error
+            conn.rollback()
+            conn.close()
+            print(f"Error in process_bet_atomic: {e}")
+            return False
+    
     def transfer_coins(self, from_user: str, to_user: str, amount: int) -> Tuple[bool, str]:
         """Transfer coins between users"""
         if amount <= 0:

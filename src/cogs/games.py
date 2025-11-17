@@ -77,7 +77,7 @@ class Games(commands.Cog):
             
             # Create result embed
             embed = discord.Embed(
-                title='🎰 Roleta Europeia',
+                title=f'🎰 Roleta Europeia - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -154,7 +154,7 @@ class Games(commands.Cog):
             
             # Create result embed
             embed = discord.Embed(
-                title='🎰 Caça-Níqueis',
+                title=f'🎰 Caça-Níqueis - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -254,7 +254,7 @@ class Games(commands.Cog):
             
             # Create result embed
             embed = discord.Embed(
-                title='🎲 Dados',
+                title=f'🎲 Dados - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -322,25 +322,39 @@ class Games(commands.Cog):
             
             msg = await ctx.send(embed=embed)
             
-            # Add reactions
-            await msg.add_reaction('⬇️')  # Hit
-            await msg.add_reaction('🛑')  # Stand
+            # Try to add reactions, fall back to text input if forbidden
+            use_reactions = True
+            try:
+                await msg.add_reaction('⬇️')  # Hit
+                await msg.add_reaction('🛑')  # Stand
+            except discord.Forbidden:
+                use_reactions = False
+                await ctx.send('💡 Digite `hit` para pedir carta ou `stand` para parar.')
             
-            def check(reaction, user):
-                return user == ctx.author and str(reaction.emoji) in ['⬇️', '🛑'] and reaction.message.id == msg.id
+            if use_reactions:
+                def check(reaction, user):
+                    return user == ctx.author and str(reaction.emoji) in ['⬇️', '🛑'] and reaction.message.id == msg.id
+            else:
+                def check_msg(m):
+                    return m.author == ctx.author and m.channel == ctx.channel and m.content.lower() in ['hit', 'stand', 'h', 's']
             
             # Player's turn
             while game.can_player_hit():
                 try:
-                    reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=check)
+                    if use_reactions:
+                        reaction, user = await self.bot.wait_for('reaction_add', timeout=30.0, check=check)
+                        action = 'hit' if str(reaction.emoji) == '⬇️' else 'stand'
+                    else:
+                        response = await self.bot.wait_for('message', timeout=30.0, check=check_msg)
+                        action = 'hit' if response.content.lower() in ['hit', 'h'] else 'stand'
                     
-                    if str(reaction.emoji) == '⬇️':
+                    if action == 'hit':
                         # Hit
                         game.player_hit()
                         
                         embed = discord.Embed(
                             title='🃏 Blackjack',
-                            description='Use ⬇️ para pedir carta (hit) ou 🛑 para parar (stand)',
+                            description='Use ⬇️ para pedir carta (hit) ou 🛑 para parar (stand)' if use_reactions else 'Digite `hit` ou `stand`',
                             color=discord.Color.blue()
                         )
                         
@@ -348,12 +362,17 @@ class Games(commands.Cog):
                         embed.add_field(name='🂠 Mão do Dealer', value=game.get_dealer_hand_str(hide_second=True), inline=False)
                         
                         await msg.edit(embed=embed)
-                        await msg.remove_reaction(reaction, user)
+                        
+                        if use_reactions:
+                            try:
+                                await msg.remove_reaction(reaction, user)
+                            except discord.Forbidden:
+                                pass  # Ignore if can't remove reactions
                         
                         if game.player_hand.is_busted():
                             break
                     
-                    elif str(reaction.emoji) == '🛑':
+                    elif action == 'stand':
                         # Stand
                         break
                 
@@ -386,7 +405,7 @@ class Games(commands.Cog):
             
             # Show final result
             embed = discord.Embed(
-                title='🃏 Blackjack - Resultado',
+                title=f'🃏 Blackjack - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red() if result != 'push' else discord.Color.blue()
             )
             
@@ -480,7 +499,7 @@ class Games(commands.Cog):
             
             # Create final result embed
             embed = discord.Embed(
-                title='🐅 Tigrinho - Fortune Tiger',
+                title=f'🐅 Tigrinho - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -596,7 +615,7 @@ class Games(commands.Cog):
             # Show final result
             if won:
                 embed = discord.Embed(
-                    title='🚀 Crash - Cash Out!',
+                    title=f'🚀 Crash - {ctx.author.display_name}',
                     description=f'✅ Você sacou em **{target_multiplier:.2f}x**!',
                     color=discord.Color.green()
                 )
@@ -612,7 +631,7 @@ class Games(commands.Cog):
                 )
             else:
                 embed = discord.Embed(
-                    title='🚀 Crash',
+                    title=f'🚀 Crash - {ctx.author.display_name}',
                     description=CrashGame.format_crash(crash_point),
                     color=discord.Color.red()
                 )
@@ -722,7 +741,7 @@ class Games(commands.Cog):
             
             # Show final result
             embed = discord.Embed(
-                title='🎡 Double - Resultado',
+                title=f'🎡 Double - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
@@ -839,8 +858,8 @@ class Games(commands.Cog):
                         )
                         
                         embed = discord.Embed(
-                            title='💣 Mines - Cash Out!',
-                            description=f'Você sacou com segurança!',
+                            title=f'💣 Mines - {ctx.author.display_name}',
+                            description=f'✅ Você sacou com segurança!',
                             color=discord.Color.green()
                         )
                         
@@ -888,7 +907,7 @@ class Games(commands.Cog):
                                 )
                                 
                                 embed = discord.Embed(
-                                    title='💣 Mines - BOOM!',
+                                    title=f'💣 Mines - {ctx.author.display_name}',
                                     description='💥 Você acertou uma mina!',
                                     color=discord.Color.red()
                                 )
@@ -943,8 +962,8 @@ class Games(commands.Cog):
                                     )
                                     
                                     embed = discord.Embed(
-                                        title='💣 Mines - LIMPEZA PERFEITA!',
-                                        description='🎉 Você revelou todos os tiles seguros!',
+                                        title=f'💣 Mines - {ctx.author.display_name}',
+                                        description='🏆 Você revelou todos os tiles seguros!',
                                         color=discord.Color.gold()
                                     )
                                     
