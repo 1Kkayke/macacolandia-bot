@@ -43,3 +43,9 @@ Thumbs.db
 # FFmpeg
 ffmpeg/
 ffprobe/
+
+# Database
+data/
+*.db
+*.sqlite
+*.sqlite3

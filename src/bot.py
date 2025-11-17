@@ -14,6 +14,9 @@ async def load_cogs(bot):
     
     await bot.load_extension('src.cogs.general')
     await bot.load_extension('src.cogs.music')
+    await bot.load_extension('src.cogs.economy')
+    await bot.load_extension('src.cogs.games')
+    await bot.load_extension('src.cogs.fun')
 
 
 async def main():
@@ -30,9 +33,9 @@ async def main():
     async def on_ready():
         print(f'🤖 Bot conectado como {bot.user.name}')
         print(f'📊 ID: {bot.user.id}')
-        print(f'🎵 Bot de música Macacolândia está online!')
+        print(f'🎮 Bot Macacolândia está online!')
         print('------')
-        await bot.change_presence(activity=discord.Game(name=f'{PREFIX}help | Música 🎵'))
+        await bot.change_presence(activity=discord.Game(name=f'{PREFIX}help | Música 🎵 Cassino 🎰'))
 
     @bot.event
     async def on_command_error(ctx, error):
