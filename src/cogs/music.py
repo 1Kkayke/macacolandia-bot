@@ -135,14 +135,33 @@ class Music(commands.Cog):
                 error_msg = str(e).lower()
                 print(f'Erro ao carregar música: {str(e)}')
                 
-                if 'sign in' in error_msg or 'login' in error_msg:
-                    await ctx.send('❌ O YouTube tá pedindo login. Tenta outra música ou usa uma URL diferente!')
+                if 'sign in' in error_msg or 'login' in error_msg or 'bot' in error_msg:
+                    embed = discord.Embed(
+                        title='❌ YouTube Bloqueou!',
+                        description='O YouTube tá pedindo login ou detectou bot.',
+                        color=discord.Color.red()
+                    )
+                    embed.add_field(
+                        name='🔧 Soluções:',
+                        value=(
+                            '**1. Tenta pesquisar em vez de URL:**\n'
+                            f'`{PREFIX}play nome da música`\n\n'
+                            '**2. Ou faça login no Chrome/Edge:**\n'
+                            '• Abra youtube.com no navegador\n'
+                            '• Faça login na sua conta\n'
+                            '• Reinicie o bot\n\n'
+                            '**3. Tenta outra música**'
+                        ),
+                        inline=False
+                    )
+                    embed.set_footer(text='O bot tentará usar cookies do seu navegador automaticamente')
+                    await ctx.send(embed=embed)
                 elif 'unavailable' in error_msg or 'not available' in error_msg:
                     await ctx.send('❌ Essa música não tá disponível caralho! Tenta outra.')
                 elif 'copyright' in error_msg:
                     await ctx.send('❌ Essa música tem copyright bloqueado fdp! Tenta outra.')
                 else:
-                    await ctx.send(f'❌ Deu ruim ao carregar a música. Verifica a URL ou tenta outra busca mano.\n\n**Erro:** {str(e)[:100]}')
+                    await ctx.send(f'❌ Deu ruim ao carregar a música. Verifica a URL ou tenta outra busca mano.\n\n**Erro:** {str(e)[:150]}')
 
     @commands.command(name='pause', aliases=['pausar'])
     async def pause(self, ctx):
