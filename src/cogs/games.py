@@ -1752,8 +1752,8 @@ class Games(commands.Cog):
                 penalty = min(penalty, steal_amount)  # Máximo = valor que ia roubar
                 
                 # Transferir penalidade do ladrão para a vítima
-                self.economy.remove_coins(str(ctx.author.id), ctx.author.name, penalty, 'Penalidade de roubo falho')
-                self.economy.add_coins(str(target.id), target.name, penalty, 'Defesa de roubo')
+                self.economy.remove_coins(str(ctx.author.id), penalty, 'Penalidade de roubo falho')
+                self.economy.add_coins(str(target.id), penalty, 'Defesa de roubo')
                 
                 defense_msg = random.choice(HeistGame.get_defense_messages())
                 
@@ -1780,8 +1780,8 @@ class Games(commands.Cog):
                 
             else:
                 # ROUBO BEM SUCEDIDO!
-                self.economy.remove_coins(str(target.id), target.name, steal_amount, f'Roubado por {ctx.author.name}')
-                self.economy.add_coins(str(ctx.author.id), ctx.author.name, steal_amount, f'Roubou de {target.name}')
+                self.economy.remove_coins(str(target.id), steal_amount, f'Roubado por {ctx.author.name}')
+                self.economy.add_coins(str(ctx.author.id), steal_amount, f'Roubou de {target.name}')
                 
                 success_msg = random.choice(HeistGame.get_success_messages())
                 
@@ -1811,8 +1811,8 @@ class Games(commands.Cog):
         
         except asyncio.TimeoutError:
             # TEMPO ESGOTADO - ROUBO BEM SUCEDIDO!
-            self.economy.remove_coins(str(target.id), target.name, steal_amount, f'Roubado por {ctx.author.name}')
-            self.economy.add_coins(str(ctx.author.id), ctx.author.name, steal_amount, f'Roubou de {target.name}')
+            self.economy.remove_coins(str(target.id), steal_amount, f'Roubado por {ctx.author.name}')
+            self.economy.add_coins(str(ctx.author.id), steal_amount, f'Roubou de {target.name}')
             
             success_msg = random.choice(HeistGame.get_success_messages())
             
