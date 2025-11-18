@@ -169,20 +169,15 @@ class Economy(commands.Cog):
     
     @commands.command(name='conquistas', aliases=['achievements', 'ach'])
     async def achievements_cmd(self, ctx, member: discord.Member = None):
-        """Mostra as conquistas de um jogador"""
+        """Mostra as conquistas de um jogador (paginado)"""
         member = member or ctx.author
         user_achievements = self.db.get_user_achievements(str(member.id))
         all_achievements = self.achievements.get_all_achievements()
         
-        embed = discord.Embed(
-            title=f'🏆 Conquistas de {member.name}',
-            description=f'{len(user_achievements)}/{len(all_achievements)} desbloqueadas',
-            color=discord.Color.purple()
-        )
-        
-        # Show unlocked achievements
         unlocked_names = {a['achievement_name'] for a in user_achievements}
         
+        # Prepare achievement list
+        achievements_list = []
         for achievement in all_achievements:
             if achievement.name in unlocked_names:
                 status = '✅'
@@ -193,13 +188,59 @@ class Economy(commands.Cog):
                 status = '🔒'
                 value = f'{achievement.description}\nRecompensa: {achievement.reward} 🪙'
             
-            embed.add_field(
-                name=f'{status} {achievement.emoji} {achievement.title}',
-                value=value,
-                inline=False
-            )
+            achievements_list.append({
+                'name': f'{status} {achievement.emoji} {achievement.title}',
+                'value': value
+            })
         
-        await ctx.send(embed=embed)
+        # Pagination - 10 per page
+        items_per_page = 10
+        total_pages = (len(achievements_list) + items_per_page - 1) // items_per_page
+        current_page = 0
+        
+        def create_embed(page):
+            embed = discord.Embed(
+                title=f'🏆 Conquistas de {member.name}',
+                description=f'{len(user_achievements)}/{len(all_achievements)} desbloqueadas',
+                color=discord.Color.purple()
+            )
+            
+            start = page * items_per_page
+            end = min(start + items_per_page, len(achievements_list))
+            
+            for ach in achievements_list[start:end]:
+                embed.add_field(name=ach['name'], value=ach['value'], inline=False)
+            
+            embed.set_footer(text=f'Página {page + 1}/{total_pages}')
+            return embed
+        
+        # Create view with buttons
+        class AchievementView(discord.ui.View):
+            def __init__(self, timeout=180):
+                super().__init__(timeout=timeout)
+                self.page = 0
+            
+            @discord.ui.button(label='◀️ Anterior', style=discord.ButtonStyle.gray)
+            async def prev_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+                if interaction.user.id != ctx.author.id:
+                    return await interaction.response.send_message('Esta paginação não é sua!', ephemeral=True)
+                
+                self.page = (self.page - 1) % total_pages
+                await interaction.response.edit_message(embed=create_embed(self.page), view=self)
+            
+            @discord.ui.button(label='▶️ Próxima', style=discord.ButtonStyle.gray)
+            async def next_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+                if interaction.user.id != ctx.author.id:
+                    return await interaction.response.send_message('Esta paginação não é sua!', ephemeral=True)
+                
+                self.page = (self.page + 1) % total_pages
+                await interaction.response.edit_message(embed=create_embed(self.page), view=self)
+        
+        if total_pages > 1:
+            view = AchievementView()
+            await ctx.send(embed=create_embed(0), view=view)
+        else:
+            await ctx.send(embed=create_embed(0))
 
 
 async def setup(bot):
