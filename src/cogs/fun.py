@@ -21,6 +21,8 @@ class Fun(commands.Cog):
         self.polls = PollManager()
         self.db = DatabaseManager()
         self.economy = EconomyManager(self.db)
+        # Track used questions per user to avoid repeats
+        self.used_questions = {}  # {user_id: [question_indices]}
     
     @commands.command(name='piada', aliases=['joke', 'piadas'])
     async def joke(self, ctx):
@@ -39,7 +41,22 @@ class Fun(commands.Cog):
     @commands.command(name='trivia', aliases=['quiz', 'pergunta'])
     async def trivia(self, ctx):
         """Inicia um quiz com recompensa"""
-        question = self.trivia.get_random_question()
+        user_id = str(ctx.author.id)
+        
+        # Initialize user's used questions list if not exists
+        if user_id not in self.used_questions:
+            self.used_questions[user_id] = []
+        
+        # Get a question that hasn't been used by this user
+        question, question_index = self.trivia.get_random_question_excluding(self.used_questions[user_id])
+        
+        # If all questions were used, reset the user's history
+        if question is None:
+            self.used_questions[user_id] = []
+            question, question_index = self.trivia.get_random_question_excluding([])
+        
+        # Mark this question as used
+        self.used_questions[user_id].append(question_index)
         
         # Format options
         options_text = '\n'.join([

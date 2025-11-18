@@ -702,6 +702,26 @@ class TriviaManager:
         """Get a random trivia question"""
         return random.choice(self.questions)
     
+    def get_random_question_excluding(self, used_indices: list) -> tuple:
+        """Get a random question that hasn't been used yet
+        
+        Args:
+            used_indices: List of question indices already used
+            
+        Returns:
+            Tuple of (Question, index) or (None, None) if all questions used
+        """
+        # Get available questions (not in used list)
+        available = [(i, q) for i, q in enumerate(self.questions) if i not in used_indices]
+        
+        if not available:
+            # All questions used
+            return (None, None)
+        
+        # Pick random from available
+        index, question = random.choice(available)
+        return (question, index)
+    
     def get_question_by_category(self, category: str) -> Question:
         """Get a random question from a category"""
         matching = [q for q in self.questions if q.category.lower() == category.lower()]
