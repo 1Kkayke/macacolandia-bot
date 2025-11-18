@@ -12,18 +12,32 @@ class Memes(commands.Cog):
         self.bot = bot
         self.memes = MemeManager()
     
-    @commands.command(name='fato', aliases=['fact', 'curiosidade'])
-    async def fact(self, ctx):
-        """Compartilha uma curiosidade engraçada"""
-        fact = self.memes.get_random_fact()
+    @commands.command(name='fato', aliases=['fact', 'curiosidade', 'fatos'])
+    async def fact(self, ctx, user: discord.Member = None):
+        """Compartilha uma curiosidade engraçada ou fato sobre um usuário"""
         
-        embed = discord.Embed(
-            title='💡 Curiosidade Aleatória',
-            description=fact,
-            color=discord.Color.blue()
-        )
+        if user is None:
+            # Fato aleatório normal
+            fact = self.memes.get_random_fact()
+            
+            embed = discord.Embed(
+                title='💡 Curiosidade Aleatória',
+                description=fact,
+                color=discord.Color.blue()
+            )
+            embed.set_footer(text='Será que é verdade? 🤔')
+        else:
+            # Fato engraçado/pesado sobre o usuário
+            roast = self.memes.get_random_roast(user.display_name)
+            
+            embed = discord.Embed(
+                title=f'🔥 Fato sobre {user.display_name}',
+                description=roast,
+                color=discord.Color.red()
+            )
+            embed.set_thumbnail(url=user.display_avatar.url)
+            embed.set_footer(text='É zueira, relaxa! 😂')
         
-        embed.set_footer(text='Será que é verdade? 🤔')
         await ctx.send(embed=embed)
     
     @commands.command(name='meme', aliases=['randommeme', 'memealeatório', 'memealeat'])
