@@ -94,7 +94,7 @@ async def main():
                 print('✅ Nenhum comando duplicado detectado')
                 print('------')
             
-            await bot.change_presence(activity=discord.Game(name=f'{PREFIX}help | Música 🎵 Cassino 🎰'))
+            await bot.change_presence(activity=discord.Game(name=f'{PREFIX}help | Usa ai porra!'))
 
         @bot.event
         async def on_command_error(ctx, error):
