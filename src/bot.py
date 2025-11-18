@@ -80,11 +80,19 @@ async def main():
             print(f'🖥️  Executando em: {HOSTNAME}')
             print('------')
             
-            # Check for multiple instances
-            app_info = await bot.application_info()
-            print(f'⚠️  AVISO: Se comandos estiverem triplicando, você tem múltiplas instâncias rodando!')
-            print(f'   Verifique Railway, Dokploy e sua máquina local.')
-            print('------')
+            # Check for duplicate commands (multiple instances)
+            command_names = [cmd.name for cmd in bot.commands]
+            duplicates = [name for name in command_names if command_names.count(name) > 1]
+            
+            if duplicates:
+                print('❌ ERRO: Comandos duplicados detectados!')
+                print(f'   Comandos duplicados: {set(duplicates)}')
+                print('   MÚLTIPLAS INSTÂNCIAS DO BOT ESTÃO RODANDO!')
+                print('   Pare todas as outras instâncias (Railway, Dokploy, local)')
+                print('------')
+            else:
+                print('✅ Nenhum comando duplicado detectado')
+                print('------')
             
             await bot.change_presence(activity=discord.Game(name=f'{PREFIX}help | Música 🎵 Cassino 🎰'))
 
