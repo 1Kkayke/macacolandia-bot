@@ -10,30 +10,26 @@ class MemeManager:
     """Manages meme fetching and selection"""
     
     def __init__(self):
+        # Apenas subreddits de shitpost e memes pesados
         self.reddit_meme_subs = [
-            'memes',
-            'dankmemes', 
-            'me_irl',
-            'wholesomememes',
-            'AdviceAnimals',
-            'terriblefacebookmemes',
-            'ComedyCemetery'
+            'circojeca',           # Shitpost BR pesado
+            'DiretoDoZapZap',      # Memes pesados do ZapZap
+            'botecodoreddit',      # Memes pesados variados
+            'brasilivre',          # Memes sem censura
+            'orochinho',           # Shitpost pesado
+            'nhaa',                # Memes da comunidade
+            'HUEstation',          # Memes pesados BR
+            'semtcholas',          # Shitpost BR
+            'clubedosaas',         # Memes de humor negro
         ]
         
-        self.brazilian_meme_subs = [
-            'brasilmemes',
-            'brasil',
-            'circojeca',
-            'DiretoDoZapZap'
-        ]
-        
-        # Categorias de memes
+        # Categorias de memes (todos shitpost/pesados)
         self.meme_categories = {
-            'sucesso': ['GetMotivated', 'wholesomememes', 'MadeMeSmile'],
-            'fracasso': ['Wellthatsucks', 'facepalm', 'therewasanattempt'],
-            'troll': ['trollface', 'memes', 'dankmemes'],
-            'zoacao': ['ComedyCemetery', 'terriblefacebookmemes', 'shitposting'],
-            '2025': ['memes', 'dankmemes', 'GenZ'],
+            'sucesso': ['circojeca', 'DiretoDoZapZap', 'botecodoreddit'],
+            'fracasso': ['DiretoDoZapZap', 'circojeca', 'orochinho'],
+            'troll': ['circojeca', 'botecodoreddit', 'brasilivre'],
+            'zoacao': ['DiretoDoZapZap', 'circojeca', 'botecodoreddit'],
+            '2025': ['circojeca', 'DiretoDoZapZap', 'HUEstation'],
         }
         
         # Cache do meme do dia
@@ -158,7 +154,7 @@ class MemeManager:
             Dict with 'title', 'url', 'subreddit' or None if failed
         """
         if subreddit is None:
-            subreddit = random.choice(self.reddit_meme_subs + self.brazilian_meme_subs)
+            subreddit = random.choice(self.reddit_meme_subs)
         
         url = f"https://www.reddit.com/r/{subreddit}/hot.json?limit=100"
         
@@ -236,7 +232,7 @@ class MemeManager:
     
     async def get_brazilian_meme(self) -> Optional[Dict]:
         """Get a Brazilian meme"""
-        subreddit = random.choice(self.brazilian_meme_subs)
+        subreddit = random.choice(self.reddit_meme_subs)
         return await self.fetch_reddit_meme(subreddit)
     
     async def get_top_meme(self, subreddit: str = None) -> Optional[Dict]:
