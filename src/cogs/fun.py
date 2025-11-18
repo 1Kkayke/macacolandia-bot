@@ -56,6 +56,7 @@ class Fun(commands.Cog):
         embed.add_field(name='Opções', value=options_text, inline=False)
         embed.add_field(name='Prêmio', value='🏆 50 🪙', inline=True)
         embed.add_field(name='Tempo', value='⏰ 15 segundos', inline=True)
+        embed.set_footer(text=f'Pergunta para: {ctx.author.name}')
         
         msg = await ctx.send(embed=embed)
         
@@ -65,6 +66,7 @@ class Fun(commands.Cog):
             await msg.add_reaction(number_emojis[i])
         
         def check(reaction, user):
+            # Apenas o autor pode responder
             return (user == ctx.author and 
                    str(reaction.emoji) in number_emojis[:len(question.options)] and
                    reaction.message.id == msg.id)
@@ -80,8 +82,8 @@ class Fun(commands.Cog):
                 self.economy.add_coins(str(ctx.author.id), 50, 'Trivia correta')
                 
                 embed = discord.Embed(
-                    title=f'✅ Resposta Correta - {ctx.author.display_name}',
-                    description=f'Parabéns! Você ganhou **50 🪙**',
+                    title=f'✅ Resposta Correta!',
+                    description=f'**{ctx.author.display_name}** ganhou **50 🪙**',
                     color=discord.Color.green()
                 )
                 
@@ -93,8 +95,8 @@ class Fun(commands.Cog):
             else:
                 # Wrong
                 embed = discord.Embed(
-                    title=f'❌ Resposta Incorreta - {ctx.author.display_name}',
-                    description='Mais sorte na próxima vez!',
+                    title=f'❌ Resposta Incorreta',
+                    description=f'**{ctx.author.display_name}**, mais sorte na próxima vez!',
                     color=discord.Color.red()
                 )
                 
@@ -105,14 +107,14 @@ class Fun(commands.Cog):
                 )
             
             user_data = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user_data["coins"]:,} 🪙')
+            embed.set_footer(text=f'Saldo de {ctx.author.name}: {user_data["coins"]:,} 🪙')
             
             await msg.edit(embed=embed)
         
         except asyncio.TimeoutError:
             embed = discord.Embed(
                 title='⏰ Tempo Esgotado',
-                description='Você não respondeu a tempo!',
+                description=f'**{ctx.author.display_name}** não respondeu a tempo!',
                 color=discord.Color.orange()
             )
             
