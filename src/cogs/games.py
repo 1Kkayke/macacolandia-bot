@@ -3,6 +3,7 @@
 import discord
 from discord.ext import commands
 import asyncio
+import random
 from src.database.db_manager import DatabaseManager
 from src.economy.economy_manager import EconomyManager
 from src.core.achievements import AchievementManager
@@ -26,7 +27,9 @@ from src.games.limbo import LimboGame
 from src.games.tower import TowerGame
 from src.games.scratch import ScratchCardGame
 from src.games.videopoker import VideoPokerGame
+from src.games.heist import HeistGame
 from src.config import PREFIX
+import time
 
 
 class Games(commands.Cog):
@@ -37,6 +40,8 @@ class Games(commands.Cog):
         self.db = DatabaseManager()
         self.economy = EconomyManager(self.db)
         self.achievements = AchievementManager(self.db)
+        self.heist_cooldowns = {}  # user_id: timestamp
+        self.active_heists = {}  # message_id: heist_data
     
     async def check_balance(self, ctx, amount: int) -> bool:
         """Check if user can afford the bet"""
@@ -1647,6 +1652,208 @@ class Games(commands.Cog):
         embed.set_footer(text='Aposta mínima: 10 🪙 | Use /saldo para ver suas moedas')
         
         await ctx.send(embed=embed)
+
+    @commands.command(name='roubar', aliases=['rob', 'steal', 'heist'])
+    async def heist(self, ctx, target: discord.Member):
+        """
+        Tenta roubar moedas de outro jogador!
+        O alvo tem 15 segundos para defender respondendo um desafio.
+        Uso: /roubar @usuario
+        """
+        
+        # Verificações básicas
+        if target.id == ctx.author.id:
+            await ctx.send('❌ Você não pode roubar de si mesmo, seu maluco!')
+            return
+        
+        if target.bot:
+            await ctx.send('❌ Não dá pra roubar de bot não, espertão!')
+            return
+        
+        # Verificar cooldown
+        current_time = time.time()
+        if ctx.author.id in self.heist_cooldowns:
+            time_left = HeistGame.COOLDOWN - (current_time - self.heist_cooldowns[ctx.author.id])
+            if time_left > 0:
+                minutes = int(time_left // 60)
+                seconds = int(time_left % 60)
+                await ctx.send(f'⏰ Calma aí ladrão! Espera mais **{minutes}m {seconds}s** antes de tentar roubar de novo.')
+                return
+        
+        # Verificar saldos
+        robber = self.db.get_user(str(ctx.author.id), ctx.author.name)
+        victim = self.db.get_user(str(target.id), target.name)
+        
+        can_rob, error_msg = HeistGame.can_rob(robber['coins'], victim['coins'])
+        if not can_rob:
+            await ctx.send(f'❌ {error_msg}')
+            return
+        
+        # Calcular quantidade a roubar
+        steal_amount = HeistGame.calculate_steal_amount(victim['coins'])
+        
+        # Gerar desafio de defesa
+        challenge_type, question, correct_answer = HeistGame.generate_challenge()
+        
+        # Mensagem inicial
+        embed = discord.Embed(
+            title='🚨 ROUBO EM ANDAMENTO! 🚨',
+            description=f'**{ctx.author.display_name}** está tentando roubar **{target.display_name}**!',
+            color=discord.Color.red()
+        )
+        
+        embed.add_field(
+            name='💰 Em Jogo',
+            value=f'{steal_amount:,} 🪙 ({HeistGame.get_loot_description(steal_amount)})',
+            inline=False
+        )
+        
+        embed.add_field(
+            name=f'{challenge_type["emoji"]} DESAFIO: {challenge_type["name"]}',
+            value=f'{question}\n\n{target.mention} responda em **{HeistGame.DEFENSE_TIME} segundos**!',
+            inline=False
+        )
+        
+        embed.add_field(
+            name='⚔️ Como Funciona',
+            value='• Responda corretamente = Defende e ladrão paga multa\n• Errar/Demorar = Ladrão leva a grana',
+            inline=False
+        )
+        
+        embed.set_footer(text=f'Dificuldade: {challenge_type["difficulty"]} | Tempo: {HeistGame.DEFENSE_TIME}s')
+        
+        heist_msg = await ctx.send(embed=embed)
+        
+        # Armazenar dados do roubo
+        self.active_heists[heist_msg.id] = {
+            'robber_id': ctx.author.id,
+            'robber_name': ctx.author.display_name,
+            'target_id': target.id,
+            'target_name': target.display_name,
+            'amount': steal_amount,
+            'correct_answer': correct_answer,
+            'challenge_type': challenge_type['type'],
+            'start_time': current_time
+        }
+        
+        # Aguardar resposta
+        def check(m):
+            return m.author.id == target.id and m.channel.id == ctx.channel.id
+        
+        try:
+            response = await self.bot.wait_for('message', timeout=HeistGame.DEFENSE_TIME, check=check)
+            
+            # Verificar resposta
+            is_correct = HeistGame.check_answer(response.content, correct_answer, challenge_type['type'])
+            
+            if is_correct:
+                # DEFESA BEM SUCEDIDA!
+                penalty = int(robber['coins'] * HeistGame.FAIL_PENALTY_PERCENT)
+                penalty = min(penalty, steal_amount)  # Máximo = valor que ia roubar
+                
+                # Transferir penalidade do ladrão para a vítima
+                self.economy.remove_coins(str(ctx.author.id), ctx.author.name, penalty, 'Penalidade de roubo falho')
+                self.economy.add_coins(str(target.id), target.name, penalty, 'Defesa de roubo')
+                
+                defense_msg = random.choice(HeistGame.get_defense_messages())
+                
+                embed = discord.Embed(
+                    title='🛡️ DEFESA BEM SUCEDIDA!',
+                    description=f'**{target.display_name}** {defense_msg}!',
+                    color=discord.Color.green()
+                )
+                
+                embed.add_field(
+                    name='✅ Resposta Correta',
+                    value=f'**{response.content}**',
+                    inline=False
+                )
+                
+                embed.add_field(
+                    name='💸 Penalidade do Ladrão',
+                    value=f'**{ctx.author.display_name}** pagou **{penalty:,} 🪙** de multa!',
+                    inline=False
+                )
+                
+                embed.set_footer(text='Crime não compensa!')
+                await ctx.send(embed=embed)
+                
+            else:
+                # ROUBO BEM SUCEDIDO!
+                self.economy.remove_coins(str(target.id), target.name, steal_amount, f'Roubado por {ctx.author.name}')
+                self.economy.add_coins(str(ctx.author.id), ctx.author.name, steal_amount, f'Roubou de {target.name}')
+                
+                success_msg = random.choice(HeistGame.get_success_messages())
+                
+                embed = discord.Embed(
+                    title='💰 ROUBO BEM SUCEDIDO!',
+                    description=f'**{ctx.author.display_name}** {success_msg} de **{target.display_name}**!',
+                    color=discord.Color.gold()
+                )
+                
+                embed.add_field(
+                    name='❌ Resposta Errada',
+                    value=f'Você disse: **{response.content}**\nCorreto era: **{correct_answer}**',
+                    inline=False
+                )
+                
+                embed.add_field(
+                    name='💰 Lucro do Ladrão',
+                    value=f'**+{steal_amount:,} 🪙**',
+                    inline=False
+                )
+                
+                embed.set_footer(text='Deveria ter estudado mais!')
+                await ctx.send(embed=embed)
+                
+                # Adicionar cooldown
+                self.heist_cooldowns[ctx.author.id] = current_time
+        
+        except asyncio.TimeoutError:
+            # TEMPO ESGOTADO - ROUBO BEM SUCEDIDO!
+            self.economy.remove_coins(str(target.id), target.name, steal_amount, f'Roubado por {ctx.author.name}')
+            self.economy.add_coins(str(ctx.author.id), ctx.author.name, steal_amount, f'Roubou de {target.name}')
+            
+            success_msg = random.choice(HeistGame.get_success_messages())
+            
+            embed = discord.Embed(
+                title='💰 ROUBO BEM SUCEDIDO!',
+                description=f'**{ctx.author.display_name}** {success_msg} de **{target.display_name}**!',
+                color=discord.Color.gold()
+            )
+            
+            embed.add_field(
+                name='⏰ Tempo Esgotado!',
+                value=f'{target.display_name} não respondeu a tempo...',
+                inline=False
+            )
+            
+            embed.add_field(
+                name='💰 Lucro do Ladrão',
+                value=f'**+{steal_amount:,} 🪙**',
+                inline=False
+            )
+            
+            embed.add_field(
+                name='💡 Resposta Correta Era',
+                value=f'**{correct_answer}**',
+                inline=False
+            )
+            
+            embed.set_footer(text='Dormiu no ponto!')
+            await ctx.send(embed=embed)
+            
+            # Adicionar cooldown
+            self.heist_cooldowns[ctx.author.id] = current_time
+        
+        # Limpar dados do roubo
+        if heist_msg.id in self.active_heists:
+            del self.active_heists[heist_msg.id]
+        
+        # Verificar conquistas
+        new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
+        if new_achievements:
+            await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
 
 
 async def setup(bot):
