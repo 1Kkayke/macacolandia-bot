@@ -513,6 +513,37 @@ O bot possui um sistema de conquistas que recompensa os jogadores:
 - Execute `ffmpeg -version` para confirmar
 - No Windows, ajuste o caminho do FFmpeg em `src/config.py` se necessário
 
+### YouTube pede login / Músicas restritas não funcionam
+
+Se você receber erros como "Sign in to confirm you're not a bot" ou músicas que requerem login:
+
+1. **Execute o script de extração de cookies:**
+```bash
+python extract_cookies.py
+```
+
+O script tentará extrair cookies automaticamente dos seguintes navegadores:
+- Google Chrome
+- Microsoft Edge
+- Mozilla Firefox
+- Opera
+- Brave
+
+2. **Alternativa manual (se o script não funcionar):**
+   - Instale a extensão "Get cookies.txt LOCALLY" no seu navegador
+   - Acesse [youtube.com](https://youtube.com) e faça login
+   - Clique na extensão e baixe o arquivo `cookies.txt`
+   - Renomeie para `youtube_cookies.txt` e coloque na pasta raiz do bot
+
+3. **Reinicie o bot**
+   - O bot detectará automaticamente os cookies
+   - Você verá a mensagem: "✅ Cookies do YouTube carregados!"
+
+**Notas importantes:**
+- Os cookies expiram após alguns meses - execute o script novamente se necessário
+- Mantenha o arquivo `youtube_cookies.txt` privado (já está no .gitignore)
+- Este método permite que o bot acesse vídeos que requerem verificação de idade ou login
+
 ### O bot não responde aos comandos
 - Verifique se o prefixo está correto (padrão: `/`)
 - Certifique-se de que o bot tem permissão para ler mensagens

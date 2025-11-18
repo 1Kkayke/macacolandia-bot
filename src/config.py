@@ -2,6 +2,7 @@
 
 import os
 import platform
+from pathlib import Path
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -10,6 +11,10 @@ load_dotenv()
 # Bot configuration
 TOKEN = os.getenv('DISCORD_TOKEN')
 PREFIX = os.getenv('PREFIX', '/')
+
+# Check if cookies file exists
+COOKIES_FILE = Path(__file__).parent.parent / 'youtube_cookies.txt'
+USE_COOKIES = COOKIES_FILE.exists()
 
 # YouTube DL options
 YTDL_FORMAT_OPTIONS = {
@@ -26,11 +31,17 @@ YTDL_FORMAT_OPTIONS = {
     'source_address': '0.0.0.0',
     'extract_flat': False,
     'force_generic_extractor': False,
-    'cookiefile': None,
+    'cookiefile': str(COOKIES_FILE) if USE_COOKIES else None,
     'age_limit': None,
     'username': None,
     'password': None,
 }
+
+# Print cookie status on load
+if USE_COOKIES:
+    print("✅ Cookies do YouTube carregados! O bot pode tocar músicas restritas.")
+else:
+    print("⚠️  Sem cookies do YouTube. Execute 'python extract_cookies.py' se tiver problemas com músicas restritas.")
 
 # FFmpeg options
 FFMPEG_OPTIONS = {
