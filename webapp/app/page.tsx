@@ -6,6 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { UserManagement } from "@/components/user-management";
 import { StatsDashboard } from "@/components/stats-dashboard";
+import { NavBar } from "@/components/nav-bar";
+import { AuthGuard } from "@/lib/auth-guard";
 import { Bot, Server } from "lucide-react";
 
 interface ServerConfig {
@@ -15,6 +17,14 @@ interface ServerConfig {
 }
 
 export default function Home() {
+  return (
+    <AuthGuard>
+      <HomePage />
+    </AuthGuard>
+  );
+}
+
+function HomePage() {
   const [selectedServer, setSelectedServer] = useState<string>("server_1");
 
   const { data: servers, isLoading } = useQuery<ServerConfig[]>({
@@ -39,19 +49,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20">
-      <header className="border-b bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center gap-4">
-            <Bot className="h-10 w-10 text-primary" />
-            <div>
-              <h1 className="text-3xl font-bold">Macacolândia Bot Admin</h1>
-              <p className="text-sm text-muted-foreground">
-                Painel de administração e gerenciamento do bot
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
+      <NavBar />
 
       <main className="container mx-auto px-4 py-8">
         <Card className="mb-6">

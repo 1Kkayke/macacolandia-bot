@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "Macacolândia Bot Admin",
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className="antialiased">
-        <Providers>{children}</Providers>
+        <SessionProvider>
+          <Providers>{children}</Providers>
+        </SessionProvider>
       </body>
     </html>
   );
