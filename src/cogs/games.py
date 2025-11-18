@@ -45,6 +45,13 @@ class Games(commands.Cog):
     
     async def check_balance(self, ctx, amount: int) -> bool:
         """Check if user can afford the bet"""
+        user = self.db.get_user(str(ctx.author.id), ctx.author.name)
+        
+        # Verificar se está negativado
+        if user['coins'] < 0:
+            await ctx.send(f'🚨 **TU TÁ DEVENDO CARALHO!**\nSaldo: **{user["coins"]:,} 🪙**\n\nPaga tuas dívida antes de jogar, caloteiro!')
+            return False
+        
         if not self.economy.can_afford(str(ctx.author.id), ctx.author.name, amount):
             await ctx.send(MSG.saldo_insuficiente())
             return False
@@ -1684,6 +1691,11 @@ class Games(commands.Cog):
         robber = self.db.get_user(str(ctx.author.id), ctx.author.name)
         victim = self.db.get_user(str(target.id), target.name)
         
+        # Verificar se o ladrão está negativado
+        if robber['coins'] < 0:
+            await ctx.send(f'❌ Você está negativado! Pague suas dívidas primeiro (saldo: **{robber["coins"]:,} 🪙**)')
+            return
+        
         can_rob, error_msg = HeistGame.can_rob(robber['coins'], victim['coins'])
         if not can_rob:
             await ctx.send(f'❌ {error_msg}')
@@ -1751,9 +1763,19 @@ class Games(commands.Cog):
                 penalty = int(robber['coins'] * HeistGame.FAIL_PENALTY_PERCENT)
                 penalty = min(penalty, steal_amount)  # Máximo = valor que ia roubar
                 
-                # Transferir penalidade do ladrão para a vítima
-                self.economy.remove_coins(str(ctx.author.id), penalty, 'Penalidade de roubo falho')
-                self.economy.add_coins(str(target.id), penalty, 'Defesa de roubo')
+                # Se o ladrão não tem dinheiro suficiente, usa o que tem e negativa
+                actual_penalty = penalty
+                robber_balance = robber['coins']
+                went_negative = False
+                
+                if robber_balance < penalty:
+                    # Ladrão não tem dinheiro suficiente, vai ficar negativo
+                    went_negative = True
+                    actual_penalty = penalty  # Cobra a multa completa mesmo que não tenha
+                
+                # Transferir penalidade do ladrão para a vítima (pode deixar negativo)
+                self.economy.remove_coins(str(ctx.author.id), actual_penalty, 'Penalidade de roubo falho')
+                self.economy.add_coins(str(target.id), actual_penalty, 'Defesa de roubo')
                 
                 defense_msg = random.choice(HeistGame.get_defense_messages())
                 
@@ -1769,13 +1791,22 @@ class Games(commands.Cog):
                     inline=False
                 )
                 
+                penalty_text = f'**{ctx.author.display_name}** pagou **{actual_penalty:,} 🪙** de multa!'
+                if went_negative:
+                    new_balance = robber_balance - actual_penalty
+                    penalty_text += f'\n⚠️ **NEGATIVADO!** Saldo ficou em **{new_balance:,} 🪙**'
+                
                 embed.add_field(
                     name='💸 Penalidade do Ladrão',
-                    value=f'**{ctx.author.display_name}** pagou **{penalty:,} 🪙** de multa!',
+                    value=penalty_text,
                     inline=False
                 )
                 
-                embed.set_footer(text='Crime não compensa!')
+                if went_negative:
+                    embed.set_footer(text='Crime não compensa! Agora está devendo!')
+                else:
+                    embed.set_footer(text='Crime não compensa!')
+                
                 await ctx.send(embed=embed)
                 
             else:

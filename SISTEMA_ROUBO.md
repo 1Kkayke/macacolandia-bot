@@ -204,6 +204,77 @@ O bot usa mensagens aleatórias para tornar cada roubo único:
 3. **Cooldown existe:** Não dá pra farmar roubando o tempo todo.
 4. **Multa é pesada:** 10% do SEU saldo se falhar na tentativa.
 5. **Mínimos existem:** Não dá pra roubar quem tem pouco dinheiro.
+6. **⚠️ NEGATIVAÇÃO:** Se você não tiver dinheiro para pagar a multa, seu saldo fica **NEGATIVO**!
+
+---
+
+## 🚨 Sistema de Negativação
+
+### O que acontece quando você fica negativado?
+
+Quando você tenta roubar e **não consegue defender**, precisa pagar uma multa de **10% do seu saldo**. Se você não tiver dinheiro suficiente, **seu saldo fica NEGATIVO**!
+
+#### Exemplo de Negativação:
+
+```
+Seu saldo: 500 🪙
+Tenta roubar: 2.000 🪙
+Falha na defesa!
+Multa: 10% do seu saldo = 50 🪙... MAS MÍNIMO = valor que tentou roubar
+Multa real: 2.000 🪙
+
+Você tem: 500 🪙
+Precisa pagar: 2.000 🪙
+Novo saldo: -1.500 🪙 ⚠️ NEGATIVADO!
+```
+
+### 🚫 Restrições quando negativado:
+
+Quando seu saldo está **negativo**, você **NÃO PODE**:
+- ❌ Jogar nenhum jogo de cassino
+- ❌ Tentar roubar outros jogadores
+- ❌ Fazer apostas
+- ❌ Usar comandos que custam moedas
+
+### ✅ Como sair do negativo:
+
+1. **Recompensa Diária** (`/diario`)
+   - Pague sua dívida com a recompensa diária
+   - Você ainda pode pegar o diário mesmo negativado!
+
+2. **Receber Transferências**
+   - Peça ajuda para amigos transferirem moedas
+   - Use `/transferir` para receber dinheiro
+
+3. **Trabalhe duro!**
+   - Acumule várias recompensas diárias
+   - Peça empréstimos (se alguém quiser ajudar)
+
+### 💡 Dicas para evitar negativação:
+
+- 🎯 **Só roube se tiver grana:** Mantenha pelo menos 1.000 moedas antes de roubar
+- 🧠 **Roube de alvos menores:** Menos risco se falhar
+- 💰 **Calcule a multa:** 10% do SEU saldo (mínimo = valor do roubo)
+- 📊 **Exemplo seguro:**
+  - Saldo: 10.000 🪙
+  - Rouba: 1.000 🪙
+  - Multa se falhar: 1.000 🪙
+  - Saldo após falha: 9.000 🪙 ✅
+
+### ⚠️ Avisos sobre Negativação:
+
+```
+🚨 TU TÁ DEVENDO CARALHO!
+Saldo: -1.500 🪙
+
+Paga tuas dívida antes de jogar, caloteiro!
+```
+
+Quando negativado:
+- Seu saldo aparece em **vermelho escuro**
+- Mensagem especial no `/saldo`
+- Todas as tentativas de jogar são bloqueadas
+- Você vira motivo de piada no servidor 😂
 
 ---
 
@@ -269,7 +340,8 @@ Crime não compensa!
 1. 🎯 Roube de jogadores ricos (>10.000 moedas)
 2. ⏰ Tente quando o servidor estiver quieto
 3. 🔄 Use o cooldown para fazer outras atividades
-4. 💰 Mantenha saldo alto para pagar multas se necessário
+4. 💰 **IMPORTANTE:** Mantenha saldo alto para pagar multas se necessário
+5. 🚨 **CUIDADO:** Se não tiver dinheiro para multa, você fica NEGATIVADO!
 
 ### Para Se Defender:
 1. ⚡ Fique atento quando tiver muito dinheiro

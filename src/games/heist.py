@@ -71,17 +71,27 @@ class HeistGame:
     @staticmethod
     def generate_math_challenge() -> Tuple[str, str]:
         """Generate a simple math problem"""
-        operations = [
-            lambda: (f"{random.randint(10, 50)} + {random.randint(10, 50)}", 
-                    str(eval(f"{random.randint(10, 50)} + {random.randint(10, 50)}"))),
-            lambda: (f"{random.randint(10, 30)} × {random.randint(2, 9)}", 
-                    str(eval(f"{random.randint(10, 30)} * {random.randint(2, 9)}"))),
-            lambda: (f"{random.randint(50, 100)} - {random.randint(10, 40)}", 
-                    str(eval(f"{random.randint(50, 100)} - {random.randint(10, 40)}"))),
-        ]
+        operation_type = random.randint(1, 3)
         
-        operation = random.choice(operations)
-        question, answer = operation()
+        if operation_type == 1:
+            # Addition
+            a = random.randint(10, 50)
+            b = random.randint(10, 50)
+            question = f"{a} + {b}"
+            answer = str(a + b)
+        elif operation_type == 2:
+            # Multiplication
+            a = random.randint(10, 30)
+            b = random.randint(2, 9)
+            question = f"{a} × {b}"
+            answer = str(a * b)
+        else:
+            # Subtraction
+            a = random.randint(50, 100)
+            b = random.randint(10, 40)
+            question = f"{a} - {b}"
+            answer = str(a - b)
+        
         return f"Quanto é: **{question}**?", answer
     
     @staticmethod

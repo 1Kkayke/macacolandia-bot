@@ -25,16 +25,31 @@ class Economy(commands.Cog):
         user = self.db.get_user(str(member.id), member.name)
         
         is_broke = user["coins"] < 1000
-        title = f'💰 Grana do {member.name}' if not is_broke else f'🚫 {member.name} tá liso!'
+        is_negative = user["coins"] < 0
+        
+        if is_negative:
+            title = f'🚨 {member.name} TÁ DEVENDO!'
+            description = 'CARALHO! Tu tá negativado! Paga essa dívida logo mano!'
+            color = discord.Color.dark_red()
+        elif is_broke:
+            title = f'🚫 {member.name} tá liso!'
+            description = 'Caralho mano, tu tá duro memo hein!'
+            color = discord.Color.red()
+        else:
+            title = f'💰 Grana do {member.name}'
+            description = 'Vamo vê se tu é rico ou se tá fudido...'
+            color = discord.Color.gold()
         
         embed = discord.Embed(
             title=title,
-            description='Vamo vê se tu é rico ou se tá fudido...' if not is_broke else 'Caralho mano, tu tá duro memo hein!',
-            color=discord.Color.gold() if not is_broke else discord.Color.red()
+            description=description,
+            color=color
         )
         
         coins_text = f'🪙 {user["coins"]:,}'
-        if user["coins"] < 100:
+        if is_negative:
+            coins_text += ' ⚠️ **NEGATIVADO! PAGA ESSA PORRA!**'
+        elif user["coins"] < 100:
             coins_text += ' (pobre do caralho)'
         elif user["coins"] > 100000:
             coins_text += ' (rico filho da puta!)'
