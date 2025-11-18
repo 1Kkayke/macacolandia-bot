@@ -332,6 +332,45 @@ Maria defendeu com sucesso!
 Crime não compensa!
 ```
 
+### Exemplo 3: Negativação por Falta de Dinheiro
+```
+Jogador: /roubar @Rico
+
+🚨 ROUBO EM ANDAMENTO! 🚨
+Pedro está tentando roubar Rico!
+
+💰 Em Jogo: 5.000 🪙 (uma fortuna)
+(Saldo de Pedro: apenas 300 🪙)
+
+🔢 DESAFIO: Sequência
+Complete a sequência:
+10 → 15 → 20 → 25 → ?
+
+@Rico responda em 15 segundos!
+
+[Rico responde: 30]
+
+🛡️ DEFESA BEM SUCEDIDA!
+Rico protegeu suas moedas!
+
+✅ Resposta Correta: 30
+💸 Penalidade: Pedro pagou 5.000 🪙 de multa!
+⚠️ NEGATIVADO! Saldo ficou em -4.700 🪙
+
+Crime não compensa! Agora está devendo!
+
+---
+
+[Pedro tenta jogar depois]
+
+Jogador: /tigrinho 100
+
+🚨 TU TÁ DEVENDO CARALHO!
+Saldo: -4.700 🪙
+
+Paga tuas dívida antes de jogar, caloteiro!
+```
+
 ---
 
 ## 🏆 Dicas Profissionais

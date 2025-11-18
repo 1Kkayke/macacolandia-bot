@@ -1704,6 +1704,9 @@ class Games(commands.Cog):
         # Calcular quantidade a roubar
         steal_amount = HeistGame.calculate_steal_amount(victim['coins'])
         
+        # Debug log
+        print(f"[ROUBO] Vítima: {target.name} | Saldo: {victim['coins']:,} | Valor roubado: {steal_amount:,}")
+        
         # Gerar desafio de defesa
         challenge_type, question, correct_answer = HeistGame.generate_challenge()
         

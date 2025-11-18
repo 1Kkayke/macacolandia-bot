@@ -53,9 +53,22 @@ class HeistGame:
     @staticmethod
     def calculate_steal_amount(target_balance: int) -> int:
         """Calculate how much can be stolen"""
+        # Calcula percentual aleatório entre 5% e 15%
         percent = random.uniform(HeistGame.MIN_STEAL_PERCENT, HeistGame.MAX_STEAL_PERCENT)
         amount = int(target_balance * percent)
-        return max(100, amount)  # Mínimo 100 moedas
+        
+        # Garante um mínimo baseado no saldo da vítima
+        if target_balance < 2000:
+            min_amount = 100  # Para saldos baixos
+        elif target_balance < 10000:
+            min_amount = int(target_balance * 0.08)  # 8% para médio
+        else:
+            min_amount = int(target_balance * 0.05)  # 5% para alto
+        
+        # Retorna o maior valor entre o calculado e o mínimo
+        final_amount = max(min_amount, amount)
+        print(f"[HEIST] Saldo vítima: {target_balance:,} | Percent: {percent:.1%} | Calculado: {amount:,} | Mínimo: {min_amount:,} | Final: {final_amount:,}")
+        return final_amount
     
     @staticmethod
     def can_rob(robber_balance: int, target_balance: int) -> Tuple[bool, str]:
