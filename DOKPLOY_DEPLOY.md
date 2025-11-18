@@ -2,6 +2,23 @@
 
 Este guia detalha como fazer o deploy do painel administrativo web do Bot Macacolândia no Dokploy, no mesmo projeto do bot já ativo.
 
+## ❓ Preciso de um Dockerfile separado para o WebApp?
+
+**SIM!** O repositório agora inclui dois Dockerfiles diferentes:
+
+1. **`Dockerfile`** (na raiz do projeto) - Para o bot Discord (Python)
+   - Usa Python 3.11
+   - Instala FFmpeg para música
+   - Executa `run.py`
+
+2. **`webapp/Dockerfile`** (dentro da pasta webapp) - Para o painel web (Next.js)
+   - Usa Node.js 18
+   - Build otimizado com standalone output
+   - Multi-stage build para imagem menor
+   - Executa servidor Next.js
+
+Ambos compartilham o mesmo banco de dados SQLite através de volumes compartilhados, mas são aplicações completamente diferentes que precisam de Dockerfiles específicos.
+
 ## 📋 Pré-requisitos
 
 - Dokploy instalado e configurado
@@ -114,14 +131,18 @@ openssl rand -base64 32
 
 **Configurações Básicas**:
 - **Nome**: `macacolandia-webapp`
-- **Tipo**: Node.js / Next.js
+- **Tipo**: Docker / Dockerfile
 - **Branch**: `main` (ou sua branch)
 - **Root Directory**: `webapp`
+- **Dockerfile Path**: `Dockerfile` (está dentro da pasta webapp)
 
 **Build Settings**:
-- **Build Command**: `npm run build`
-- **Start Command**: `npm start`
+- **Build Type**: Dockerfile
+- **Dockerfile**: `Dockerfile`
+- **Build Context**: `webapp`
 - **Port**: `3000`
+
+**Nota Importante**: O repositório agora inclui um `Dockerfile` específico para o webapp dentro da pasta `webapp/`. Este Dockerfile é otimizado para produção com Next.js standalone output e é diferente do Dockerfile do bot Python.
 
 **Environment Variables**: (copie do passo 2)
 

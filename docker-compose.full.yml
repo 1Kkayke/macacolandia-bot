@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: macacolandia-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - PREFIX=${PREFIX:-!}
+    volumes:
+      - ./data:/app/data
+    networks:
+      - macacolandia-network
+
+  webapp:
+    build: ./webapp
+    container_name: macacolandia-webapp
+    restart: unless-stopped
+    env_file:
+      - ./webapp/.env
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./data:/app/data
+    networks:
+      - macacolandia-network
+    depends_on:
+      - bot
+
+networks:
+  macacolandia-network:
+    driver: bridge
