@@ -80,7 +80,7 @@ class Memes(commands.Cog):
         else:
             await ctx.send('❌ Não consegui buscar o meme do dia. Tente /randommeme!')
     
-    @commands.command(name='memedesucesso', aliases=['meme-sucesso', 'memesucesso', 'memesucesso'])
+    @commands.command(name='memedesucesso', aliases=['meme-sucesso', 'memesucesso'])
     async def meme_sucesso(self, ctx):
         """Mostra um meme de sucesso do momento"""
         await ctx.typing()

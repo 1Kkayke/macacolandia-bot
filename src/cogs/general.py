@@ -71,6 +71,23 @@ class General(commands.Cog):
         )
         
         embed.add_field(
+            name='🎭 Memes e Zoeiras',
+            value=(
+                f'`{PREFIX}fato` - Curiosidade engraçada♪\n'
+                f'`{PREFIX}meme` - Meme aleatório♪\n'
+                f'`{PREFIX}memede2025` - Memes de 2025♪\n'
+                f'`{PREFIX}memedodia` - Meme do dia♪\n'
+                f'`{PREFIX}memedesucesso` - Meme motivacional♪\n'
+                f'`{PREFIX}memedefracasso` - Meme de falha♪\n'
+                f'`{PREFIX}memedetroll` - Meme de troll♪\n'
+                f'`{PREFIX}memedezoacao` - Meme de zoação♪\n'
+                f'`{PREFIX}memebr` - Memes brasileiros♪\n'
+                f'`{PREFIX}topmeme` - Top memes de hoje'
+            ),
+            inline=False
+        )
+        
+        embed.add_field(
             name='📊 Info',
             value=(
                 f'`{PREFIX}historico` - Ver transações\n'
@@ -79,7 +96,7 @@ class General(commands.Cog):
             inline=False
         )
         
-        embed.set_footer(text=f'Use {PREFIX}<comando> para executar | Aposta mínima: 10 🪙')
+        embed.set_footer(text=f'Use {PREFIX}<comando> para executar | ♪ = busca da internet')
         await ctx.send(embed=embed)
     
     @commands.command(name='ping', aliases=['latencia', 'lat'])

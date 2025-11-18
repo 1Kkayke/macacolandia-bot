@@ -32,7 +32,8 @@ async def load_cogs(bot):
         'src.cogs.music',
         'src.cogs.economy',
         'src.cogs.games',
-        'src.cogs.fun'
+        'src.cogs.fun',
+        'src.cogs.memes'
     ]
     
     for cog in cogs_to_load:
