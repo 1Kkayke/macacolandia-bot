@@ -232,8 +232,8 @@ class MemeManager:
     
     def get_random_roast(self, username: str) -> str:
         """Get a random roast/fact about a user"""
-        # Piadas especiais pesadas sobre gordura para anthony.gbs
-        if username.lower() == "anthony.gbs":
+        # Piadas especiais pesadas sobre gordura para Thony
+        if username.lower() == "Thony":
             fat_roasts = [
                 f"{username} é tão gordo que quando pula, a Terra muda de órbita.",
                 f"{username} é tão gordo que tem fuso horário próprio.",
