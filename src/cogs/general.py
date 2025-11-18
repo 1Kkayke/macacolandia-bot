@@ -17,86 +17,86 @@ class General(commands.Cog):
     async def help_command(self, ctx):
         """Mostra todos os comandos disponíveis"""
         embed = discord.Embed(
-            title='🎮 Bot Macacolândia - Comandos',
-            description='Bot completo de música, cassino e diversão!',
+            title='🎮 Ow mano, os bagulho que eu faço',
+            description='Caralho mano, esse bot faz um monte de parada loca, se vira aí!',
             color=discord.Color.blue()
         )
         
         embed.add_field(
-            name='🎵 Música',
+            name='🎵 Música (pra tu ouvir tuas porcaria)',
             value=(
-                f'`{PREFIX}play <url/busca>` - Toca uma música\n'
-                f'`{PREFIX}pause` - Pausa a música\n'
-                f'`{PREFIX}skip` - Pula música\n'
-                f'`{PREFIX}queue` - Ver fila\n'
-                f'`{PREFIX}volume <0-100>` - Ajustar volume'
+                f'`{PREFIX}play <url/busca>` - Bota pra tocar aí porra\n'
+                f'`{PREFIX}pause` - Para essa merda\n'
+                f'`{PREFIX}skip` - Pula essa bosta\n'
+                f'`{PREFIX}queue` - Vê as parada na fila\n'
+                f'`{PREFIX}volume <0-100>` - Aumenta ou diminui essa porra'
             ),
             inline=False
         )
         
         embed.add_field(
-            name='💰 Economia',
+            name='💰 Grana (pra tu ver se tá rico ou fudido)',
             value=(
-                f'`{PREFIX}saldo` - Ver seu saldo\n'
-                f'`{PREFIX}diario` - Recompensa diária\n'
-                f'`{PREFIX}transferir <@user> <valor>` - Transferir moedas\n'
-                f'`{PREFIX}ranking` - Top 10 jogadores\n'
-                f'`{PREFIX}conquistas` - Ver suas conquistas'
+                f'`{PREFIX}saldo` - Vê quanto tu tem de grana aí\n'
+                f'`{PREFIX}diario` - Pega teu migalho diário fdp\n'
+                f'`{PREFIX}transferir <@user> <valor>` - Manda grana pros parça\n'
+                f'`{PREFIX}ranking` - Top 10 dos rico do bagulho\n'
+                f'`{PREFIX}conquistas` - Vê tuas conquista aí mano'
             ),
             inline=False
         )
         
         embed.add_field(
-            name='🎰 Jogos de Cassino',
+            name='🎰 Cassino (pra tu perder tudo)',
             value=(
-                f'`{PREFIX}slots <valor>` - Caça-níqueis\n'
-                f'`{PREFIX}roleta <valor> <tipo> <aposta>` - Roleta\n'
-                f'`{PREFIX}dados <valor> <tipo>` - Dados\n'
-                f'`{PREFIX}blackjack <valor>` - Blackjack (21)\n'
-                f'`{PREFIX}coinflip <valor> <cara/coroa>` - Cara ou coroa\n'
-                f'`{PREFIX}jogos` - Listar todos os jogos'
+                f'`{PREFIX}slots <valor>` - Caça níquel do tiozão\n'
+                f'`{PREFIX}roleta <valor> <tipo> <aposta>` - Roleta pra tu se foder\n'
+                f'`{PREFIX}dados <valor> <tipo>` - Joga uns dados aí\n'
+                f'`{PREFIX}blackjack <valor>` - 21 ou tu se fode\n'
+                f'`{PREFIX}coinflip <valor> <cara/coroa>` - Cara ou coroa, vamo sortear\n'
+                f'`{PREFIX}jogos` - Lista tudo que tem pra tu perder grana'
             ),
             inline=False
         )
         
         embed.add_field(
-            name='🎉 Diversão',
+            name='🎉 Zueira (pra dar risada)',
             value=(
-                f'`{PREFIX}piada` - Piada aleatória\n'
-                f'`{PREFIX}trivia` - Quiz com recompensa\n'
-                f'`{PREFIX}enquete <min> "pergunta" "op1" "op2"` - Criar enquete\n'
-                f'`{PREFIX}8ball <pergunta>` - Bola mágica 8'
+                f'`{PREFIX}piada` - Conta uma piada merda\n'
+                f'`{PREFIX}trivia` - Responde uns bagulho aí e ganha grana\n'
+                f'`{PREFIX}enquete <min> "pergunta" "op1" "op2"` - Faz uma votação aí\n'
+                f'`{PREFIX}8ball <pergunta>` - Pergunta pro oráculo aleatório'
             ),
             inline=False
         )
         
         embed.add_field(
-            name='🎭 Memes e Zoeiras',
+            name='🎭 Memes e Zoeiras (pra rir pra caralho)',
             value=(
-                f'`{PREFIX}fato` - Curiosidade engraçada♪\n'
-                f'`{PREFIX}meme` - Meme aleatório♪\n'
-                f'`{PREFIX}memede2025` - Memes de 2025♪\n'
-                f'`{PREFIX}memedodia` - Meme do dia♪\n'
-                f'`{PREFIX}memedesucesso` - Meme motivacional♪\n'
-                f'`{PREFIX}memedefracasso` - Meme de falha♪\n'
-                f'`{PREFIX}memedetroll` - Meme de troll♪\n'
-                f'`{PREFIX}memedezoacao` - Meme de zoação♪\n'
-                f'`{PREFIX}memebr` - Memes brasileiros♪\n'
-                f'`{PREFIX}topmeme` - Top memes de hoje'
+                f'`{PREFIX}fato` - Fato aleatório engraçado♪\n'
+                f'`{PREFIX}meme` - Meme randômico da net♪\n'
+                f'`{PREFIX}memede2025` - Memes de 2025 fdp♪\n'
+                f'`{PREFIX}memedodia` - Meme do dia carai♪\n'
+                f'`{PREFIX}memedesucesso` - Meme pra motivar♪\n'
+                f'`{PREFIX}memedefracasso` - Meme de fracasso mesmo♪\n'
+                f'`{PREFIX}memedetroll` - Trollagem pesada♪\n'
+                f'`{PREFIX}memedezoacao` - Zueira não tem limites♪\n'
+                f'`{PREFIX}memebr` - Memes br puro sangue♪\n'
+                f'`{PREFIX}topmeme` - Os top meme de hj'
             ),
             inline=False
         )
         
         embed.add_field(
-            name='📊 Info',
+            name='📊 Info (se liga)',
             value=(
-                f'`{PREFIX}historico` - Ver transações\n'
-                f'`{PREFIX}help` - Este menu de ajuda'
+                f'`{PREFIX}historico` - Vê onde tu gastou tua grana\n'
+                f'`{PREFIX}help` - Esse menu aqui ó'
             ),
             inline=False
         )
         
-        embed.set_footer(text=f'Use {PREFIX}<comando> para executar | ♪ = busca da internet')
+        embed.set_footer(text=f'Usa {PREFIX}<comando> aí porra | ♪ = pego da net mesmo')
         await ctx.send(embed=embed)
     
     @commands.command(name='ping', aliases=['latencia', 'lat'])
@@ -105,15 +105,15 @@ class General(commands.Cog):
         latency = round(self.bot.latency * 1000)
         
         embed = discord.Embed(
-            title='🏓 Pong!',
+            title='🏓 Pong caralho!',
             color=discord.Color.green()
         )
-        embed.add_field(name='Latência', value=f'{latency}ms', inline=True)
-        embed.add_field(name='Servidores', value=len(self.bot.guilds), inline=True)
-        embed.add_field(name='Host', value=socket.gethostname(), inline=True)
+        embed.add_field(name='Latência (o delay)', value=f'{latency}ms', inline=True)
+        embed.add_field(name='Servidores (onde tô)', value=len(self.bot.guilds), inline=True)
+        embed.add_field(name='Host (onde tá rodando)', value=socket.gethostname(), inline=True)
         embed.add_field(
-            name='⚠️ Comandos Triplicando?',
-            value='Verifique se há múltiplas instâncias do bot rodando!\nPare Railway/Dokploy ou sua máquina local.',
+            name='⚠️ Tá triplicando os comando?',
+            value='Ó aí mano, deve ter vários bot rodando ao mesmo tempo!\nDesliga o Railway/Dokploy ou tua máquina aí porra.',
             inline=False
         )
         
