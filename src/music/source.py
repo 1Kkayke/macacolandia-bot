@@ -33,9 +33,29 @@ class YTDLSource(discord.PCMVolumeTransformer):
             )
         except asyncio.TimeoutError:
             raise Exception("A busca demorou muito tempo. Tente novamente.")
+        except Exception as e:
+            # Re-raise with more context
+            error_msg = str(e)
+            if 'Sign in' in error_msg or 'login' in error_msg.lower():
+                raise Exception("YouTube está pedindo login. Tente outra música ou URL.")
+            elif 'Video unavailable' in error_msg or 'not available' in error_msg.lower():
+                raise Exception("Música não disponível no YouTube.")
+            elif 'copyright' in error_msg.lower():
+                raise Exception("Música bloqueada por copyright.")
+            else:
+                raise Exception(f"Erro ao buscar música: {error_msg}")
+
+        if not data:
+            raise Exception("Nenhum resultado encontrado para esta busca.")
 
         if 'entries' in data:
+            # Take first item from a playlist
+            if len(data['entries']) == 0:
+                raise Exception("Nenhum resultado encontrado.")
             data = data['entries'][0]
+
+        if not data:
+            raise Exception("Erro ao processar a música.")
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, executable=FFMPEG_EXECUTABLE, **FFMPEG_OPTIONS), data=data)

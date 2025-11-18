@@ -22,9 +22,14 @@ YTDL_FORMAT_OPTIONS = {
     'logtostderr': False,
     'quiet': True,
     'no_warnings': True,
-    'default_search': 'auto',
+    'default_search': 'ytsearch',
     'source_address': '0.0.0.0',
     'extract_flat': False,
+    'force_generic_extractor': False,
+    'cookiefile': None,
+    'age_limit': None,
+    'username': None,
+    'password': None,
 }
 
 # FFmpeg options

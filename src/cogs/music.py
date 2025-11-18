@@ -67,7 +67,7 @@ class Music(commands.Cog):
         
         # Check if user is in a voice channel
         if not ctx.author.voice:
-            await ctx.send('❌ Você precisa estar em um canal de voz!')
+            await ctx.send('❌ Tu precisa tá num canal de voz porra!')
             return
 
         # Connect to voice channel if not connected
@@ -130,28 +130,37 @@ class Music(commands.Cog):
                     await ctx.send(embed=embed)
                     
             except asyncio.TimeoutError:
-                await ctx.send('❌ A busca demorou muito tempo. Tente novamente.')
+                await ctx.send('❌ Demorou demais pra buscar essa porra! Tenta de novo.')
             except Exception as e:
+                error_msg = str(e).lower()
                 print(f'Erro ao carregar música: {str(e)}')
-                await ctx.send('❌ Não foi possível carregar a música. Verifique a URL ou tente outra busca.')
+                
+                if 'sign in' in error_msg or 'login' in error_msg:
+                    await ctx.send('❌ O YouTube tá pedindo login. Tenta outra música ou usa uma URL diferente!')
+                elif 'unavailable' in error_msg or 'not available' in error_msg:
+                    await ctx.send('❌ Essa música não tá disponível caralho! Tenta outra.')
+                elif 'copyright' in error_msg:
+                    await ctx.send('❌ Essa música tem copyright bloqueado fdp! Tenta outra.')
+                else:
+                    await ctx.send(f'❌ Deu ruim ao carregar a música. Verifica a URL ou tenta outra busca mano.\n\n**Erro:** {str(e)[:100]}')
 
     @commands.command(name='pause', aliases=['pausar'])
     async def pause(self, ctx):
         """Pausa a música atual"""
         if ctx.voice_client and ctx.voice_client.is_playing():
             ctx.voice_client.pause()
-            await ctx.send('⏸️ Música pausada!')
+            await ctx.send('⏸️ Pausei essa porra!')
         else:
-            await ctx.send('❌ Nenhuma música está tocando no momento.')
+            await ctx.send('❌ Não tem nada tocando não caralho.')
 
     @commands.command(name='resume', aliases=['retomar', 'continuar'])
     async def resume(self, ctx):
         """Retoma a música pausada"""
         if ctx.voice_client and ctx.voice_client.is_paused():
             ctx.voice_client.resume()
-            await ctx.send('▶️ Música retomada!')
+            await ctx.send('▶️ Despausei caralho!')
         else:
-            await ctx.send('❌ Nenhuma música está pausada.')
+            await ctx.send('❌ Não tem nada pausado não.')
 
     @commands.command(name='stop', aliases=['parar'])
     async def stop(self, ctx):
@@ -160,18 +169,18 @@ class Music(commands.Cog):
             queue = get_queue(ctx.guild.id)
             queue.clear()
             ctx.voice_client.stop()
-            await ctx.send('⏹️ Música parada e fila limpa!')
+            await ctx.send('⏹️ Parei tudo e limpei a fila caralho!')
         else:
-            await ctx.send('❌ O bot não está em um canal de voz.')
+            await ctx.send('❌ Eu nem tô no canal de voz fdp.')
 
     @commands.command(name='skip', aliases=['pular', 's'])
     async def skip(self, ctx):
         """Pula para a próxima música"""
         if ctx.voice_client and ctx.voice_client.is_playing():
             ctx.voice_client.stop()
-            await ctx.send('⏭️ Música pulada!')
+            await ctx.send('⏭️ Pulei essa merda!')
         else:
-            await ctx.send('❌ Nenhuma música está tocando no momento.')
+            await ctx.send('❌ Não tem nada tocando porra.')
 
     @commands.command(name='volume', aliases=['vol', 'v'])
     async def volume(self, ctx, volume: int):
