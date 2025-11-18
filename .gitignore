@@ -56,3 +56,9 @@ data/
 # YouTube Cookies (sensitive data)
 youtube_cookies.txt
 cookies.txt
+
+# Next.js / Web App
+webapp/.next/
+webapp/out/
+webapp/node_modules/
+webapp/.env*.local
