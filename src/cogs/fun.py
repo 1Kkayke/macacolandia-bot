@@ -30,12 +30,12 @@ class Fun(commands.Cog):
         joke = self.jokes.get_random_joke()
         
         embed = discord.Embed(
-            title='😄 Piada do Dia',
+            title='😂 Piada Merda do Dia',
             description=joke,
             color=discord.Color.blue()
         )
         
-        embed.set_footer(text='Espero que tenha gostado! 🤣')
+        embed.set_footer(text='Se não riu, problema é teu! 🤣')
         await ctx.send(embed=embed)
     
     @commands.command(name='trivia', aliases=['quiz', 'pergunta'])
@@ -66,14 +66,14 @@ class Fun(commands.Cog):
         
         embed = discord.Embed(
             title=f'❓ Trivia - {question.category}',
-            description=question.question,
+            description=f'Responde aí se tu é esperto:\n\n{question.question}',
             color=discord.Color.blue()
         )
         
-        embed.add_field(name='Opções', value=options_text, inline=False)
-        embed.add_field(name='Prêmio', value='🏆 50 🪙', inline=True)
-        embed.add_field(name='Tempo', value='⏰ 15 segundos', inline=True)
-        embed.set_footer(text=f'Pergunta para: {ctx.author.name}')
+        embed.add_field(name='Opções (escolhe uma porra)', value=options_text, inline=False)
+        embed.add_field(name='Prêmio (se acertar)', value='🏆 50 🪙', inline=True)
+        embed.add_field(name='Tempo (rápido caralho)', value='⏰ 15 segundos', inline=True)
+        embed.set_footer(text=f'Pergunta pro {ctx.author.name} | Só tu pode responder!')
         
         msg = await ctx.send(embed=embed)
         
@@ -99,26 +99,26 @@ class Fun(commands.Cog):
                 self.economy.add_coins(str(ctx.author.id), 50, 'Trivia correta')
                 
                 embed = discord.Embed(
-                    title=f'✅ Resposta Correta!',
-                    description=f'**{ctx.author.display_name}** ganhou **50 🪙**',
+                    title=f'✅ Acertou porra!',
+                    description=f'**{ctx.author.display_name}** mandou bem e ganhou **50 🪙** caralho!',
                     color=discord.Color.green()
                 )
                 
                 embed.add_field(
-                    name='Resposta',
+                    name='Resposta (tu acertou)',
                     value=question.options[question.correct],
                     inline=False
                 )
             else:
                 # Wrong
                 embed = discord.Embed(
-                    title=f'❌ Resposta Incorreta',
-                    description=f'**{ctx.author.display_name}**, mais sorte na próxima vez!',
+                    title=f'❌ Errou fdp!',
+                    description=f'**{ctx.author.display_name}**, tu é burro memo hein! Tenta de novo.',
                     color=discord.Color.red()
                 )
                 
                 embed.add_field(
-                    name='Resposta Correta',
+                    name='Resposta Correta (era essa aí ó)',
                     value=question.options[question.correct],
                     inline=False
                 )
@@ -130,13 +130,13 @@ class Fun(commands.Cog):
         
         except asyncio.TimeoutError:
             embed = discord.Embed(
-                title='⏰ Tempo Esgotado',
-                description=f'**{ctx.author.display_name}** não respondeu a tempo!',
+                title='⏰ Tempo acabou caralho!',
+                description=f'**{ctx.author.display_name}** demorou demais porra! Perdeu a chance.',
                 color=discord.Color.orange()
             )
             
             embed.add_field(
-                name='Resposta Correta',
+                name='Resposta Correta (era essa aí)',
                 value=question.options[question.correct],
                 inline=False
             )
@@ -150,19 +150,19 @@ class Fun(commands.Cog):
         Uso: /enquete <minutos> "pergunta" "opção1" "opção2" ...
         """
         if not question:
-            await ctx.send(f'❌ Uso: `{PREFIX}enquete <minutos> "pergunta" "opção1" "opção2" ...`')
+            await ctx.send(f'❌ Uso certo porra: `{PREFIX}enquete <minutos> "pergunta" "opção1" "opção2" ...`')
             return
         
         if len(options) < 2:
-            await ctx.send('❌ Você precisa fornecer pelo menos 2 opções!')
+            await ctx.send('❌ Precisa de pelo menos 2 opção caralho!')
             return
         
         if len(options) > 10:
-            await ctx.send('❌ Máximo de 10 opções!')
+            await ctx.send('❌ Máximo de 10 opção só mano!')
             return
         
         if duration < 1 or duration > 60:
-            await ctx.send('❌ A duração deve ser entre 1 e 60 minutos!')
+            await ctx.send('❌ A duração tem que ser entre 1 e 60 minutos fdp!')
             return
         
         # Create poll
@@ -177,14 +177,14 @@ class Fun(commands.Cog):
         ])
         
         embed = discord.Embed(
-            title='📊 Enquete',
+            title='📊 Enquete (vota aí)',
             description=question,
             color=discord.Color.blue()
         )
         
-        embed.add_field(name='Opções', value=options_text, inline=False)
-        embed.add_field(name='Duração', value=f'⏰ {duration} minutos', inline=True)
-        embed.set_footer(text=f'Criada por {ctx.author.name}')
+        embed.add_field(name='Opções (clica no emoji)', value=options_text, inline=False)
+        embed.add_field(name='Duração (quanto tempo)', value=f'⏰ {duration} minutos', inline=True)
+        embed.set_footer(text=f'Criada pelo {ctx.author.name}')
         
         msg = await ctx.send(embed=embed)
         
@@ -222,18 +222,18 @@ class Fun(commands.Cog):
                 results_text.append(f'{number_emojis[i]} **{option}**\n{bar} {votes} votos ({percentage:.1f}%)')
             
             embed = discord.Embed(
-                title='📊 Enquete Encerrada',
+                title='📊 Enquete Encerrada porra!',
                 description=question,
                 color=discord.Color.green()
             )
             
             embed.add_field(
-                name=f'Resultados ({total_votes} votos)',
+                name=f'Resultados ({total_votes} votos | tá aí)',
                 value='\n\n'.join(results_text),
                 inline=False
             )
             
-            embed.set_footer(text=f'Criada por {ctx.author.name}')
+            embed.set_footer(text=f'Criada pelo {ctx.author.name} | Acabou caralho')
             
             await msg.edit(embed=embed)
         
@@ -247,42 +247,48 @@ class Fun(commands.Cog):
     async def magic_8ball(self, ctx, *, question: str = None):
         """Pergunta à bola mágica 8"""
         if not question:
-            await ctx.send(f'❌ Faça uma pergunta! Exemplo: `{PREFIX}8ball Vou ganhar no cassino hoje?`')
+            await ctx.send(f'❌ Faz uma pergunta porra! Exemplo: `{PREFIX}8ball Vou ganhar no cassino hoje?`')
             return
         
         import random
         responses = [
-            '🟢 Com certeza!',
-            '🟢 É certo.',
-            '🟢 Sem dúvida.',
-            '🟢 Sim, definitivamente.',
-            '🟢 Pode contar com isso.',
-            '🟡 As perspectivas são boas.',
-            '🟡 Provavelmente sim.',
-            '🟡 Sinais apontam que sim.',
-            '🟡 Sim.',
-            '🟡 Parece que sim.',
-            '🟠 Resposta incerta, tente novamente.',
-            '🟠 Pergunte novamente mais tarde.',
-            '🟠 Melhor não te dizer agora.',
-            '🟠 Não posso prever agora.',
-            '🟠 Concentre-se e pergunte novamente.',
-            '🔴 Não conte com isso.',
-            '🔴 Minha resposta é não.',
-            '🔴 Minhas fontes dizem que não.',
-            '🔴 As perspectivas não são boas.',
-            '🔴 Muito duvidoso.',
+            '🟢 Com certeza caralho!',
+            '🟢 É certo mano.',
+            '🟢 Sem dúvida nenhuma.',
+            '🟢 Sim porra, definitivamente.',
+            '🟢 Pode contar com isso fdp!',
+            '🟡 As perspectiva são boa.',
+            '🟡 Provavelmente sim mano.',
+            '🟡 Os sinais aponta que sim.',
+            '🟡 Sim caralho.',
+            '🟡 Parece que sim né.',
+            '🟠 Resposta incerta, tenta de novo.',
+            '🟠 Pergunta depois mano.',
+            '🟠 Melhor não te falar agora não.',
+            '🟠 Não consigo prever essa porra agora.',
+            '🟠 Concentra e pergunta de novo.',
+            '🔴 Não conta com isso não fdp.',
+            '🔴 Minha resposta é não caralho.',
+            '🔴 Minhas fonte dizem que não.',
+            '🔴 As perspectiva não são boa não.',
+            '🔴 Muito duvidoso mano.',
+            '🔴 Nem fodendo que isso vai acontecer!',
+            '🔴 Esquece essa merda.',
+            '🟢 Vai dar bom porra!',
+            '🟡 Talvez né, sei lá.',
+            '🔴 Tá sonhando demais amigo.',
         ]
         
         answer = random.choice(responses)
         
         embed = discord.Embed(
-            title='🎱 Bola Mágica 8',
+            title='🎱 Bola Mágica 8 (oráculo aleatório)',
             color=discord.Color.purple()
         )
         
-        embed.add_field(name='Pergunta', value=question, inline=False)
-        embed.add_field(name='Resposta', value=answer, inline=False)
+        embed.add_field(name='Pergunta (oq tu quis saber)', value=question, inline=False)
+        embed.add_field(name='Resposta (oq a bola disse)', value=answer, inline=False)
+        embed.set_footer(text='Confia não que é aleatório kkkk')
         
         await ctx.send(embed=embed)
 
