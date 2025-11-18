@@ -6,6 +6,22 @@
 
 Um bot completo para Discord feito em Python com música, jogos de cassino, sistema de economia e comandos interativos!
 
+## 🌐 Novo: Painel de Administração Web!
+
+Agora o Bot Macacolândia inclui um **painel web completo** para administração! Gerencie usuários, moedas e visualize estatísticas através de uma interface moderna e responsiva.
+
+**[📖 Ver Guia de Configuração do Web App →](WEBAPP_SETUP.md)**
+
+### Principais Funcionalidades do Painel Web:
+- 💰 Adicionar/remover moedas de jogadores
+- 📊 Dashboard com estatísticas em tempo real
+- 👥 Gerenciar usuários por servidor
+- 📈 Visualizar histórico de jogos e transações
+- 🏆 Ver conquistas desbloqueadas
+- 📱 Interface responsiva e moderna
+
+[Acesse a documentação completa do webapp →](webapp/README.md)
+
 ## ✨ Características
 
 ### 🎵 Sistema de Música
