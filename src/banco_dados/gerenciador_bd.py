@@ -1,3 +1,4 @@
+
 """Gerenciador de banco de dados para operações SQLite"""
 
 import sqlite3
@@ -31,7 +32,7 @@ class GerenciadorBancoDados:
             CREATE TABLE IF NOT EXISTS users (
                 user_id TEXT PRIMARY KEY,
                 username TEXT NOT NULL,
-                coins INTEGER DEFAULT 1000,
+                coins INTEGER DEFAULT 5000,
                 total_won INTEGER DEFAULT 0,
                 total_lost INTEGER DEFAULT 0,
                 games_played INTEGER DEFAULT 0,
