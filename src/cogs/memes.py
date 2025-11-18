@@ -12,7 +12,7 @@ class Memes(commands.Cog):
         self.bot = bot
         self.memes = MemeManager()
     
-    @commands.command(name='fact', aliases=['fato', 'curiosidade'])
+    @commands.command(name='fato', aliases=['fact', 'curiosidade'])
     async def fact(self, ctx):
         """Compartilha uma curiosidade engraçada"""
         fact = self.memes.get_random_fact()
@@ -26,7 +26,7 @@ class Memes(commands.Cog):
         embed.set_footer(text='Será que é verdade? 🤔')
         await ctx.send(embed=embed)
     
-    @commands.command(name='randommeme', aliases=['meme'])
+    @commands.command(name='meme', aliases=['randommeme', 'memealeatório', 'memealeat'])
     async def random_meme(self, ctx):
         """Envia um meme aleatório"""
         await ctx.typing()
@@ -44,7 +44,7 @@ class Memes(commands.Cog):
         else:
             await ctx.send('❌ Não consegui encontrar um meme no momento. Tente novamente!')
     
-    @commands.command(name='meme2025', aliases=['meme-2025', 'meme_2025'])
+    @commands.command(name='memede2025', aliases=['meme2025', 'meme-2025', 'meme_2025'])
     async def meme_2025(self, ctx):
         """Envia um meme da moda em 2025"""
         await ctx.typing()
@@ -60,7 +60,7 @@ class Memes(commands.Cog):
             embed.set_footer(text=f'r/{meme["subreddit"]} • Trending 2025 🚀')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não consegui encontrar um meme 2025. Tente /randommeme!')
+            await ctx.send('❌ Não consegui encontrar um meme 2025. Tente /meme!')
     
     @commands.command(name='memedodia', aliases=['meme-do-dia', 'meme_do_dia', 'dailymeme'])
     async def meme_do_dia(self, ctx):
@@ -80,25 +80,7 @@ class Memes(commands.Cog):
         else:
             await ctx.send('❌ Não consegui buscar o meme do dia. Tente /randommeme!')
     
-    @commands.command(name='memealeatório', aliases=['meme-aleatorio', 'memealeat', 'memealeat'])
-    async def meme_aleatorio(self, ctx):
-        """Envia um meme completamente aleatório"""
-        await ctx.typing()
-        
-        meme = await self.memes.fetch_reddit_meme()
-        
-        if meme:
-            embed = discord.Embed(
-                title=f'🎲 {meme["title"][:200]}',
-                color=discord.Color.blue()
-            )
-            embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • Aleatório total!')
-            await ctx.send(embed=embed)
-        else:
-            await ctx.send('❌ Erro ao buscar meme. Tente novamente!')
-    
-    @commands.command(name='memedesucesso', aliases=['meme-sucesso', 'memesucesso'])
+    @commands.command(name='memedesucesso', aliases=['meme-sucesso', 'memesucesso', 'memesucesso'])
     async def meme_sucesso(self, ctx):
         """Mostra um meme de sucesso do momento"""
         await ctx.typing()
@@ -114,7 +96,7 @@ class Memes(commands.Cog):
             embed.set_footer(text=f'r/{meme["subreddit"]} • Motivação! 💪')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não encontrei memes de sucesso. Tente /randommeme!')
+            await ctx.send('❌ Não encontrei memes de sucesso. Tente /meme!')
     
     @commands.command(name='memedefracasso', aliases=['meme-fracasso', 'memefracasso'])
     async def meme_fracasso(self, ctx):
@@ -132,7 +114,7 @@ class Memes(commands.Cog):
             embed.set_footer(text=f'r/{meme["subreddit"]} • F no chat 😅')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não encontrei memes de fracasso. Tente /randommeme!')
+            await ctx.send('❌ Não encontrei memes de fracasso. Tente /meme!')
     
     @commands.command(name='memedetroll', aliases=['meme-troll', 'troll'])
     async def meme_troll(self, ctx):
@@ -150,7 +132,7 @@ class Memes(commands.Cog):
             embed.set_footer(text=f'r/{meme["subreddit"]} • Problem? 😏')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não encontrei memes de troll. Tente /randommeme!')
+            await ctx.send('❌ Não encontrei memes de troll. Tente /meme!')
     
     @commands.command(name='memedezoacao', aliases=['meme-zoacao', 'zoacao', 'zoeira'])
     async def meme_zoacao(self, ctx):
@@ -168,7 +150,7 @@ class Memes(commands.Cog):
             embed.set_footer(text=f'r/{meme["subreddit"]} • É zueira! 😂')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não encontrei memes de zoação. Tente /randommeme!')
+            await ctx.send('❌ Não encontrei memes de zoação. Tente /meme!')
     
     @commands.command(name='memebr', aliases=['meme-br', 'memebrasil'])
     async def meme_brasileiro(self, ctx):
@@ -186,7 +168,7 @@ class Memes(commands.Cog):
             embed.set_footer(text=f'r/{meme["subreddit"]} • Meme raiz BR!')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não encontrei memes BR. Tente /randommeme!')
+            await ctx.send('❌ Não encontrei memes BR. Tente /meme!')
     
     @commands.command(name='topmeme', aliases=['top-meme', 'memetop'])
     async def top_meme(self, ctx):
@@ -204,7 +186,7 @@ class Memes(commands.Cog):
             embed.set_footer(text=f'r/{meme["subreddit"]} • {meme["score"]:,} ⬆️ • Top de hoje!')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não consegui buscar top memes. Tente /randommeme!')
+            await ctx.send('❌ Não consegui buscar top memes. Tente /meme!')
 
 
 async def setup(bot):
