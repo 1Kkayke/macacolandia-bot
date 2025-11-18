@@ -1,6 +1,9 @@
 # Stage 1: Dependencies
-FROM node:18-alpine AS deps
+FROM node:20-alpine AS deps
 WORKDIR /app
+
+# Install Python and build tools for better-sqlite3
+RUN apk add --no-cache python3 make g++
 
 # Copy package files
 COPY package.json package-lock.json* ./
@@ -9,7 +12,7 @@ COPY package.json package-lock.json* ./
 RUN npm ci || npm install
 
 # Stage 2: Builder
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy dependencies from deps stage
@@ -20,7 +23,7 @@ COPY . .
 RUN npm run build
 
 # Stage 3: Runner
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
