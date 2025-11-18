@@ -11,6 +11,7 @@ Um bot completo para Discord feito em Python com música, jogos de cassino, sist
 Agora o Bot Macacolândia inclui um **painel web completo** para administração! Gerencie usuários, moedas e visualize estatísticas através de uma interface moderna e responsiva.
 
 **[📖 Ver Guia de Configuração do Web App →](WEBAPP_SETUP.md)**
+**[🐳 Ver Guia de Docker do Web App →](webapp/DOCKER_README.md)** ⭐ NOVO!
 
 ### Principais Funcionalidades do Painel Web:
 - 💰 Adicionar/remover moedas de jogadores
@@ -19,6 +20,13 @@ Agora o Bot Macacolândia inclui um **painel web completo** para administração
 - 📈 Visualizar histórico de jogos e transações
 - 🏆 Ver conquistas desbloqueadas
 - 📱 Interface responsiva e moderna
+
+### 🐳 Deploy com Docker
+O projeto agora inclui **Dockerfiles separados** para bot e webapp:
+- **Bot Discord**: `Dockerfile` (Python)
+- **WebApp Admin**: `webapp/Dockerfile` (Next.js)
+
+**[❓ Por que dois Dockerfiles? →](DOCKERFILE_FAQ.md)**
 
 [Acesse a documentação completa do webapp →](webapp/README.md)
 
