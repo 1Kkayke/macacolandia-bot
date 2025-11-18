@@ -7,17 +7,17 @@ from typing import Tuple, List
 class ScratchCardGame:
     """Instant win scratch card game"""
     
-    # Prize pool with probabilities (mais difícil)
+    # Prize pool with probabilities (muito mais difícil - house edge alto)
     PRIZES = [
-        {'multiplier': 0, 'label': 'Perdeu', 'emoji': '❌', 'weight': 60},  # 60% perder
-        {'multiplier': 0.5, 'label': 'Metade', 'emoji': '💸', 'weight': 18},  # 18% metade
-        {'multiplier': 1.0, 'label': 'Empate', 'emoji': '🤝', 'weight': 10},  # 10% empate
-        {'multiplier': 2.0, 'label': 'Dobro', 'emoji': '💰', 'weight': 7},  # 7% dobro
-        {'multiplier': 3.0, 'label': 'Triplo', 'emoji': '💎', 'weight': 3},  # 3% triplo
-        {'multiplier': 5.0, 'label': 'x5', 'emoji': '🌟', 'weight': 1.2},  # 1.2% x5
-        {'multiplier': 10.0, 'label': 'x10', 'emoji': '⭐', 'weight': 0.5},  # 0.5% x10
-        {'multiplier': 25.0, 'label': 'x25', 'emoji': '🎊', 'weight': 0.2},  # 0.2% x25
-        {'multiplier': 100.0, 'label': 'JACKPOT!', 'emoji': '🎰', 'weight': 0.1},  # 0.1% jackpot
+        {'multiplier': 0, 'label': 'Perdeu', 'emoji': '❌', 'weight': 70},  # 70% perder
+        {'multiplier': 0.5, 'label': 'Metade', 'emoji': '💸', 'weight': 15},  # 15% metade (perde metade)
+        {'multiplier': 1.0, 'label': 'Empate', 'emoji': '🤝', 'weight': 8},  # 8% empate
+        {'multiplier': 2.0, 'label': 'Dobro', 'emoji': '💰', 'weight': 4},  # 4% dobro
+        {'multiplier': 3.0, 'label': 'Triplo', 'emoji': '💎', 'weight': 1.8},  # 1.8% triplo
+        {'multiplier': 5.0, 'label': 'x5', 'emoji': '🌟', 'weight': 0.8},  # 0.8% x5
+        {'multiplier': 10.0, 'label': 'x10', 'emoji': '⭐', 'weight': 0.3},  # 0.3% x10
+        {'multiplier': 25.0, 'label': 'x25', 'emoji': '🎊', 'weight': 0.08},  # 0.08% x25
+        {'multiplier': 100.0, 'label': 'JACKPOT!', 'emoji': '🎰', 'weight': 0.02},  # 0.02% jackpot
     ]
     
     CARD_SIZE = 9  # 3x3 grid
