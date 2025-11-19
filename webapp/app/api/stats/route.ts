@@ -5,9 +5,10 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const gameType = searchParams.get('gameType');
+    const guildId = searchParams.get('guildId');
 
-    const globalStats = getGlobalStats();
-    const gameStats = getGameStats(gameType || undefined);
+    const globalStats = getGlobalStats(guildId || undefined);
+    const gameStats = getGameStats(gameType || undefined, guildId || undefined);
 
     return NextResponse.json({
       global: globalStats,

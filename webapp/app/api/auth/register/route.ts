@@ -251,21 +251,8 @@ export async function POST(request: Request) {
     }
 
     // ===== ENVIAR EMAIL DE NOTIFICAÇÃO =====
-    console.log('[REGISTER] Enviando notificação por email...');
-    try {
-      const emailSent = await sendRegistrationNotification({
-        name: sanitizedName,
-        email: sanitizedEmail,
-        ipAddress: ip,
-        userAgent,
-        requestedAt: new Date().toISOString(),
-        registrationId,
-      });
-      console.log('[REGISTER] Email enviado:', emailSent);
-    } catch (emailError) {
-      console.error('[REGISTER] Erro ao enviar email (não crítico):', emailError);
-      // Não falha o registro se o email falhar
-    }
+    // Email removido conforme solicitação - admin deve verificar painel
+    console.log('[REGISTER] Notificação por email desativada. Admin deve verificar painel.');
 
     // ===== LIMPAR RATE LIMIT APÓS SUCESSO =====
     clearRateLimit(ip, 'register');

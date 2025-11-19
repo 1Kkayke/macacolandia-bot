@@ -7,6 +7,7 @@ import os
 import sys
 import socket
 from src.config import TOKEN, PREFIX
+from src.database.db_manager import DatabaseManager
 
 # Lock file to prevent multiple instances
 LOCK_FILE = 'bot.lock'
@@ -61,9 +62,11 @@ async def main():
         intents = discord.Intents.default()
         intents.message_content = True
         intents.voice_states = True
+        intents.members = True  # Enable members intent for user tracking
 
         # Bot instance
         bot = commands.Bot(command_prefix=PREFIX, intents=intents, help_command=None)
+        db = DatabaseManager()
 
         @bot.event
         async def on_ready():
@@ -79,6 +82,22 @@ async def main():
             print(f'📍 Servidores: {len(bot.guilds)}')
             print(f'🖥️  Executando em: {HOSTNAME}')
             print('------')
+
+            # Sync guilds and members to database
+            print('🔄 Sincronizando servidores e membros com o banco de dados...')
+            for guild in bot.guilds:
+                icon_url = str(guild.icon.url) if guild.icon else None
+                db.update_guild(str(guild.id), guild.name, guild.member_count, icon_url)
+                
+                # Sync members
+                member_count = 0
+                for member in guild.members:
+                    if not member.bot:
+                        db.add_guild_member(str(guild.id), str(member.id))
+                        member_count += 1
+                print(f'   Synced {guild.name}: {member_count} members')
+                
+            print('✅ Servidores e membros sincronizados!')
             
             # Check for duplicate commands (multiple instances)
             command_names = [cmd.name for cmd in bot.commands]
@@ -95,6 +114,36 @@ async def main():
                 print('------')
             
             await bot.change_presence(activity=discord.Game(name=f'{PREFIX}help | Usa ai porra!'))
+
+        @bot.event
+        async def on_guild_join(guild):
+            """Log when bot joins a guild"""
+            print(f'➕ Entrei no servidor: {guild.name} (ID: {guild.id})')
+            icon_url = str(guild.icon.url) if guild.icon else None
+            db.update_guild(str(guild.id), guild.name, guild.member_count, icon_url)
+            
+            # Sync members
+            for member in guild.members:
+                if not member.bot:
+                    db.add_guild_member(str(guild.id), str(member.id))
+
+        @bot.event
+        async def on_guild_remove(guild):
+            """Log when bot leaves a guild"""
+            print(f'➖ Sai do servidor: {guild.name} (ID: {guild.id})')
+            db.remove_guild(str(guild.id))
+
+        @bot.event
+        async def on_member_join(member):
+            """Log when a member joins a guild"""
+            if not member.bot:
+                db.add_guild_member(str(member.guild.id), str(member.id))
+
+        @bot.event
+        async def on_member_remove(member):
+            """Log when a member leaves a guild"""
+            if not member.bot:
+                db.remove_guild_member(str(member.guild.id), str(member.id))
 
         @bot.event
         async def on_command_error(ctx, error):

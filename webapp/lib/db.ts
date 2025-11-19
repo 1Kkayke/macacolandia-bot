@@ -43,9 +43,11 @@ export interface Achievement {
 }
 
 export interface ServerConfig {
-  guild_id: string;
-  guild_name: string;
-  user_count: number;
+  id: string;
+  name: string;
+  member_count: number;
+  icon: string | null;
+  joined_at: string;
 }
 
 let db: Database.Database | null = null;
@@ -66,7 +68,53 @@ export function getDatabase() {
 // User operations
 export function getAllUsers(guildId?: string): User[] {
   const db = getDatabase();
-  // For now, return all users. In production, filter by guild_id if available
+  
+  if (guildId) {
+    // Check if guild_coins has any data for this guild
+    const guildCoinsCount = db.prepare('SELECT COUNT(*) as count FROM guild_coins WHERE guild_id = ?').get(guildId) as { count: number };
+    
+    if (guildCoinsCount.count === 0) {
+      // Fallback to global user data for guild members
+      return db.prepare(`
+        SELECT 
+          u.user_id, 
+          u.username,
+          u.coins,
+          u.total_won,
+          u.total_lost,
+          u.games_played,
+          u.games_won,
+          u.created_at,
+          u.last_daily,
+          u.streak
+        FROM users u
+        INNER JOIN guild_members gm ON u.user_id = gm.user_id
+        WHERE gm.guild_id = ?
+        ORDER BY u.coins DESC
+      `).all(guildId) as User[];
+    }
+    
+    // Return guild-specific user data with guild-specific coins
+    return db.prepare(`
+      SELECT 
+        u.user_id, 
+        u.username,
+        gc.coins,
+        gc.total_won,
+        gc.total_lost,
+        gc.games_played,
+        gc.games_won,
+        u.created_at,
+        gc.last_daily,
+        gc.streak
+      FROM users u
+      INNER JOIN guild_members gm ON u.user_id = gm.user_id
+      INNER JOIN guild_coins gc ON gc.user_id = u.user_id AND gc.guild_id = gm.guild_id
+      WHERE gm.guild_id = ?
+      ORDER BY gc.coins DESC
+    `).all(guildId) as User[];
+  }
+  
   const users = db.prepare('SELECT * FROM users ORDER BY coins DESC').all() as User[];
   return users;
 }
@@ -125,33 +173,43 @@ export function getUserGameHistory(userId: string, limit = 50): GameHistory[] {
     .all(userId, limit) as GameHistory[];
 }
 
-export function getGameStats(gameType?: string) {
+export function getGameStats(gameType?: string, guildId?: string) {
   const db = getDatabase();
-  if (gameType) {
-    return db
-      .prepare(
-        `SELECT 
-          COUNT(*) as total_games,
-          SUM(CASE WHEN result = 'win' THEN 1 ELSE 0 END) as wins,
-          SUM(bet_amount) as total_bet,
-          SUM(winnings) as total_winnings
-        FROM game_history 
-        WHERE game_type = ?`
-      )
-      .get(gameType);
+  
+  let query = `
+    SELECT 
+      ${gameType ? '' : 'gh.game_type,'}
+      COUNT(*) as total_games,
+      SUM(CASE WHEN gh.result = 'win' THEN 1 ELSE 0 END) as wins,
+      SUM(gh.bet_amount) as total_bet,
+      SUM(gh.winnings) as total_winnings
+    FROM game_history gh
+  `;
+  
+  const params: any[] = [];
+  const conditions: string[] = [];
+  
+  if (guildId) {
+    query += ` INNER JOIN guild_members gm ON gh.user_id = gm.user_id `;
+    conditions.push('gm.guild_id = ?');
+    params.push(guildId);
   }
-  return db
-    .prepare(
-      `SELECT 
-        game_type,
-        COUNT(*) as total_games,
-        SUM(CASE WHEN result = 'win' THEN 1 ELSE 0 END) as wins,
-        SUM(bet_amount) as total_bet,
-        SUM(winnings) as total_winnings
-      FROM game_history 
-      GROUP BY game_type`
-    )
-    .all();
+  
+  if (gameType) {
+    conditions.push('gh.game_type = ?');
+    params.push(gameType);
+  }
+  
+  if (conditions.length > 0) {
+    query += ' WHERE ' + conditions.join(' AND ');
+  }
+  
+  if (!gameType) {
+    query += ' GROUP BY gh.game_type';
+    return db.prepare(query).all(...params);
+  }
+  
+  return db.prepare(query).get(...params);
 }
 
 // Achievement operations
@@ -163,8 +221,56 @@ export function getUserAchievements(userId: string): Achievement[] {
 }
 
 // Statistics
-export function getGlobalStats() {
+export function getGlobalStats(guildId?: string) {
   const db = getDatabase();
+  
+  if (guildId) {
+    // Check if guild_coins has any data for this guild
+    const guildCoinsCount = db.prepare('SELECT COUNT(*) as count FROM guild_coins WHERE guild_id = ?').get(guildId) as { count: number };
+    
+    if (guildCoinsCount.count === 0) {
+      // Fallback to global stats for guild members
+      const memberIds = db.prepare('SELECT user_id FROM guild_members WHERE guild_id = ?').all(guildId) as { user_id: string }[];
+      const memberIdList = memberIds.map(m => m.user_id);
+      
+      if (memberIdList.length === 0) {
+        return {
+          totalUsers: { count: 0 },
+          totalCoins: { total: 0 },
+          totalGames: { count: 0 },
+          avgCoinsPerUser: { avg: 0 },
+        };
+      }
+      
+      const placeholders = memberIdList.map(() => '?').join(',');
+      return {
+        totalUsers: { count: memberIdList.length },
+        totalCoins: db.prepare(`SELECT COALESCE(SUM(coins), 0) as total FROM users WHERE user_id IN (${placeholders})`).get(...memberIdList) as { total: number },
+        totalGames: db.prepare(`SELECT COALESCE(SUM(games_played), 0) as count FROM users WHERE user_id IN (${placeholders})`).get(...memberIdList) as { count: number },
+        avgCoinsPerUser: db.prepare(`SELECT COALESCE(AVG(coins), 0) as avg FROM users WHERE user_id IN (${placeholders})`).get(...memberIdList) as { avg: number },
+      };
+    }
+    
+    return {
+      totalUsers: db.prepare('SELECT COUNT(*) as count FROM guild_members WHERE guild_id = ?').get(guildId) as { count: number },
+      totalCoins: db.prepare(`
+        SELECT COALESCE(SUM(gc.coins), 0) as total 
+        FROM guild_coins gc
+        WHERE gc.guild_id = ?
+      `).get(guildId) as { total: number },
+      totalGames: db.prepare(`
+        SELECT COALESCE(SUM(gc.games_played), 0) as count 
+        FROM guild_coins gc
+        WHERE gc.guild_id = ?
+      `).get(guildId) as { count: number },
+      avgCoinsPerUser: db.prepare(`
+        SELECT COALESCE(AVG(gc.coins), 0) as avg 
+        FROM guild_coins gc
+        WHERE gc.guild_id = ?
+      `).get(guildId) as { avg: number },
+    };
+  }
+
   return {
     totalUsers: db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number },
     totalCoins: db.prepare('SELECT SUM(coins) as total FROM users').get() as { total: number },
@@ -173,23 +279,30 @@ export function getGlobalStats() {
   };
 }
 
-// Simulated server data (since we don't have guild_id in the current schema)
-// In production, you would extend the schema to track which users belong to which guild
+// Get real server data from database
 export function getServers(): ServerConfig[] {
   const db = getDatabase();
-  const userCount = db.prepare('SELECT COUNT(*) as count FROM users').get() as { count: number };
-  
-  // Simulate two servers as mentioned in requirements
-  return [
-    {
-      guild_id: 'server_1',
-      guild_name: 'Servidor Principal',
-      user_count: Math.floor(userCount.count * 0.6),
-    },
-    {
-      guild_id: 'server_2',
-      guild_name: 'Servidor Secundário',
-      user_count: Math.floor(userCount.count * 0.4),
-    },
-  ];
+  try {
+    // Check if table exists first (migration safety)
+    const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='guilds'").get();
+    
+    if (!tableExists) {
+      // Fallback if bot hasn't run yet
+      return [];
+    }
+
+    const guilds = db.prepare('SELECT guild_id, name, member_count, icon_url, joined_at FROM guilds ORDER BY member_count DESC').all() as any[];
+    
+    // Map database columns to frontend interface
+    return guilds.map(guild => ({
+      id: guild.guild_id,
+      name: guild.name,
+      member_count: guild.member_count,
+      icon: guild.icon_url,
+      joined_at: guild.joined_at
+    }));
+  } catch (error) {
+    console.error('Error fetching servers:', error);
+    return [];
+  }
 }
