@@ -218,7 +218,23 @@ export async function POST(request: Request) {
       console.log('[REGISTER] Registro pendente criado com ID:', registrationId);
     } catch (dbError) {
       console.error('[REGISTER] Erro ao criar registro pendente:', dbError);
-      
+
+      // Handle duplicate email / pending cases from DB helper
+      const msg = dbError instanceof Error ? dbError.message : String(dbError);
+      if (msg === 'EMAIL_EXISTS') {
+        return NextResponse.json(
+          { error: 'Este email já está cadastrado' },
+          { status: 400 }
+        );
+      }
+
+      if (msg === 'PENDING_EXISTS') {
+        return NextResponse.json(
+          { error: 'Já existe uma solicitação pendente para este email' },
+          { status: 400 }
+        );
+      }
+
       logSecurityEvent({
         event_type: 'register_database_error',
         severity: 'high',

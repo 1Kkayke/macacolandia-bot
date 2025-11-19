@@ -236,6 +236,16 @@ export function createPendingRegistration(
 ): number {
   try {
     const db = getAuthDatabase();
+    // Prevent duplicate pending registrations or existing users with same email
+    const existingUser = db.prepare('SELECT id FROM auth_users WHERE email = ?').get(email);
+    if (existingUser) {
+      throw new Error('EMAIL_EXISTS');
+    }
+
+    const existingPending = db.prepare('SELECT id FROM pending_registrations WHERE email = ? AND status = ?').get(email, 'pending');
+    if (existingPending) {
+      throw new Error('PENDING_EXISTS');
+    }
     console.log('[AUTH-DB] Inserindo registro pendente:', { name, email });
     const result = db
       .prepare(
@@ -248,6 +258,11 @@ export function createPendingRegistration(
     console.error('[AUTH-DB] Erro ao criar registro pendente:', error);
     throw error;
   }
+}
+
+export function getPendingRegistrationByEmail(email: string) {
+  const db = getAuthDatabase();
+  return db.prepare('SELECT * FROM pending_registrations WHERE email = ? AND status = ?').get(email, 'pending');
 }
 
 export function getPendingRegistrations(): PendingRegistration[] {
