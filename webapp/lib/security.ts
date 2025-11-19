@@ -68,7 +68,8 @@ export function checkRateLimit(
 
   // Se atingiu o limite
   if (entry.count >= config.maxAttempts) {
-    const minutesRemaining = Math.ceil((entry.resetTime - now) / 60000);
+    const secondsRemaining = Math.max(0, Math.ceil((entry.resetTime - now) / 1000));
+    const minutesRemaining = Math.max(0, Math.ceil(secondsRemaining / 60));
     return {
       allowed: false,
       resetTime: entry.resetTime,
@@ -219,7 +220,8 @@ export function isAccountLocked(email: string): {
 
   if (lockout) {
     const lockedUntil = new Date(lockout.locked_until);
-    const minutesRemaining = Math.ceil((lockedUntil.getTime() - Date.now()) / 60000);
+    const secondsRemaining = Math.max(0, Math.ceil((lockedUntil.getTime() - Date.now()) / 1000));
+    const minutesRemaining = Math.max(0, Math.ceil(secondsRemaining / 60));
     
     return {
       locked: true,
