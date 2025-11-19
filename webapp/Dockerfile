@@ -48,15 +48,6 @@ COPY --from=builder /app/package.json ./package.json
 # Create data directory for database
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app
 
-# Create entrypoint script (starts the server only)
-# Updated: 2025-11-19 - Fixed entrypoint path
-RUN echo '#!/bin/sh\n\
-echo "🔧 Inicializando aplicação..."\n\
-echo "🚀 Iniciando servidor..."\n\
-exec node server.js' > /app/entrypoint.sh && \
-    chmod +x /app/entrypoint.sh && \
-    chown nextjs:nodejs /app/entrypoint.sh
-
 USER nextjs
 
 EXPOSE 3000
@@ -64,5 +55,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start the application with entrypoint
-CMD ["/app/entrypoint.sh"]
+# Start the application directly
+CMD ["node", "server.js"]
