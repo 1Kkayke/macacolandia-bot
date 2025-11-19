@@ -2,7 +2,7 @@ const bcrypt = require('bcryptjs');
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const dbPath = path.join(__dirname, '..', '..', 'data', 'macacolandia.db');
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'macacolandia.db');
 
 async function ensureAdmin() {
   // Usar variáveis de ambiente ou valores padrão (apenas para desenvolvimento local)
