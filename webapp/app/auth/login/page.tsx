@@ -30,28 +30,43 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
+      // Usar API customizada que retorna mensagens de erro apropriadas
+      const response = await fetch('/api/auth/signin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
       });
 
-      if (result?.error) {
-        setError(result.error);
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Erro ao fazer login');
         setAttemptCount(prev => prev + 1);
         
-        // Mensagens específicas para bloqueios
-        if (result.error.includes("bloqueada") || result.error.includes("Tente novamente")) {
-          setError(result.error);
-        } else if (attemptCount >= 3) {
-          setError(`${result.error} (${attemptCount + 1} tentativas falhas - cuidado com bloqueio temporário)`);
+        // Mostrar tentativas restantes se houver
+        if (data.remainingAttempts !== undefined && data.remainingAttempts > 0) {
+          setError(`${data.error} (${data.remainingAttempts} tentativas restantes)`);
         }
-      } else if (result?.ok) {
-        router.push("/");
-        router.refresh();
+      } else if (data.success) {
+        // Login bem-sucedido - usar NextAuth para criar a sessão
+        const result = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (result?.ok) {
+          router.push("/");
+          router.refresh();
+        } else {
+          setError("Erro ao criar sessão. Tente novamente.");
+        }
       }
     } catch (err) {
-      setError("Erro ao fazer login");
+      console.error('Erro ao fazer login:', err);
+      setError("Erro ao conectar ao servidor. Tente novamente.");
     } finally {
       setLoading(false);
     }
