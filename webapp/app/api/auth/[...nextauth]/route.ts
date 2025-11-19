@@ -1,5 +1,5 @@
 import { handlers } from '@/lib/auth';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import {
   recordFailedAttempt,
   checkAndLockAccount,
@@ -11,11 +11,11 @@ import {
 export const GET = handlers.GET;
 
 // Wrapper para POST que adiciona lógica de tentativas falhas
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   const originalHandler = handlers.POST;
   
   // Capturar o resultado da autenticação
-  const response = await originalHandler(request);
+  const response = await originalHandler(request as any);
   
   // Se for uma requisição de callback de signin
   if (request.url.includes('callback/credentials')) {
