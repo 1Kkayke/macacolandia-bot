@@ -73,12 +73,14 @@ export function middleware(request: NextRequest) {
 
   // ===== RATE LIMITING POR ROTA =====
   let rateLimitConfig: { maxRequests: number; windowMs: number } | null = null;
+  const method = request.method;
 
-  if (pathname.startsWith('/api/auth/login') || pathname === '/auth/login') {
-    rateLimitConfig = { maxRequests: 10, windowMs: 5 * 60 * 1000 }; // 10 req/5min
-  } else if (pathname.startsWith('/api/auth/register') || pathname === '/auth/register') {
-    rateLimitConfig = { maxRequests: 5, windowMs: 60 * 60 * 1000 }; // 5 req/1hora
-  } else if (pathname.startsWith('/api/')) {
+  // Rate limit apenas em endpoints de API (POST/PUT/DELETE), não em páginas (GET)
+  if (pathname.startsWith('/api/auth/login') && method === 'POST') {
+    rateLimitConfig = { maxRequests: 10, windowMs: 5 * 60 * 1000 }; // 10 tentativas/5min
+  } else if (pathname.startsWith('/api/auth/register') && method === 'POST') {
+    rateLimitConfig = { maxRequests: 5, windowMs: 60 * 60 * 1000 }; // 5 tentativas/1hora
+  } else if (pathname.startsWith('/api/') && method !== 'GET') {
     rateLimitConfig = { maxRequests: 100, windowMs: 60 * 1000 }; // 100 req/1min (API geral)
   }
 
@@ -152,7 +154,7 @@ export function middleware(request: NextRequest) {
   // Permissions Policy
   response.headers.set(
     'Permissions-Policy',
-    'camera=(), microphone=(), geolocation=(), interest-cohort=()'
+    'camera=(), microphone=(), geolocation=()'
   );
 
   // HSTS (HTTP Strict Transport Security) - apenas em produção
