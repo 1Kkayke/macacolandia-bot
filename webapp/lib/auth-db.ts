@@ -127,6 +127,9 @@ function initAuthTables() {
     )
   `);
 
+  // Ensure unique index on auth_users.email (defensive, in case schema changed)
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_auth_users_email ON auth_users(email)`);
+
   // Pending registrations table
   db.exec(`
     CREATE TABLE IF NOT EXISTS pending_registrations (
@@ -306,9 +309,21 @@ export function approvePendingRegistration(id: number): { name: string; email: s
     }
 
     // Create auth user
-    db.prepare(
-      'INSERT INTO auth_users (name, email, password, role, approved) VALUES (?, ?, ?, ?, ?)'
-    ).run(pending.name, pending.email, pending.password, 'user', 1);
+    try {
+      db.prepare(
+        'INSERT INTO auth_users (name, email, password, role, approved) VALUES (?, ?, ?, ?, ?)'
+      ).run(pending.name, pending.email, pending.password, 'user', 1);
+    } catch (err) {
+      // Handle unique constraint: another user may have been created concurrently
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('SQLITE_CONSTRAINT') || msg.includes('constraint')) {
+        console.warn('[AUTH-DB] Approve failed: email already exists, rejecting pending registration', pending.email);
+        // Mark pending as rejected to avoid retry loops
+        db.prepare('UPDATE pending_registrations SET status = ? WHERE id = ?').run('rejected', id);
+        return null;
+      }
+      throw err;
+    }
 
     // Update pending status
     db.prepare('UPDATE pending_registrations SET status = ? WHERE id = ?').run('approved', id);
