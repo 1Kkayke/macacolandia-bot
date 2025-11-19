@@ -141,6 +141,9 @@ function initAuthTables() {
     )
   `);
 
+  // Enforce uniqueness at DB level as extra safety
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS uniq_pending_registrations_email ON pending_registrations(email)`);
+
   // Activity logs table
   db.exec(`
     CREATE TABLE IF NOT EXISTS activity_logs (
@@ -247,11 +250,28 @@ export function createPendingRegistration(
       throw new Error('PENDING_EXISTS');
     }
     console.log('[AUTH-DB] Inserindo registro pendente:', { name, email });
-    const result = db
-      .prepare(
-        'INSERT INTO pending_registrations (name, email, password, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)'
-      )
-      .run(name, email, hashedPassword, ipAddress, userAgent);
+    let result;
+    try {
+      result = db
+        .prepare(
+          'INSERT INTO pending_registrations (name, email, password, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)'
+        )
+        .run(name, email, hashedPassword, ipAddress, userAgent);
+    } catch (err) {
+      // Handle unique constraint errors that may happen in race conditions
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes('SQLITE_CONSTRAINT') || msg.includes('constraint')) {
+        // Determine whether an auth user exists or a pending exists now
+        const nowUser = db.prepare('SELECT id FROM auth_users WHERE email = ?').get(email);
+        if (nowUser) throw new Error('EMAIL_EXISTS');
+        const nowPending = db.prepare('SELECT id FROM pending_registrations WHERE email = ? AND status = ?').get(email, 'pending');
+        if (nowPending) throw new Error('PENDING_EXISTS');
+        // fallback
+        throw new Error('DB_CONSTRAINT');
+      }
+      throw err;
+    }
+
     console.log('[AUTH-DB] Registro inserido com ID:', result.lastInsertRowid);
     return result.lastInsertRowid as number;
   } catch (error) {
