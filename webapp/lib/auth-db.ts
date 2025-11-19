@@ -2,13 +2,14 @@ import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
 
-const DB_PATH = path.join(process.cwd(), '..', 'data', 'macacolandia.db');
+// Use environment variable or default to ./data relative to project root
+const DB_DIR = process.env.DATABASE_DIR || path.join(process.cwd(), 'data');
+const DB_PATH = path.join(DB_DIR, 'macacolandia.db');
 
 // Ensure data directory exists
-const dataDir = path.dirname(DB_PATH);
-if (!fs.existsSync(dataDir)) {
-  console.log('[AUTH-DB] Criando diretório de dados:', dataDir);
-  fs.mkdirSync(dataDir, { recursive: true });
+if (!fs.existsSync(DB_DIR)) {
+  console.log('[AUTH-DB] Criando diretório de dados:', DB_DIR);
+  fs.mkdirSync(DB_DIR, { recursive: true });
 }
 
 export interface AuthUser {
