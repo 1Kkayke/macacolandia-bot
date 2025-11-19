@@ -1,7 +1,15 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 
 const DB_PATH = path.join(process.cwd(), '..', 'data', 'macacolandia.db');
+
+// Ensure data directory exists
+const dataDir = path.dirname(DB_PATH);
+if (!fs.existsSync(dataDir)) {
+  console.log('[AUTH-DB] Criando diretório de dados:', dataDir);
+  fs.mkdirSync(dataDir, { recursive: true });
+}
 
 export interface AuthUser {
   id: number;
@@ -31,12 +39,16 @@ let db: Database.Database | null = null;
 export function getAuthDatabase() {
   if (!db) {
     try {
+      console.log('[AUTH-DB] Tentando conectar ao banco:', DB_PATH);
       db = new Database(DB_PATH, { readonly: false });
       db.pragma('journal_mode = WAL');
+      console.log('[AUTH-DB] Banco conectado, inicializando tabelas...');
       initAuthTables();
+      console.log('[AUTH-DB] Tabelas inicializadas com sucesso!');
     } catch (error) {
-      console.error('Failed to open auth database:', error);
-      throw new Error('Database connection failed');
+      console.error('[AUTH-DB] Falha ao abrir banco de dados:', error);
+      console.error('[AUTH-DB] Caminho do banco:', DB_PATH);
+      throw new Error(`Database connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
   return db;
@@ -96,13 +108,20 @@ export function createPendingRegistration(
   ipAddress: string | null,
   userAgent: string | null
 ): number {
-  const db = getAuthDatabase();
-  const result = db
-    .prepare(
-      'INSERT INTO pending_registrations (name, email, password, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)'
-    )
-    .run(name, email, hashedPassword, ipAddress, userAgent);
-  return result.lastInsertRowid as number;
+  try {
+    const db = getAuthDatabase();
+    console.log('[AUTH-DB] Inserindo registro pendente:', { name, email });
+    const result = db
+      .prepare(
+        'INSERT INTO pending_registrations (name, email, password, ip_address, user_agent) VALUES (?, ?, ?, ?, ?)'
+      )
+      .run(name, email, hashedPassword, ipAddress, userAgent);
+    console.log('[AUTH-DB] Registro inserido com ID:', result.lastInsertRowid);
+    return result.lastInsertRowid as number;
+  } catch (error) {
+    console.error('[AUTH-DB] Erro ao criar registro pendente:', error);
+    throw error;
+  }
 }
 
 export function getPendingRegistrations(): PendingRegistration[] {
