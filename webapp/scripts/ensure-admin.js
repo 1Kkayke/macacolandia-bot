@@ -5,8 +5,15 @@ const path = require('path');
 const dbPath = path.join(__dirname, '..', '..', 'data', 'macacolandia.db');
 
 async function ensureAdmin() {
-  const adminEmail = 'admin@macacolandia.com';
-  const adminPassword = 'Lucas8556!';
+  // Usar variáveis de ambiente ou valores padrão (apenas para desenvolvimento local)
+  const adminEmail = process.env.ADMIN_EMAIL || 'admin@macacolandia.com';
+  const adminPassword = process.env.ADMIN_PASSWORD;
+  
+  if (!adminPassword) {
+    console.error('❌ ERRO: Variável de ambiente ADMIN_PASSWORD não configurada!');
+    console.error('Configure no Dokploy: Settings → Environment Variables → ADMIN_PASSWORD');
+    process.exit(1);
+  }
   
   console.log('🔧 Garantindo admin em produção...');
   console.log(`📁 Banco de dados: ${dbPath}`);
@@ -61,7 +68,7 @@ async function ensureAdmin() {
     console.log('✅ ADMIN GARANTIDO COM SUCESSO!');
     console.log('═══════════════════════════════════════════════════════════');
     console.log(`📧 Email:  ${adminEmail}`);
-    console.log(`🔑 Senha:  ${adminPassword}`);
+    console.log(`🔑 Senha:  ${'*'.repeat(adminPassword.length)} (configurada via env)`);
     console.log('═══════════════════════════════════════════════════════════\n');
     
   } catch (error) {
