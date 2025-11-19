@@ -44,6 +44,7 @@ export function getAuthDatabase() {
       db.pragma('journal_mode = WAL');
       console.log('[AUTH-DB] Banco conectado, inicializando tabelas...');
       initAuthTables();
+      initSecurityTables();
       console.log('[AUTH-DB] Tabelas inicializadas com sucesso!');
     } catch (error) {
       console.error('[AUTH-DB] Falha ao abrir banco de dados:', error);
@@ -52,6 +53,59 @@ export function getAuthDatabase() {
     }
   }
   return db;
+}
+
+function initSecurityTables() {
+  if (!db) return;
+  
+  // Failed attempts table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS failed_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL,
+      ip_address TEXT NOT NULL,
+      user_agent TEXT,
+      attempt_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      reason TEXT
+    )
+  `);
+  
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_failed_email ON failed_attempts(email)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_failed_ip ON failed_attempts(ip_address)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_failed_time ON failed_attempts(attempt_time)`);
+
+  // Account lockouts table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS account_lockouts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      locked_until TIMESTAMP NOT NULL,
+      locked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      reason TEXT
+    )
+  `);
+  
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_lockout_email ON account_lockouts(email)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_lockout_until ON account_lockouts(locked_until)`);
+
+  // Security logs table
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS security_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_type TEXT NOT NULL,
+      severity TEXT NOT NULL CHECK(severity IN ('low', 'medium', 'high', 'critical')),
+      email TEXT,
+      ip_address TEXT NOT NULL,
+      user_agent TEXT,
+      details TEXT,
+      timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+  
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_log_event ON security_logs(event_type)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_log_severity ON security_logs(severity)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_log_email ON security_logs(email)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_log_time ON security_logs(timestamp)`);
 }
 
 function initAuthTables() {
@@ -97,6 +151,77 @@ function initAuthTables() {
       timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES auth_users(id)
     )
+  `);
+
+  // Security tables
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS failed_attempts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL,
+      ip_address TEXT NOT NULL,
+      user_agent TEXT,
+      attempt_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      reason TEXT
+    )
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_failed_attempts_email ON failed_attempts(email)
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_failed_attempts_ip ON failed_attempts(ip_address)
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_failed_attempts_time ON failed_attempts(attempt_time)
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS account_lockouts (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL UNIQUE,
+      locked_until TIMESTAMP NOT NULL,
+      locked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      reason TEXT
+    )
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_lockouts_email ON account_lockouts(email)
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_lockouts_until ON account_lockouts(locked_until)
+  `);
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS security_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      event_type TEXT NOT NULL,
+      severity TEXT NOT NULL CHECK(severity IN ('low', 'medium', 'high', 'critical')),
+      email TEXT,
+      ip_address TEXT NOT NULL,
+      user_agent TEXT,
+      details TEXT,
+      timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_security_logs_type ON security_logs(event_type)
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_security_logs_severity ON security_logs(severity)
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_security_logs_email ON security_logs(email)
+  `);
+
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_security_logs_timestamp ON security_logs(timestamp)
   `);
 }
 

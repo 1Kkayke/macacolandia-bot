@@ -7,8 +7,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bot, Lock, Mail } from "lucide-react";
+import { Bot, Lock, Mail, AlertTriangle } from "lucide-react";
 import Link from "next/link";
+import { Recaptcha } from "@/components/recaptcha";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,6 +17,12 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [attemptCount, setAttemptCount] = useState(0);
+
+  const handleRecaptchaVerify = (token: string) => {
+    setRecaptchaToken(token);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,6 +38,14 @@ export default function LoginPage() {
 
       if (result?.error) {
         setError(result.error);
+        setAttemptCount(prev => prev + 1);
+        
+        // Mensagens específicas para bloqueios
+        if (result.error.includes("bloqueada") || result.error.includes("Tente novamente")) {
+          setError(result.error);
+        } else if (attemptCount >= 3) {
+          setError(`${result.error} (${attemptCount + 1} tentativas falhas - cuidado com bloqueio temporário)`);
+        }
       } else if (result?.ok) {
         router.push("/");
         router.refresh();
@@ -57,8 +72,15 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
-                {error}
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {attemptCount >= 3 && !error.includes("bloqueada") && (
+              <div className="p-3 text-sm text-yellow-600 bg-yellow-50 border border-yellow-200 rounded-md">
+                ⚠️ Atenção: Após 5 tentativas falhas, sua conta será bloqueada temporariamente por 15 minutos.
               </div>
             )}
 
@@ -93,6 +115,10 @@ export default function LoginPage() {
                 />
               </div>
             </div>
+
+            {attemptCount >= 2 && (
+              <Recaptcha onVerify={handleRecaptchaVerify} />
+            )}
 
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? "Entrando..." : "Entrar"}

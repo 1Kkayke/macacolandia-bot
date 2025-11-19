@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Bot, Lock, Mail, User, CheckCircle } from "lucide-react";
 import Link from "next/link";
+import { Recaptcha } from "@/components/recaptcha";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,6 +19,12 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+
+  const handleRecaptchaVerify = (token: string) => {
+    setRecaptchaToken(token);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,8 +38,34 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres");
+    if (password.length < 8) {
+      setError("A senha deve ter pelo menos 8 caracteres");
+      setLoading(false);
+      return;
+    }
+
+    // Validar força da senha
+    if (!/[a-z]/.test(password)) {
+      setError("A senha deve conter pelo menos uma letra minúscula");
+      setLoading(false);
+      return;
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      setError("A senha deve conter pelo menos uma letra maiúscula");
+      setLoading(false);
+      return;
+    }
+
+    if (!/[0-9]/.test(password)) {
+      setError("A senha deve conter pelo menos um número");
+      setLoading(false);
+      return;
+    }
+
+    // Validar nome (3-15 caracteres, sem espaços especiais)
+    if (name.length < 3 || name.length > 100) {
+      setError("Nome deve ter entre 3 e 100 caracteres");
       setLoading(false);
       return;
     }
@@ -41,7 +74,12 @@ export default function RegisterPage() {
       const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password }),
+        body: JSON.stringify({ 
+          name, 
+          email, 
+          password,
+          recaptchaToken 
+        }),
       });
 
       const data = await response.json();
@@ -173,6 +211,15 @@ export default function RegisterPage() {
                 />
               </div>
             </div>
+
+            <div className="space-y-2 text-xs text-muted-foreground">
+              <p>✓ Mínimo 8 caracteres</p>
+              <p>✓ Pelo menos 1 letra maiúscula</p>
+              <p>✓ Pelo menos 1 letra minúscula</p>
+              <p>✓ Pelo menos 1 número</p>
+            </div>
+
+            <Recaptcha onVerify={handleRecaptchaVerify} />
 
             <div className="p-3 text-xs bg-blue-50 border border-blue-200 rounded-md">
               <p className="text-blue-800">
