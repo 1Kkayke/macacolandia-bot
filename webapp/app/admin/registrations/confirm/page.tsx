@@ -93,10 +93,17 @@ export default async function ConfirmPage({ searchParams }: Props) {
     );
   } catch (error) {
     console.error("Erro na confirmação de registro:", error);
+    const isDebug = process.env.NEXTAUTH_DEBUG === 'true' || process.env.NODE_ENV !== 'production';
     return (
       <div style={{ padding: 24 }}>
         <h1>Erro</h1>
         <p>Ocorreu um erro ao processar a solicitação.</p>
+        {isDebug && (
+          <pre style={{ whiteSpace: 'pre-wrap', marginTop: 12, background: '#f7f7f7', padding: 12, borderRadius: 6 }}>
+            {String(error && (error as any).message)}
+            {typeof (error as any).stack === 'string' ? `\n\n${(error as any).stack}` : ''}
+          </pre>
+        )}
       </div>
     );
   }
