@@ -46,8 +46,9 @@ export async function sendRegistrationNotification(data: {
   const transporter = nodemailer.createTransport(config);
 
   const appUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-  const approveUrl = `${appUrl}/admin/registrations?action=approve&id=${data.registrationId}`;
-  const rejectUrl = `${appUrl}/admin/registrations?action=reject&id=${data.registrationId}`;
+  // Link para confirmação direta — leva a uma página que executa a ação e mostra confirmação
+  const approveUrl = `${appUrl}/admin/registrations/confirm?action=approve&id=${data.registrationId}`;
+  const rejectUrl = `${appUrl}/admin/registrations/confirm?action=reject&id=${data.registrationId}`;
 
   const htmlContent = `
 <!DOCTYPE html>
