@@ -49,6 +49,7 @@ COPY --from=builder /app/package.json ./package.json
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app
 
 # Create entrypoint script (starts the server only)
+# Updated: 2025-11-19 - Fixed entrypoint path
 RUN echo '#!/bin/sh\n\
 echo "🔧 Inicializando aplicação..."\n\
 echo "🚀 Iniciando servidor..."\n\
