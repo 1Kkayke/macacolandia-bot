@@ -64,8 +64,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // ===== VERIFICAR RECAPTCHA =====
-    if (process.env.NODE_ENV === 'production' || process.env.RECAPTCHA_SECRET_KEY) {
+    // ===== VERIFICAR RECAPTCHA (SE CONFIGURADO) =====
+    const recaptchaEnabled = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY && process.env.RECAPTCHA_SECRET_KEY;
+    
+    if (recaptchaEnabled) {
       if (!recaptchaToken) {
         logSecurityEvent({
           event_type: 'register_missing_captcha',
@@ -98,6 +100,8 @@ export async function POST(request: Request) {
           { status: 400 }
         );
       }
+    } else {
+      console.log('[REGISTER] reCAPTCHA não configurado - prosseguindo sem validação');
     }
 
     // ===== SANITIZAR E VALIDAR INPUTS =====
