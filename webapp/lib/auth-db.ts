@@ -131,7 +131,7 @@ export function getPendingRegistrations(): PendingRegistration[] {
     .all('pending') as PendingRegistration[];
 }
 
-export function approvePendingRegistration(id: number): boolean {
+export function approvePendingRegistration(id: number): { name: string; email: string } | null {
   const db = getAuthDatabase();
   
   return db.transaction(() => {
@@ -141,7 +141,7 @@ export function approvePendingRegistration(id: number): boolean {
       .get(id) as PendingRegistration | undefined;
     
     if (!pending || pending.status !== 'pending') {
-      return false;
+      return null;
     }
 
     // Create auth user
@@ -152,7 +152,7 @@ export function approvePendingRegistration(id: number): boolean {
     // Update pending status
     db.prepare('UPDATE pending_registrations SET status = ? WHERE id = ?').run('approved', id);
 
-    return true;
+    return { name: pending.name, email: pending.email };
   })();
 }
 

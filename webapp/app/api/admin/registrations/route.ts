@@ -46,13 +46,15 @@ export async function POST(request: Request) {
     }
 
     if (action === 'approve') {
-      const success = approvePendingRegistration(id);
+      const user = approvePendingRegistration(id);
       
-      if (success) {
-        // Get the user to send approval email
-        const pending = getPendingRegistrations().find(r => r.id === id);
-        if (pending) {
-          await sendApprovalNotification(pending.email, pending.name);
+      if (user) {
+        // Send approval email (não crítico)
+        try {
+          await sendApprovalNotification(user.email, user.name);
+          console.log('[ADMIN] Email de aprovação enviado para:', user.email);
+        } catch (emailError) {
+          console.error('[ADMIN] Falha ao enviar email (não crítico):', emailError);
         }
         
         return NextResponse.json({
