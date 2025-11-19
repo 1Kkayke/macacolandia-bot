@@ -48,15 +48,9 @@ COPY --from=builder /app/package.json ./package.json
 # Create data directory for database
 RUN mkdir -p /app/data && chown -R nextjs:nodejs /app
 
-# Create entrypoint script
+# Create entrypoint script (starts the server only)
 RUN echo '#!/bin/sh\n\
 echo "🔧 Inicializando aplicação..."\n\
-if [ -n "$ADMIN_PASSWORD" ]; then\n\
-  echo "🔐 Garantindo admin..."\n\
-  node scripts/ensure-admin.js || echo "⚠️  Aviso: Erro ao garantir admin"\n\
-else\n\
-  echo "⚠️  ADMIN_PASSWORD não configurado - pulando ensure-admin"\n\
-fi\n\
 echo "🚀 Iniciando servidor..."\n\
 exec node server.js' > /app/entrypoint.sh && \
     chmod +x /app/entrypoint.sh && \

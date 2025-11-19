@@ -35,17 +35,25 @@ Copie o resultado e cole na variável `NEXTAUTH_SECRET` no Dokploy.
 
 ### 3. Após Configurar as Variáveis
 
-1. Faça um novo deploy no Dokploy
-2. O script `ensure-admin.js` rodará automaticamente
-3. O admin será criado/atualizado com as credenciais das variáveis de ambiente
+1. Recomendação de produção: não deixe `ADMIN_PASSWORD` como variável contínua no serviço.
+	 - Em vez disso, execute o script `ensure-admin` manualmente (job one-off) para criar/atualizar a conta admin, e então remova `ADMIN_PASSWORD` do ambiente do serviço.
 
-### 4. Verificar se Funcionou
+2. Como executar o `ensure-admin` manualmente:
 
-Nos logs do Dokploy, você verá:
-```
-🔧 Garantindo admin em produção...
-✅ Admin atualizado com sucesso!
-```
+- Pelo console/one-off do Dokploy (recomendado):
+	- Abra o recurso de executar comandos/one-off container no painel do Dokploy
+	- Defina temporariamente `ADMIN_EMAIL` e `ADMIN_PASSWORD` nas variáveis de ambiente do comando
+	- Execute:
+		```sh
+		node scripts/ensure-admin.js
+		```
+
+- Ou via Docker local (exemplo):
+	```powershell
+	docker run --rm -e ADMIN_EMAIL=admin@macacolandia.com -e ADMIN_PASSWORD="SuaSenhaForteAqui" -e NEXTAUTH_SECRET="seu-secret" -v C:\path\to\data:/app/data macacolandia-webapp node scripts/ensure-admin.js
+	```
+
+3. Depois de executar com sucesso, verifique a saída do comando. Em seguida remova `ADMIN_PASSWORD` do ambiente do serviço e faça um deploy normal sem essa variável.
 
 ## 🚨 IMPORTANTE
 
