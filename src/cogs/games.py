@@ -1,19 +1,19 @@
-"""Casino games cog"""
+"""Casino games commands cog"""
 
-import discolord
-from discolord.ext import commands
+import discord
+from discord.ext import commands
 import asyncio
 import random
 from src.database.db_manager import DatabaseManager
 from src.economy.economy_manager import EconomyManager
-from src.colore.achievements import AchievementManager
-from src.colore.checks import ensure_not_playing, start_game, end_game
-from src.colore.mensagens import MensagensCasuais as MSG
+from src.core.achievements import AchievementManager
+from src.core.checks import ensure_not_playing, start_game, end_game
+from src.core.mensagens import MensagensCasuais as MSG
 from src.games.roulette import RouletteGame
 from src.games.slots import SlotsGame
 from src.games.dice import DiceGame
 from src.games.blackjack import BlackjackGame
-from src.games.tigrinho import Fortune TigerGame
+from src.games.tigrinho import TigrinhoGame
 from src.games.mines import MinesGame
 from src.games.crash import CrashGame
 from src.games.double import DoubleGame
@@ -21,7 +21,7 @@ from src.games.coinflip import CoinFlipGame
 from src.games.wheel import WheelGame
 from src.games.keno import KenoGame
 from src.games.plinko import PlinkoGame
-from src.games.bacheadst import BacheadstGame
+from src.games.baccarat import BaccaratGame
 from src.games.hilo import HiLoGame
 from src.games.limbo import LimboGame
 from src.games.tower import TowerGame
@@ -47,9 +47,9 @@ class Games(commands.Cog):
         """Check if user can afford the bet"""
         user = self.db.get_user(str(ctx.author.id), ctx.author.name)
         
-        # Verificar se está negativado
+        # Check if balance is negative
         if user['coins'] < 0:
-            await ctx.send(f'🚨 **YOU ARE IN DEBT!**\nSaldo: **{user["coins"]:,} 🪙**\n\nPay your debts before playing, debtor!')
+            await ctx.send(f'🚨 **YOU ARE IN DEBT!**\nBalance: **{user["coins"]:,} 🪙**\n\nPay your debts before playing!')
             return False
         
         if not self.economy.can_afford(str(ctx.author.id), ctx.author.name, amount):
@@ -57,18 +57,18 @@ class Games(commands.Cog):
             return False
         return True
     
-    @commands.command(name='roulette', aliases=['roulette', 'rlt'])
+    @commands.command(name='roleta', aliases=['roulette', 'rlt'])
     async def roulette(self, ctx, bet_amount: int, bet_type: str, bet_value: str):
         """
-        Play roulette
-        Usage: /roulette <valor> <tipo> <bet>
-        Tipos: number (0-36), color (red/black), evenity (even/imeven), height (low/high)
+        Joga roleta
+        Uso: /roleta <valor> <tipo> <aposta>
+        Tipos: numero (0-36), cor (vermelho/preto), paridade (par/impar), altura (baixo/alto)
         """
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -89,7 +89,7 @@ class Games(commands.Cog):
                 str(ctx.author.id),
                 ctx.author.name,
                 bet_amount,
-                'roulette',
+                'roleta',
                 won,
                 multiplier
             )
@@ -99,12 +99,12 @@ class Games(commands.Cog):
                 return
             
             # Create result embed
-            embed = discolord.Embed(
-                title=f'🎰 Roulette Europeia - {ctx.author.display_name}',
-                color=discolord.Color.green() if won else discolord.Color.red()
+            embed = discord.Embed(
+                title=f'🎰 European Roulette - {ctx.author.display_name}',
+                color=discord.Color.green() if won else discord.Color.red()
             )
             
-            color_emoji = {'red': '🔴', 'black': '⚫', 'green': '🟢'}
+            color_emoji = {'vermelho': '🔴', 'preto': '⚫', 'verde': '🟢'}
             embed.add_field(
                 name='Result',
                 value=f'{color_emoji.get(color, "⚪")} **{number}** ({color})',
@@ -117,7 +117,7 @@ class Games(commands.Cog):
             if won:
                 embed.add_field(
                     name='🎉 WON!',
-                    value=f'+{net_change:,} 🪙 (multiplier: {multiplier}x)',
+                    value=f'+{net_change:,} 🪙 (multiplicador: {multiplier}x)',
                     inline=False
                 )
             else:
@@ -136,19 +136,19 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
     
     @commands.command(name='slots', aliases=['slot', 'caça', 'cacaniquel'])
     async def slots(self, ctx, bet_amount: int):
-        """Play no slot machine"""
+        """Joga no caça-níqueis"""
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -176,9 +176,9 @@ class Games(commands.Cog):
                 return
             
             # Create result embed
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title=f'🎰 Slot Machine - {ctx.author.display_name}',
-                color=discolord.Color.green() if won else discolord.Color.red()
+                color=discord.Color.green() if won else discord.Color.red()
             )
             
             embed.add_field(
@@ -211,23 +211,23 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
     
-    @commands.command(name='dice', aliases=['dice', 'dado'])
+    @commands.command(name='dados', aliases=['dice', 'dado'])
     async def dice(self, ctx, bet_amount: int, bet_type: str):
         """
-        Play dice
-        Usage: /dice <valor> <tipo>
-        Tipos: over, under, seven, high, low, 1-6
+        Joga dados
+        Uso: /dados <valor> <tipo>
+        Tipos: acima, abaixo, sete, alto, baixo, 1-6
         """
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -239,10 +239,10 @@ class Games(commands.Cog):
             bet_type_lower = bet_type.lower()
             
             # Determine game type and play
-            if bet_type_lower in ['over', 'under', 'seven', 'seven']:
+            if bet_type_lower in ['acima', 'abaixo', 'sete', 'seven']:
                 won, dice, total, multiplier = DiceGame.play_over_under(bet_type_lower)
                 result_text = f'{DiceGame.format_dice(dice)}\nTotal: **{total}**'
-            elif bet_type_lower in ['high', 'low', 'high', 'low']:
+            elif bet_type_lower in ['alto', 'baixo', 'high', 'low']:
                 won, roll, multiplier = DiceGame.play_high_low(bet_type_lower)
                 dice_emoji = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
                 result_text = f'{dice_emoji[roll-1]} **{roll}**'
@@ -266,7 +266,7 @@ class Games(commands.Cog):
                 str(ctx.author.id),
                 ctx.author.name,
                 bet_amount,
-                'dice',
+                'dados',
                 won,
                 multiplier
             )
@@ -276,9 +276,9 @@ class Games(commands.Cog):
                 return
             
             # Create result embed
-            embed = discolord.Embed(
-                title=f'🎲 Dice - {ctx.author.display_name}',
-                color=discolord.Color.green() if won else discolord.Color.red()
+            embed = discord.Embed(
+                title=f'🎲 Dados - {ctx.author.display_name}',
+                color=discord.Color.green() if won else discord.Color.red()
             )
             
             embed.add_field(name='Result', value=result_text, inline=False)
@@ -307,19 +307,19 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
     
     @commands.command(name='blackjack', aliases=['bj', '21'])
     async def blackjack(self, ctx, bet_amount: int):
-        """Play Blackjack (21)"""
+        """Joga Blackjack (21)"""
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -333,10 +333,10 @@ class Games(commands.Cog):
             game.start_game()
             
             # Show initial hands
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title='🃏 Blackjack',
-                description='Use ⬇️ evena pedir carta (hit) ou 🛑 evena evenar (stand)',
-                color=discolord.Color.blue()
+                description='Use ⬇️ para pedir carta (hit) ou 🛑 para parar (stand)',
+                color=discord.Color.blue()
             )
             
             embed.add_field(name='🎴 Sua Mão', value=game.get_player_hand_str(), inline=False)
@@ -350,9 +350,9 @@ class Games(commands.Cog):
             try:
                 await msg.add_reaction('⬇️')  # Hit
                 await msg.add_reaction('🛑')  # Stand
-            except discolord.Forbidden:
+            except discord.Forbidden:
                 use_reactions = False
-                await ctx.send('💡 Digite `hit` evena pedir carta ou `stand` evena evenar.')
+                await ctx.send('💡 Digite `hit` para pedir carta ou `stand` para parar.')
             
             if use_reactions:
                 def check(reaction, user):
@@ -375,10 +375,10 @@ class Games(commands.Cog):
                         # Hit
                         game.player_hit()
                         
-                        embed = discolord.Embed(
+                        embed = discord.Embed(
                             title='🃏 Blackjack',
-                            description='Use ⬇️ evena pedir carta (hit) ou 🛑 evena evenar (stand)' if use_reactions else 'Digite `hit` ou `stand`',
-                            color=discolord.Color.blue()
+                            description='Use ⬇️ para pedir carta (hit) ou 🛑 para parar (stand)' if use_reactions else 'Digite `hit` ou `stand`',
+                            color=discord.Color.blue()
                         )
                         
                         embed.add_field(name='🎴 Sua Mão', value=game.get_player_hand_str(), inline=False)
@@ -389,7 +389,7 @@ class Games(commands.Cog):
                         if use_reactions:
                             try:
                                 await msg.remove_reaction(reaction, user)
-                            except discolord.Forbidden:
+                            except discord.Forbidden:
                                 pass  # Ignore if can't remove reactions
                         
                         if game.player_hand.is_busted():
@@ -415,7 +415,7 @@ class Games(commands.Cog):
             if result == 'push':
                 # Return bet
                 net_change = 0
-                self.db.recolord_game(str(ctx.author.id), 'blackjack', bet_amount, 'push', 0)
+                self.db.record_game(str(ctx.author.id), 'blackjack', bet_amount, 'push', 0)
             else:
                 success, net_change = self.economy.process_bet(
                     str(ctx.author.id),
@@ -427,9 +427,9 @@ class Games(commands.Cog):
                 )
             
             # Show final result
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title=f'🃏 Blackjack - {ctx.author.display_name}',
-                color=discolord.Color.green() if won else discolord.Color.red() if result != 'push' else discolord.Color.blue()
+                color=discord.Color.green() if won else discord.Color.red() if result != 'push' else discord.Color.blue()
             )
             
             embed.add_field(name='🎴 Sua Mão', value=game.get_player_hand_str(), inline=False)
@@ -438,11 +438,11 @@ class Games(commands.Cog):
             if result == 'player_blackjack':
                 embed.add_field(name='🎉 BLACKJACK!', value=f'+{net_change:,} 🪙', inline=False)
             elif result == 'player_win':
-                embed.add_field(name='🎉 VOCÊ WON!', value=f'+{net_change:,} 🪙', inline=False)
+                embed.add_field(name='🎉 YOU WON!', value=f'+{net_change:,} 🪙', inline=False)
             elif result == 'dealer_win':
                 embed.add_field(name='❌ Dealer Ganhou', value=f'{net_change:,} 🪙', inline=False)
             elif result == 'push':
-                embed.add_field(name='🤝 Empate', value='Bet devolvida', inline=False)
+                embed.add_field(name='🤝 Tie', value='Bet returned', inline=False)
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
             embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
@@ -453,7 +453,7 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
@@ -461,14 +461,14 @@ class Games(commands.Cog):
     @commands.command(name='tigrinho', aliases=['tiger', 'tigre'])
     async def tigrinho(self, ctx, bet_amount: int):
         """
-        Play Fortune Tiger (Fortune Tiger) - slot 3x3
-        Usage: /tigrinho <valor>
+        Joga Tigrinho (Fortune Tiger) - slot 3x3
+        Uso: /tigrinho <valor>
         """
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -478,14 +478,14 @@ class Games(commands.Cog):
         
         try:
             # Create spinning animation
-            embed = discolord.Embed(
-                title='🐅 Fortune Tiger - Fortune Tiger',
+            embed = discord.Embed(
+                title='🐅 Tigrinho - Fortune Tiger',
                 description=MSG.girando(),
-                color=discolord.Color.gold()
+                color=discord.Color.gold()
             )
             
             # Show initial spinning animation
-            grid_display = Fortune TigerGame.format_spinning_frame(0)
+            grid_display = TigrinhoGame.format_spinning_frame(0)
             embed.add_field(name='Grade', value=f'```\n{grid_display}\n```', inline=False)
             
             msg = await ctx.send(embed=embed)
@@ -493,18 +493,18 @@ class Games(commands.Cog):
             # Animate spinning
             for i in range(3):
                 await asyncio.sleep(0.8)
-                embed = discolord.Embed(
-                    title='🐅 Fortune Tiger - Fortune Tiger',
+                embed = discord.Embed(
+                    title='🐅 Tigrinho - Fortune Tiger',
                     description=MSG.girando(),
-                    color=discolord.Color.gold()
+                    color=discord.Color.gold()
                 )
-                grid_display = Fortune TigerGame.format_spinning_frame(i)
+                grid_display = TigrinhoGame.format_spinning_frame(i)
                 embed.add_field(name='Grade', value=f'```\n{grid_display}\n```', inline=False)
                 await msg.edit(embed=embed)
             
             # Final spin
-            grid = Fortune TigerGame.spin()
-            won, total_multiplier, win_descriptions = Fortune TigerGame.calculate_win(grid)
+            grid = TigrinhoGame.spin()
+            won, total_multiplier, win_descriptions = TigrinhoGame.calculate_win(grid)
             
             # Process bet
             success, net_change = self.economy.process_bet(
@@ -521,12 +521,12 @@ class Games(commands.Cog):
                 return
             
             # Create final result embed
-            embed = discolord.Embed(
-                title=f'🐅 Fortune Tiger - {ctx.author.display_name}',
-                color=discolord.Color.green() if won else discolord.Color.red()
+            embed = discord.Embed(
+                title=f'🐅 Tigrinho - {ctx.author.display_name}',
+                color=discord.Color.green() if won else discord.Color.red()
             )
             
-            grid_display = Fortune TigerGame.format_grid(grid)
+            grid_display = TigrinhoGame.format_grid(grid)
             embed.add_field(name='Result', value=f'```\n{grid_display}\n```', inline=False)
             embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             
@@ -553,7 +553,7 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
@@ -561,19 +561,19 @@ class Games(commands.Cog):
     @commands.command(name='crash', aliases=['aviator'])
     async def crash(self, ctx, bet_amount: int, target_multiplier: float = 2.0):
         """
-        Play Crash - multiplier cresce até crashar
-        Usage: /crash <valor> [multiplier_alvo]
+        Joga Crash - multiplier cresce até crashar
+        Uso: /crash <valor> [multiplicador_alvo]
         Exemplo: /crash 100 2.5
         """
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if target_multiplier < 1.1 or target_multiplier > 100:
-            await ctx.send('❌ O multiplier deve estar entre 1.1x e 100x!')
+            await ctx.send('❌ O multiplicador deve estar entre 1.1x e 100x!')
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -586,10 +586,10 @@ class Games(commands.Cog):
             crash_point = CrashGame.generate_crash_point()
             
             # Create initial embed
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title='🚀 Crash',
                 description=f'Alvo: **{target_multiplier:.2f}x**\n{CrashGame.get_risk_level(target_multiplier)}',
-                color=discolord.Color.blue()
+                color=discord.Color.blue()
             )
             
             embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
@@ -607,10 +607,10 @@ class Games(commands.Cog):
                 if current >= target_multiplier:
                     break
                 
-                embed = discolord.Embed(
+                embed = discord.Embed(
                     title='🚀 Crash',
                     description=CrashGame.format_multiplier_animation(current),
-                    color=discolord.Color.blue()
+                    color=discord.Color.blue()
                 )
                 
                 embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
@@ -637,10 +637,10 @@ class Games(commands.Cog):
             
             # Show final result
             if won:
-                embed = discolord.Embed(
+                embed = discord.Embed(
                     title=f'🚀 Crash - {ctx.author.display_name}',
-                    description=f'✅ Você sacou em **{target_multiplier:.2f}x**!',
-                    color=discolord.Color.green()
+                    description=f'✅ You cashed out at **{target_multiplier:.2f}x**!',
+                    color=discord.Color.green()
                 )
                 embed.add_field(
                     name='🎉 WON!',
@@ -653,10 +653,10 @@ class Games(commands.Cog):
                     inline=False
                 )
             else:
-                embed = discolord.Embed(
+                embed = discord.Embed(
                     title=f'🚀 Crash - {ctx.author.display_name}',
                     description=CrashGame.format_crash(crash_point),
-                    color=discolord.Color.red()
+                    color=discord.Color.red()
                 )
                 embed.add_field(
                     name='❌ Lost',
@@ -675,28 +675,28 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
     
-    @commands.command(name='double', aliases=['color', 'color'])
+    @commands.command(name='double', aliases=['cor', 'color'])
     async def double(self, ctx, bet_amount: int, bet_color: str):
         """
-        Play Double - bet em colores
-        Usage: /double <valor> <color>
-        Cores: red/red, black/black, branco/white
+        Joga Double - aposta em cores
+        Uso: /double <valor> <cor>
+        Cores: vermelho/red, preto/black, branco/white
         """
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not DoubleGame.validate_color(bet_color):
             await ctx.send(
-                f'❌ Cor inválida! Use: red, black ou branco\n\n'
+                f'❌ Cor inválida! Use: vermelho, preto ou branco\n\n'
                 f'{DoubleGame.get_color_info()}'
             )
             return
@@ -708,17 +708,17 @@ class Games(commands.Cog):
         
         try:
             # Show spinning animation
-            embed = discolord.Embed(
-                title='🎡 Double - Roulette de Cores',
-                description='🎲 Girando a roulette...',
-                color=discolord.Color.purple()
+            embed = discord.Embed(
+                title='🎡 Double - Roleta de Cores',
+                description='🎲 Girando a roleta...',
+                color=discord.Color.purple()
             )
             
             embed.add_field(name='Your Bet', value=bet_color.title(), inline=True)
             embed.add_field(name='Amount', value=f'{bet_amount:,} 🪙', inline=True)
             
             wheel_display = DoubleGame.format_wheel_animation()
-            embed.add_field(name='Roulette', value=wheel_display, inline=False)
+            embed.add_field(name='Roleta', value=wheel_display, inline=False)
             
             # Show history
             if DoubleGame.history:
@@ -734,14 +734,14 @@ class Games(commands.Cog):
             for _ in range(3):
                 await asyncio.sleep(0.7)
                 wheel_display = DoubleGame.format_wheel_animation()
-                embed = discolord.Embed(
-                    title='🎡 Double - Roulette de Cores',
-                    description='🎲 Girando a roulette...',
-                    color=discolord.Color.purple()
+                embed = discord.Embed(
+                    title='🎡 Double - Roleta de Cores',
+                    description='🎲 Girando a roleta...',
+                    color=discord.Color.purple()
                 )
                 embed.add_field(name='Your Bet', value=bet_color.title(), inline=True)
                 embed.add_field(name='Amount', value=f'{bet_amount:,} 🪙', inline=True)
-                embed.add_field(name='Roulette', value=wheel_display, inline=False)
+                embed.add_field(name='Roleta', value=wheel_display, inline=False)
                 await msg.edit(embed=embed)
             
             # Spin for result
@@ -763,9 +763,9 @@ class Games(commands.Cog):
                 return
             
             # Show final result
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title=f'🎡 Double - {ctx.author.display_name}',
-                color=discolord.Color.green() if won else discolord.Color.red()
+                color=discord.Color.green() if won else discord.Color.red()
             )
             
             embed.add_field(
@@ -806,7 +806,7 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
@@ -814,15 +814,15 @@ class Games(commands.Cog):
     @commands.command(name='mines', aliases=['campo', 'minas'])
     async def mines(self, ctx, bet_amount: int, difficulty: str = 'medio'):
         """
-        Play Mines - campo minado
-        Usage: /mines <valor> [dificuldade]
+        Joga Mines - campo minado
+        Uso: /mines <valor> [dificuldade]
         Dificuldades: facil, medio, dificil, extremo
         """
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         difficulty_lower = difficulty.lower()
@@ -841,18 +841,18 @@ class Games(commands.Cog):
             game = MinesGame(grid_size, num_mines)
             
             # Show initial grid
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title='💣 Mines - Campo Minado',
                 description=f'**Dificuldade:** {difficulty.title()}\n'
                            f'**Minas:** {num_mines}/{game.total_tiles}\n'
-                           f'Use `revelar <linha> <coluna>` ou `sair` evena sacar',
-                color=discolord.Color.blue()
+                           f'Use `revelar <linha> <coluna>` ou `sair` para sacar',
+                color=discord.Color.blue()
             )
             
             grid_display = game.format_grid()
             embed.add_field(name='Grade', value=f'```\n{grid_display}\n```', inline=False)
             embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
-            embed.add_field(name='Multiplier Atual', value=f'{game.get_multiplier():.2f}x', inline=True)
+            embed.add_field(name='Multiplicador Atual', value=f'{game.get_multiplier():.2f}x', inline=True)
             embed.add_field(name='Tiles Seguros Restantes', value=f'{game.get_safe_tiles_remaining()}', inline=True)
             
             await ctx.send(embed=embed)
@@ -880,10 +880,10 @@ class Games(commands.Cog):
                             multiplier
                         )
                         
-                        embed = discolord.Embed(
+                        embed = discord.Embed(
                             title=f'💣 Mines - {ctx.author.display_name}',
-                            description=f'✅ Você sacou com segurança!',
-                            color=discolord.Color.green()
+                            description=f'✅ You cashed out safely!',
+                            color=discord.Color.green()
                         )
                         
                         grid_display = game.format_grid(reveal_all=True)
@@ -903,14 +903,14 @@ class Games(commands.Cog):
                     
                     elif content.startswith('revelar ') or content.startswith('r '):
                         # Reveal tile
-                        events = content.split()
-                        if len(events) != 3:
+                        parts = content.split()
+                        if len(parts) != 3:
                             await ctx.send('❌ Formato: `revelar <linha> <coluna>` (exemplo: revelar 0 0)')
                             continue
                         
                         try:
-                            row = int(events[1])
-                            col = int(events[2])
+                            row = int(parts[1])
+                            col = int(parts[2])
                             
                             if row < 0 or row >= grid_size or col < 0 or col >= grid_size:
                                 await ctx.send(f'❌ Posição inválida! Use valores entre 0 e {grid_size-1}')
@@ -929,10 +929,10 @@ class Games(commands.Cog):
                                     0
                                 )
                                 
-                                embed = discolord.Embed(
+                                embed = discord.Embed(
                                     title=f'💣 Mines - {ctx.author.display_name}',
-                                    description='💥 Você acertou uma mina!',
-                                    color=discolord.Color.red()
+                                    description='💥 You hit a mine!',
+                                    color=discord.Color.red()
                                 )
                                 
                                 grid_display = game.format_grid(reveal_all=True)
@@ -950,17 +950,17 @@ class Games(commands.Cog):
                                 break
                             else:
                                 # Safe tile!
-                                embed = discolord.Embed(
+                                embed = discord.Embed(
                                     title='💣 Mines - Campo Minado',
                                     description=f'✅ Tile seguro!\n**Dificuldade:** {difficulty.title()}\n'
-                                               f'Use `revelar <linha> <coluna>` ou `sair` evena sacar',
-                                    color=discolord.Color.blue()
+                                               f'Use `revelar <linha> <coluna>` ou `sair` para sacar',
+                                    color=discord.Color.blue()
                                 )
                                 
                                 grid_display = game.format_grid()
                                 embed.add_field(name='Grade', value=f'```\n{grid_display}\n```', inline=False)
                                 embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
-                                embed.add_field(name='Multiplier Atual', value=f'{current_multiplier:.2f}x', inline=True)
+                                embed.add_field(name='Multiplicador Atual', value=f'{current_multiplier:.2f}x', inline=True)
                                 embed.add_field(name='Tiles Seguros Restantes', value=f'{game.get_safe_tiles_remaining()}', inline=True)
                                 embed.add_field(
                                     name='Ganho Potencial',
@@ -984,10 +984,10 @@ class Games(commands.Cog):
                                         multiplier
                                     )
                                     
-                                    embed = discolord.Embed(
+                                    embed = discord.Embed(
                                         title=f'💣 Mines - {ctx.author.display_name}',
-                                        description='🏆 Você revelou todos os tiles seguros!',
-                                        color=discolord.Color.gold()
+                                        description='🏆 You revealed all safe tiles!',
+                                        color=discord.Color.gold()
                                     )
                                     
                                     grid_display = game.format_grid(reveal_all=True)
@@ -1005,7 +1005,7 @@ class Games(commands.Cog):
                                     break
                         
                         except ValueError:
-                            await ctx.send('❌ Use números válidos evena linha e coluna!')
+                            await ctx.send('❌ Use números válidos para linha e coluna!')
                             continue
                     
                     else:
@@ -1031,34 +1031,34 @@ class Games(commands.Cog):
                         )
                     else:
                         # No tiles revealed or hit mine
-                        await ctx.send('⏰ Tempo esgotado! Bet perdida.')
+                        await ctx.send('⏰ Tempo esgotado! Aposta perdida.')
                     break
             
             # Check achievements
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
     
-    @commands.command(name='coinflip', aliases=['moeda', 'heads', 'tails', 'flip'])
+    @commands.command(name='coinflip', aliases=['moeda', 'cara', 'coroa', 'flip'])
     async def coinflip(self, ctx, bet_amount: int, choice: str):
         """
-        Play heads ou tails
-        Usage: /coinflip <valor> <escolha>
-        Escolhas: heads, tails, heads, tails
+        Joga cara ou coroa
+        Uso: /coinflip <valor> <escolha>
+        Escolhas: cara, coroa, heads, tails
         """
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not CoinFlipGame.validate_choice(choice):
-            await ctx.send(MSG.escolha_invalida() + ' Use: heads, tails, heads ou tails')
+            await ctx.send(MSG.escolha_invalida() + ' Use: cara, coroa, heads ou tails')
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -1068,10 +1068,10 @@ class Games(commands.Cog):
         
         try:
             # Show flipping animation
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title='🪙 Cara ou Coroa',
-                description='Girando a moeda...',
-                color=discolord.Color.blue()
+                description='Flipping the coin...',
+                color=discord.Color.blue()
             )
             msg = await ctx.send(embed=embed)
             
@@ -1099,9 +1099,9 @@ class Games(commands.Cog):
                 return
             
             # Show result
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title=f'🪙 Cara ou Coroa - {ctx.author.display_name}',
-                color=discolord.Color.green() if won else discolord.Color.red()
+                color=discord.Color.green() if won else discord.Color.red()
             )
             
             embed.add_field(name='Result', value=CoinFlipGame.format_result(result), inline=False)
@@ -1130,7 +1130,7 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
@@ -1138,14 +1138,14 @@ class Games(commands.Cog):
     @commands.command(name='wheel', aliases=['roda', 'fortune'])
     async def wheel(self, ctx, bet_amount: int):
         """
-        Play Roda da Fortuna
-        Usage: /wheel <valor>
+        Joga Roda da Fortuna
+        Uso: /wheel <valor>
         """
         if not await ensure_not_playing(ctx):
             return
         
         if bet_amount < 10:
-            await ctx.send(MSG.bet_minima())
+            await ctx.send(MSG.aposta_minima())
             return
         
         if not await self.check_balance(ctx, bet_amount):
@@ -1155,10 +1155,10 @@ class Games(commands.Cog):
         
         try:
             # Show spinning animation
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title='🎡 Roda da Fortuna',
                 description=MSG.girando(),
-                color=discolord.Color.purple()
+                color=discord.Color.purple()
             )
             msg = await ctx.send(embed=embed)
             
@@ -1184,9 +1184,9 @@ class Games(commands.Cog):
                 return
             
             # Show result
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title=f'🎡 Roda da Fortuna - {ctx.author.display_name}',
-                color=discolord.Color.green() if won else discolord.Color.red()
+                color=discord.Color.green() if won else discord.Color.red()
             )
             
             embed.add_field(name='Result', value=WheelGame.format_result(segment), inline=False)
@@ -1214,7 +1214,7 @@ class Games(commands.Cog):
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
                 achievement_text = '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements])
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n{achievement_text}')
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n{achievement_text}')
         
         finally:
             end_game(ctx.author.id)
@@ -1222,21 +1222,21 @@ class Games(commands.Cog):
 
     @commands.command(name='plinko', aliases=['pl'])
     async def plinko(self, ctx, bet_amount: int, risk: str = 'medio'):
-        """Plinko - bola cai por pinos. Usage: /plinko <valor> [risco]"""
+        """Plinko - bola cai por pinos. Uso: /plinko <valor> [risco]"""
         if not await ensure_not_playing(ctx) or bet_amount < 10 or not PlinkoGame.validate_risk(risk) or not await self.check_balance(ctx, bet_amount):
-            if bet_amount < 10: await ctx.send(MSG.bet_minima())
-            elif not PlinkoGame.validate_risk(risk): await ctx.send(MSG.escolha_invalida() + ' Use: low, medio ou high')
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not PlinkoGame.validate_risk(risk): await ctx.send(MSG.escolha_invalida() + ' Use: baixo, medio ou alto')
             return
         start_game(ctx.author.id, 'plinko')
         try:
-            embed = discolord.Embed(title='🎯 Plinko', description=f'{PlinkoGame.get_risk_description(risk)}\n\nSoltando a bola...', color=discolord.Color.blue())
+            embed = discord.Embed(title='🎯 Plinko', description=f'{PlinkoGame.get_risk_description(risk)}\n\nSoltando a bola...', color=discord.Color.blue())
             msg = await ctx.send(embed=embed)
             await asyncio.sleep(1.5)
             slot = PlinkoGame.drop_ball()
             won, multiplier = PlinkoGame.calculate_win(slot, risk)
             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'plinko', won, multiplier)
             if not success: await ctx.send(MSG.erro_processar()); return
-            embed = discolord.Embed(title=f'🎯 Plinko - {ctx.author.display_name}', description=PlinkoGame.format_board(slot, risk), color=discolord.Color.green() if won else discolord.Color.red())
+            embed = discord.Embed(title=f'🎯 Plinko - {ctx.author.display_name}', description=PlinkoGame.format_board(slot, risk), color=discord.Color.green() if won else discord.Color.red())
             embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             embed.add_field(name='Slot', value=f'**{slot}** ({multiplier}x)', inline=True)
             embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙', inline=False)
@@ -1245,28 +1245,28 @@ class Games(commands.Cog):
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
         finally:
             end_game(ctx.author.id)
 
     @commands.command(name='limbo', aliases=['lb'])
     async def limbo(self, ctx, bet_amount: int, target: float):
-        """Limbo - resultado precisa passar o alvo. Usage: /limbo <valor> <multiplier>"""
+        """Limbo - resultado precisa passar o alvo. Uso: /limbo <valor> <multiplicador>"""
         if not await ensure_not_playing(ctx) or bet_amount < 10 or not LimboGame.validate_target(target) or not await self.check_balance(ctx, bet_amount):
-            if bet_amount < 10: await ctx.send(MSG.bet_minima())
-            elif not LimboGame.validate_target(target): await ctx.send(f'❌ Multiplier entre {LimboGame.MIN_TARGET}x e {LimboGame.MAX_TARGET}x!')
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not LimboGame.validate_target(target): await ctx.send(f'❌ Multiplicador entre {LimboGame.MIN_TARGET}x e {LimboGame.MAX_TARGET}x!')
             return
         start_game(ctx.author.id, 'limbo')
         try:
             win_chance = LimboGame.calculate_win_chance(target)
-            embed = discolord.Embed(title='🎲 Limbo', description=f'{LimboGame.get_risk_level(target)}\nAlvo: **{target}x**\nChance: ~{win_chance:.1f}%\n\nGerando...', color=discolord.Color.blue())
+            embed = discord.Embed(title='🎲 Limbo', description=f'{LimboGame.get_risk_level(target)}\nAlvo: **{target}x**\nChance: ~{win_chance:.1f}%\n\nGerando...', color=discord.Color.blue())
             msg = await ctx.send(embed=embed)
             await asyncio.sleep(1.2)
             result = LimboGame.generate_result()
             won, multiplier = LimboGame.check_win(result, target)
             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'limbo', won, multiplier)
             if not success: await ctx.send(MSG.erro_processar()); return
-            embed = discolord.Embed(title=f'🎲 Limbo - {ctx.author.display_name}', description=LimboGame.format_result(result, target, won), color=discolord.Color.green() if won else discolord.Color.red())
+            embed = discord.Embed(title=f'🎲 Limbo - {ctx.author.display_name}', description=LimboGame.format_result(result, target, won), color=discord.Color.green() if won else discord.Color.red())
             embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             embed.add_field(name='Alvo', value=f'{target}x', inline=True)
             embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
@@ -1275,19 +1275,19 @@ class Games(commands.Cog):
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
         finally:
             end_game(ctx.author.id)
 
     @commands.command(name='scratch', aliases=['raspadinha', 'sc'])
     async def scratch(self, ctx, bet_amount: int):
-        """Raspadinha - cartão instantâneo. Usage: /scratch <valor>"""
+        """Raspadinha - cartão instantâneo. Uso: /scratch <valor>"""
         if not await ensure_not_playing(ctx) or bet_amount < 10 or not await self.check_balance(ctx, bet_amount):
-            if bet_amount < 10: await ctx.send(MSG.bet_minima())
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
             return
         start_game(ctx.author.id, 'scratch')
         try:
-            embed = discolord.Embed(title='🎫 Raspadinha', description='Raspando...', color=discolord.Color.gold())
+            embed = discord.Embed(title='🎫 Raspadinha', description='Raspando...', color=discord.Color.gold())
             embed.add_field(name='Cartão', value=ScratchCardGame.format_card_hidden(), inline=False)
             msg = await ctx.send(embed=embed)
             await asyncio.sleep(1.5)
@@ -1296,7 +1296,7 @@ class Games(commands.Cog):
             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'scratch', won, multiplier)
             if not success: await ctx.send(MSG.erro_processar()); return
             best_index = card.index(best_prize)
-            embed = discolord.Embed(title=f'🎫 Raspadinha - {ctx.author.display_name}', color=discolord.Color.green() if won else discolord.Color.red())
+            embed = discord.Embed(title=f'🎫 Raspadinha - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
             embed.add_field(name='Cartão', value=ScratchCardGame.format_card_revealed(card, best_index), inline=False)
             embed.add_field(name='Prêmio', value=f'{best_prize["emoji"]} {best_prize["label"]}', inline=True)
             embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
@@ -1306,15 +1306,15 @@ class Games(commands.Cog):
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
         finally:
             end_game(ctx.author.id)
 
     @commands.command(name='keno', aliases=['kn'])
     async def keno(self, ctx, bet_amount: int, *numbers: int):
-        """Keno - loteria. Usage: /keno <valor> <num1> <num2> ... (1-10 números entre 1-40)"""
+        """Keno - loteria. Uso: /keno <valor> <num1> <num2> ... (1-10 números entre 1-40)"""
         if not await ensure_not_playing(ctx) or bet_amount < 10:
-            if bet_amount < 10: await ctx.send(MSG.bet_minima())
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
             return
         numbers_list = list(numbers)
         if not KenoGame.validate_numbers(numbers_list, len(numbers_list)):
@@ -1322,7 +1322,7 @@ class Games(commands.Cog):
         if not await self.check_balance(ctx, bet_amount): return
         start_game(ctx.author.id, 'keno')
         try:
-            embed = discolord.Embed(title='🎱 Keno', description=f'Seus números: {KenoGame.format_numbers(numbers_list)}\n\nSorteando...', color=discolord.Color.blue())
+            embed = discord.Embed(title='🎱 Keno', description=f'Seus números: {KenoGame.format_numbers(numbers_list)}\n\nSorteando...', color=discord.Color.blue())
             msg = await ctx.send(embed=embed)
             await asyncio.sleep(1.5)
             drawn = KenoGame.draw_numbers()
@@ -1330,7 +1330,7 @@ class Games(commands.Cog):
             won, multiplier = KenoGame.calculate_win(len(numbers_list), matches)
             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'keno', won, multiplier)
             if not success: await ctx.send(MSG.erro_processar()); return
-            embed = discolord.Embed(title=f'🎱 Keno - {ctx.author.display_name}', color=discolord.Color.green() if won else discolord.Color.red())
+            embed = discord.Embed(title=f'🎱 Keno - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
             embed.add_field(name='Seus Números', value=KenoGame.format_numbers(numbers_list, drawn), inline=False)
             embed.add_field(name='Sorteados', value=KenoGame.format_numbers(drawn), inline=False)
             embed.add_field(name='Acertos', value=f'**{matches}/{len(numbers_list)}**', inline=True)
@@ -1341,31 +1341,31 @@ class Games(commands.Cog):
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
         finally:
             end_game(ctx.author.id)
 
 
 
-    @commands.command(name='bacheadst', aliases=['bac'])
-    async def bacheadst(self, ctx, bet_amount: int, bet_type: str):
-        """Bacheadst - jogue contra a banca. Usage: /bacheadst <valor> <jogador|banca|empate>"""
-        if not await ensure_not_playing(ctx) or bet_amount < 10 or not BacheadstGame.validate_bet(bet_type) or not await self.check_balance(ctx, bet_amount):
-            if bet_amount < 10: await ctx.send(MSG.bet_minima())
-            elif not BacheadstGame.validate_bet(bet_type): await ctx.send('❌ Bet inválida! Use: jogador, banca ou empate')
+    @commands.command(name='baccarat', aliases=['bac'])
+    async def baccarat(self, ctx, bet_amount: int, bet_type: str):
+        """Baccarat - jogue contra a banca. Uso: /baccarat <valor> <jogador|banca|empate>"""
+        if not await ensure_not_playing(ctx) or bet_amount < 10 or not BaccaratGame.validate_bet(bet_type) or not await self.check_balance(ctx, bet_amount):
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not BaccaratGame.validate_bet(bet_type): await ctx.send('❌ Aposta inválida! Use: jogador, banca ou empate')
             return
-        start_game(ctx.author.id, 'bacheadst')
+        start_game(ctx.author.id, 'baccarat')
         try:
-            embed = discolord.Embed(title='🎴 Bacheadst', description='Distribuindo cartas...', color=discolord.Color.blue())
+            embed = discord.Embed(title='🎴 Baccarat', description='Distribuindo cartas...', color=discord.Color.blue())
             msg = await ctx.send(embed=embed)
             await asyncio.sleep(1.2)
-            winner, player_hand, banker_hand, player_value, banker_value = BacheadstGame.play_game()
-            won, multiplier = BacheadstGame.calculate_win(winner, bet_type)
-            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'bacheadst', won, multiplier)
+            winner, player_hand, banker_hand, player_value, banker_value = BaccaratGame.play_game()
+            won, multiplier = BaccaratGame.calculate_win(winner, bet_type)
+            success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'baccarat', won, multiplier)
             if not success: await ctx.send(MSG.erro_processar()); return
-            embed = discolord.Embed(title=f'🎴 Bacheadst - {ctx.author.display_name}', color=discolord.Color.green() if won else discolord.Color.red())
-            embed.add_field(name='Playdor', value=BacheadstGame.format_hand(player_hand, player_value), inline=False)
-            embed.add_field(name='Banca', value=BacheadstGame.format_hand(banker_hand, banker_value), inline=False)
+            embed = discord.Embed(title=f'🎴 Baccarat - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
+            embed.add_field(name='Jogador', value=BaccaratGame.format_hand(player_hand, player_value), inline=False)
+            embed.add_field(name='Banca', value=BaccaratGame.format_hand(banker_hand, banker_value), inline=False)
             embed.add_field(name='Vencedor', value=winner.title(), inline=True)
             embed.add_field(name='Your Bet', value=bet_type.title(), inline=True)
             embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
@@ -1374,28 +1374,28 @@ class Games(commands.Cog):
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
         finally:
             end_game(ctx.author.id)
 
     @commands.command(name='hilo', aliases=['highlow', 'hl'])
     async def hilo(self, ctx, bet_amount: int, guess: str):
-        """Hi-Lo - próxima carta maior ou menor. Usage: /hilo <valor> <high|low|igual>"""
+        """Hi-Lo - próxima carta maior ou menor. Uso: /hilo <valor> <alto|baixo|igual>"""
         if not await ensure_not_playing(ctx) or bet_amount < 10 or not HiLoGame.validate_guess(guess) or not await self.check_balance(ctx, bet_amount):
-            if bet_amount < 10: await ctx.send(MSG.bet_minima())
-            elif not HiLoGame.validate_guess(guess): await ctx.send('❌ Escolha inválida! Use: high, low ou igual')
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
+            elif not HiLoGame.validate_guess(guess): await ctx.send('❌ Escolha inválida! Use: alto, baixo ou igual')
             return
         start_game(ctx.author.id, 'hilo')
         try:
             current = HiLoGame.draw_card()
-            embed = discolord.Embed(title='🎴 Hi-Lo', description=f'Carta atual: {HiLoGame.format_card(current)}\n\n{HiLoGame.get_odds(current)}\n\nSua escolha: **{guess.title()}**\n\nRevelando próxima carta...', color=discolord.Color.blue())
+            embed = discord.Embed(title='🎴 Hi-Lo', description=f'Carta atual: {HiLoGame.format_card(current)}\n\n{HiLoGame.get_odds(current)}\n\nSua escolha: **{guess.title()}**\n\nRevelando próxima carta...', color=discord.Color.blue())
             msg = await ctx.send(embed=embed)
             await asyncio.sleep(1.5)
             next_card = HiLoGame.draw_card()
-            won, multiplier = HiLoGame.comevene_cards(current, next_card, guess)
+            won, multiplier = HiLoGame.compare_cards(current, next_card, guess)
             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'hilo', won, multiplier)
             if not success: await ctx.send(MSG.erro_processar()); return
-            embed = discolord.Embed(title=f'🎴 Hi-Lo - {ctx.author.display_name}', color=discolord.Color.green() if won else discolord.Color.red())
+            embed = discord.Embed(title=f'🎴 Hi-Lo - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
             embed.add_field(name='Carta Anterior', value=HiLoGame.format_card(current), inline=True)
             embed.add_field(name='Nova Carta', value=HiLoGame.format_card(next_card), inline=True)
             embed.add_field(name='Sua Escolha', value=guess.title(), inline=True)
@@ -1405,23 +1405,23 @@ class Games(commands.Cog):
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
         finally:
             end_game(ctx.author.id)
 
     @commands.command(name='tower', aliases=['torre', 'tw'])
     async def tower(self, ctx, bet_amount: int, difficulty: str = 'medio'):
-        """Tower - suba a torre interativo. Usage: /tower <valor> [dificuldade]"""
+        """Tower - suba a torre interativo. Uso: /tower <valor> [dificuldade]"""
         if not await ensure_not_playing(ctx) or bet_amount < 10 or not TowerGame.validate_difficulty(difficulty) or not await self.check_balance(ctx, bet_amount):
-            if bet_amount < 10: await ctx.send(MSG.bet_minima())
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
             elif not TowerGame.validate_difficulty(difficulty): await ctx.send('❌ Dificuldade inválida! Use: facil, medio, dificil, extremo')
             return
         start_game(ctx.author.id, 'tower')
         try:
             game = TowerGame(difficulty)
-            embed = discolord.Embed(title='🗼 Tower', description=f'{TowerGame.get_difficulty_info(difficulty)}\n\nEscolha um tile (0-{game.tiles_per_level-1}) ou digite `sair` evena sacar', color=discolord.Color.blue())
+            embed = discord.Embed(title='🗼 Tower', description=f'{TowerGame.get_difficulty_info(difficulty)}\n\nEscolha um tile (0-{game.tiles_per_level-1}) ou digite `sair` para sacar', color=discord.Color.blue())
             embed.add_field(name='Torre', value=f'```\n{game.format_tower()}\n```', inline=False)
-            embed.add_field(name='Multiplier', value=f'{game.get_multiplier():.2f}x', inline=True)
+            embed.add_field(name='Multiplicador', value=f'{game.get_multiplier():.2f}x', inline=True)
             await ctx.send(embed=embed)
             
             while not game.game_over:
@@ -1432,7 +1432,7 @@ class Games(commands.Cog):
                     if content in ['sair', 'cashout']:
                         multiplier = game.cash_out()
                         success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', True, multiplier)
-                        embed = discolord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='✅ Cash out!', color=discolord.Color.green())
+                        embed = discord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='✅ Cash out!', color=discord.Color.green())
                         embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
                         embed.add_field(name='🎉 WON!', value=f'+{net_change:,} 🪙 ({multiplier:.2f}x)', inline=False)
                         user = self.db.get_user(str(ctx.author.id), ctx.author.name)
@@ -1444,7 +1444,7 @@ class Games(commands.Cog):
                         is_safe, current_mult = game.choose_tile(tile_index)
                         if not is_safe:
                             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', False, 0)
-                            embed = discolord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='💥 Tile errado!', color=discolord.Color.red())
+                            embed = discord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='💥 Tile errado!', color=discord.Color.red())
                             embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
                             embed.add_field(name='❌ Lost', value=f'{net_change:,} 🪙', inline=False)
                             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
@@ -1454,16 +1454,16 @@ class Games(commands.Cog):
                         else:
                             if game.won:
                                 success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', True, current_mult)
-                                embed = discolord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='🏆 Topo alcançado!', color=discolord.Color.gold())
+                                embed = discord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='🏆 Topo alcançado!', color=discord.Color.gold())
                                 embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
                                 embed.add_field(name='🏆 VITÓRIA!', value=f'+{net_change:,} 🪙 ({current_mult:.2f}x)', inline=False)
                                 user = self.db.get_user(str(ctx.author.id), ctx.author.name)
                                 embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
                                 await ctx.send(embed=embed)
                                 break
-                            embed = discolord.Embed(title='🗼 Tower', description=f'✅ Seguro! Nível {game.current_level}\n\nEscolha próximo tile ou `sair`', color=discolord.Color.blue())
+                            embed = discord.Embed(title='🗼 Tower', description=f'✅ Seguro! Nível {game.current_level}\n\nEscolha próximo tile ou `sair`', color=discord.Color.blue())
                             embed.add_field(name='Torre', value=f'```\n{game.format_tower()}\n```', inline=False)
-                            embed.add_field(name='Multiplier', value=f'{current_mult:.2f}x', inline=True)
+                            embed.add_field(name='Multiplicador', value=f'{current_mult:.2f}x', inline=True)
                             embed.add_field(name='Ganho Potencial', value=f'{int(bet_amount * current_mult):,} 🪙', inline=True)
                             await ctx.send(embed=embed)
                     except ValueError:
@@ -1479,21 +1479,21 @@ class Games(commands.Cog):
             
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
-                await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+                await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
         finally:
             end_game(ctx.author.id)
 
     @commands.command(name='videopoker', aliases=['poker', 'vp'])
     async def videopoker(self, ctx, bet_amount: int):
-        """Video Poker - Jacks or Better. Usage: /videopoker <valor>"""
+        """Video Poker - Jacks or Better. Uso: /videopoker <valor>"""
         if not await ensure_not_playing(ctx) or bet_amount < 10 or not await self.check_balance(ctx, bet_amount):
-            if bet_amount < 10: await ctx.send(MSG.bet_minima())
+            if bet_amount < 10: await ctx.send(MSG.aposta_minima())
             return
         start_game(ctx.author.id, 'videopoker')
         try:
             game = VideoPokerGame()
             hand = game.deal()
-            embed = discolord.Embed(title='🎰 Video Poker', description='Digite os números das cartas evena segurar (0-4) seevenados por espaço.\nExemplo: `0 2 4` ou `todas` ou `nenhuma`', color=discolord.Color.blue())
+            embed = discord.Embed(title='🎰 Video Poker', description='Digite os números das cartas para segurar (0-4) separados por espaço.\nExemplo: `0 2 4` ou `todas` ou `nenhuma`', color=discord.Color.blue())
             embed.add_field(name='Sua Mão', value=game.format_hand_with_positions(), inline=False)
             await ctx.send(embed=embed)
             
@@ -1519,7 +1519,7 @@ class Games(commands.Cog):
                 success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'videopoker', won, multiplier)
                 if not success: await ctx.send(MSG.erro_processar()); return
                 
-                embed = discolord.Embed(title=f'🎰 Video Poker - {ctx.author.display_name}', color=discolord.Color.green() if won else discolord.Color.red())
+                embed = discord.Embed(title=f'🎰 Video Poker - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
                 embed.add_field(name='Mão Final', value=game.format_hand(show_held=True), inline=False)
                 embed.add_field(name='Result', value=hand_name, inline=True)
                 embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
@@ -1530,7 +1530,7 @@ class Games(commands.Cog):
                 
                 new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
                 if new_achievements:
-                    await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+                    await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
             except asyncio.TimeoutError:
                 await ctx.send('⏰ Tempo esgotado!')
         finally:
@@ -1540,28 +1540,28 @@ class Games(commands.Cog):
     @commands.command(name='jogos', aliases=['games', 'listgames'])
     async def list_games(self, ctx):
         """Lista todos os jogos disponíveis"""
-        embed = discolord.Embed(
-            title='🎰 Casino Games Disponíveis',
-            description='Teste sua sorte e ganhe moedas! 18 jogos disponíveis!',
-            color=discolord.Color.purple()
+        embed = discord.Embed(
+            title='🎰 Jogos de Cassino Disponíveis',
+            description='Test your luck and win coins! 18 games available!',
+            color=discord.Color.purple()
         )
         
         # Original games
         embed.add_field(
-            name='🐅 Fortune Tiger (Fortune Tiger)',
+            name='🐅 Tigrinho (Fortune Tiger)',
             value=f'`{PREFIX}tigrinho <valor>`\nSlot 3x3 com múltiplas linhas!',
             inline=True
         )
         
         embed.add_field(
             name='🚀 Crash',
-            value=f'`{PREFIX}crash <valor> [mult]`\nMultiplier até crashar!',
+            value=f'`{PREFIX}crash <valor> [mult]`\nMultiplicador até crashar!',
             inline=True
         )
         
         embed.add_field(
             name='🎡 Double',
-            value=f'`{PREFIX}double <valor> <color>`\nVermelho/Preto (2x), Branco (14x)',
+            value=f'`{PREFIX}double <valor> <cor>`\nVermelho/Preto (2x), Branco (14x)',
             inline=True
         )
         
@@ -1572,8 +1572,8 @@ class Games(commands.Cog):
         )
         
         embed.add_field(
-            name='🎰 Roulette',
-            value=f'`{PREFIX}roulette <valor> <tipo> <bet>`\nRoulette europeia clássica',
+            name='🎰 Roleta',
+            value=f'`{PREFIX}roleta <valor> <tipo> <aposta>`\nRoleta europeia clássica',
             inline=True
         )
         
@@ -1584,8 +1584,8 @@ class Games(commands.Cog):
         )
         
         embed.add_field(
-            name='🎲 Dice',
-            value=f'`{PREFIX}dice <valor> <tipo>`\nAcima, under, número...',
+            name='🎲 Dados',
+            value=f'`{PREFIX}dados <valor> <tipo>`\nAcima, abaixo, número...',
             inline=True
         )
         
@@ -1598,13 +1598,13 @@ class Games(commands.Cog):
         # New games
         embed.add_field(
             name='🪙 Cara ou Coroa',
-            value=f'`{PREFIX}coinflip <valor> <heads|tails>`\nSimples e rápido!',
+            value=f'`{PREFIX}coinflip <valor> <cara|coroa>`\nSimples e rápido!',
             inline=True
         )
         
         embed.add_field(
             name='🎡 Roda da Fortuna',
-            value=f'`{PREFIX}wheel <valor>`\nGire evena ganhar prêmios!',
+            value=f'`{PREFIX}wheel <valor>`\nGire para ganhar prêmios!',
             inline=True
         )
         
@@ -1616,7 +1616,7 @@ class Games(commands.Cog):
         
         embed.add_field(
             name='🎲 Limbo',
-            value=f'`{PREFIX}limbo <valor> <alvo>`\nPasse o multiplier!',
+            value=f'`{PREFIX}limbo <valor> <alvo>`\nPasse o multiplicador!',
             inline=True
         )
         
@@ -1633,14 +1633,14 @@ class Games(commands.Cog):
         )
         
         embed.add_field(
-            name='🎴 Bacheadst',
-            value=f'`{PREFIX}bacheadst <valor> <tipo>`\nPlaydor, banca ou empate',
+            name='🎴 Baccarat',
+            value=f'`{PREFIX}baccarat <valor> <tipo>`\nJogador, banca ou empate',
             inline=True
         )
         
         embed.add_field(
             name='🎴 Hi-Lo',
-            value=f'`{PREFIX}hilo <valor> <high|low|igual>`\nPróxima carta!',
+            value=f'`{PREFIX}hilo <valor> <alto|baixo|igual>`\nPróxima carta!',
             inline=True
         )
         
@@ -1656,21 +1656,21 @@ class Games(commands.Cog):
             inline=True
         )
         
-        embed.set_footer(text='Bet mínima: 10 🪙 | Use /saldo evena ver suas moedas')
+        embed.set_footer(text='Minimum bet: 10 🪙 | Use /balance to check your coins')
         
         await ctx.send(embed=embed)
 
     @commands.command(name='roubar', aliases=['rob', 'steal', 'heist'])
-    async def heist(self, ctx, target: discolord.Member):
+    async def heist(self, ctx, target: discord.Member):
         """
-        Tenta roubar moedas de outro jogador!
-        O alvo tem 15 segundos evena defender respondendo um desafio.
-        Usage: /roubar @usuario
+        Try to steal coins from another player!
+        O alvo tem 15 segundos para defender respondendo um desafio.
+        Uso: /roubar @usuario
         """
         
         # Verificações básicas
         if target.id == ctx.author.id:
-            await ctx.send('❌ Você não pode roubar de si mesmo, seu maluco!')
+            await ctx.send('❌ You can\'t steal from yourself!')
             return
         
         if target.bot:
@@ -1687,13 +1687,13 @@ class Games(commands.Cog):
                 await ctx.send(f'⏰ Calma aí ladrão! Espera mais **{minutes}m {seconds}s** antes de tentar roubar de novo.')
                 return
         
-        # Verificar saldos
+        # Check balances
         robber = self.db.get_user(str(ctx.author.id), ctx.author.name)
         victim = self.db.get_user(str(target.id), target.name)
         
         # Verificar se o ladrão está negativado
         if robber['coins'] < 0:
-            await ctx.send(f'❌ Você está negativado! Pague suas dívidas primeiro (saldo: **{robber["coins"]:,} 🪙**)')
+            await ctx.send(f'❌ You are in debt! Pay off your debts first (balance: **{robber["coins"]:,} 🪙**)')
             return
         
         can_rob, error_msg = HeistGame.can_rob(robber['coins'], victim['coins'])
@@ -1705,16 +1705,16 @@ class Games(commands.Cog):
         steal_amount = HeistGame.calculate_steal_amount(victim['coins'])
         
         # Debug log
-        print(f"[ROUBO] Vítima: {target.name} | Saldo: {victim['coins']:,} | Amount roubado: {steal_amount:,}")
+        print(f"[HEIST] Victim: {target.name} | Balance: {victim['coins']:,} | Amount stolen: {steal_amount:,}")
         
         # Gerar desafio de defesa
-        challenge_type, question, colorrect_answer = HeistGame.generate_challenge()
+        challenge_type, question, correct_answer = HeistGame.generate_challenge()
         
         # Mensagem inicial
-        embed = discolord.Embed(
+        embed = discord.Embed(
             title='🚨 ROUBO EM ANDAMENTO! 🚨',
             description=f'**{ctx.author.display_name}** está tentando roubar **{target.display_name}**!',
-            color=discolord.Color.red()
+            color=discord.Color.red()
         )
         
         embed.add_field(
@@ -1731,7 +1731,7 @@ class Games(commands.Cog):
         
         embed.add_field(
             name='⚔️ Como Funciona',
-            value='• Responda colorretamente = Defende e ladrão paga multa\n• Errar/Demorar = Ladrão leva a grana',
+            value='• Responda corretamente = Defende e ladrão paga multa\n• Errar/Demorar = Ladrão leva a grana',
             inline=False
         )
         
@@ -1739,14 +1739,14 @@ class Games(commands.Cog):
         
         heist_msg = await ctx.send(embed=embed)
         
-        # Armazenar dice do roubo
+        # Armazenar dados do roubo
         self.active_heists[heist_msg.id] = {
             'robber_id': ctx.author.id,
             'robber_name': ctx.author.display_name,
             'target_id': target.id,
             'target_name': target.display_name,
             'amount': steal_amount,
-            'colorrect_answer': colorrect_answer,
+            'correct_answer': correct_answer,
             'challenge_type': challenge_type['type'],
             'start_time': current_time
         }
@@ -1759,9 +1759,9 @@ class Games(commands.Cog):
             response = await self.bot.wait_for('message', timeout=HeistGame.DEFENSE_TIME, check=check)
             
             # Verificar resposta
-            is_colorrect = HeistGame.check_answer(response.content, colorrect_answer, challenge_type['type'])
+            is_correct = HeistGame.check_answer(response.content, correct_answer, challenge_type['type'])
             
-            if is_colorrect:
+            if is_correct:
                 # DEFESA BEM SUCEDIDA!
                 penalty = int(robber['coins'] * HeistGame.FAIL_PENALTY_PERCENT)
                 penalty = min(penalty, steal_amount)  # Máximo = valor que ia roubar
@@ -1776,16 +1776,16 @@ class Games(commands.Cog):
                     went_negative = True
                     actual_penalty = penalty  # Cobra a multa completa mesmo que não tenha
                 
-                # Transferir penalidade do ladrão evena a vítima (pode deixar negativo)
+                # Transferir penalidade do ladrão para a vítima (pode deixar negativo)
                 self.economy.remove_coins(str(ctx.author.id), actual_penalty, 'Penalidade de roubo falho')
                 self.economy.add_coins(str(target.id), actual_penalty, 'Defesa de roubo')
                 
                 defense_msg = random.choice(HeistGame.get_defense_messages())
                 
-                embed = discolord.Embed(
+                embed = discord.Embed(
                     title='🛡️ DEFESA BEM SUCEDIDA!',
                     description=f'**{target.display_name}** {defense_msg}!',
-                    color=discolord.Color.green()
+                    color=discord.Color.green()
                 )
                 
                 embed.add_field(
@@ -1797,7 +1797,7 @@ class Games(commands.Cog):
                 penalty_text = f'**{ctx.author.display_name}** pagou **{actual_penalty:,} 🪙** de multa!'
                 if went_negative:
                     new_balance = robber_balance - actual_penalty
-                    penalty_text += f'\n⚠️ **NEGATIVADO!** Saldo ficou em **{new_balance:,} 🪙**'
+                    penalty_text += f'\n⚠️ **IN DEBT!** Balance is now **{new_balance:,} 🪙**'
                 
                 embed.add_field(
                     name='💸 Penalidade do Ladrão',
@@ -1819,15 +1819,15 @@ class Games(commands.Cog):
                 
                 success_msg = random.choice(HeistGame.get_success_messages())
                 
-                embed = discolord.Embed(
+                embed = discord.Embed(
                     title='💰 ROUBO BEM SUCEDIDO!',
                     description=f'**{ctx.author.display_name}** {success_msg} de **{target.display_name}**!',
-                    color=discolord.Color.gold()
+                    color=discord.Color.gold()
                 )
                 
                 embed.add_field(
                     name='❌ Resposta Errada',
-                    value=f'Você disse: **{response.content}**\nCorreto era: **{colorrect_answer}**',
+                    value=f'You said: **{response.content}**\nCorrect was: **{correct_answer}**',
                     inline=False
                 )
                 
@@ -1850,10 +1850,10 @@ class Games(commands.Cog):
             
             success_msg = random.choice(HeistGame.get_success_messages())
             
-            embed = discolord.Embed(
+            embed = discord.Embed(
                 title='💰 ROUBO BEM SUCEDIDO!',
                 description=f'**{ctx.author.display_name}** {success_msg} de **{target.display_name}**!',
-                color=discolord.Color.gold()
+                color=discord.Color.gold()
             )
             
             embed.add_field(
@@ -1870,7 +1870,7 @@ class Games(commands.Cog):
             
             embed.add_field(
                 name='💡 Resposta Correta Era',
-                value=f'**{colorrect_answer}**',
+                value=f'**{correct_answer}**',
                 inline=False
             )
             
@@ -1880,14 +1880,14 @@ class Games(commands.Cog):
             # Adicionar cooldown
             self.heist_cooldowns[ctx.author.id] = current_time
         
-        # Limeven dice do roubo
+        # Limpar dados do roubo
         if heist_msg.id in self.active_heists:
             del self.active_heists[heist_msg.id]
         
         # Verificar conquistas
         new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
         if new_achievements:
-            await ctx.send(f'🏆 **Achievements Unlocked!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
+            await ctx.send(f'🏆 **Conquistas Desbloqueadas!**\n' + '\n'.join([f'{a.emoji} **{a.title}** (+{a.reward} 🪙)' for a in new_achievements]))
 
 
 async def setup(bot):

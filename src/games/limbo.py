@@ -54,23 +54,23 @@ class LimboGame:
     def format_result(result: float, target: float, won: bool) -> str:
         """Format result for display"""
         if won:
-            return f"✅ **{result}x** (alvo: {target}x) - Passou!"
+            return f"✅ **{result}x** (target: {target}x) - Passed!"
         else:
-            return f"❌ **{result}x** (alvo: {target}x) - Não atingiu"
+            return f"❌ **{result}x** (target: {target}x) - Did not reach"
     
     @staticmethod
     def get_risk_level(target: float) -> str:
         """Get risk level description"""
         if target < 2.0:
-            return "🟢 Baixo Risco"
+            return "🟢 Low Risk"
         elif target < 5.0:
-            return "🟡 Risco Médio"
+            return "🟡 Medium Risk"
         elif target < 10.0:
-            return "🟠 Alto Risco"
+            return "🟠 High Risk"
         elif target < 50.0:
-            return "🔴 Risco Muito Alto"
+            return "🔴 Very High Risk"
         else:
-            return "💀 Risco Extremo"
+            return "💀 Extreme Risk"
     
     @staticmethod
     def calculate_win_chance(target: float) -> float:
@@ -99,13 +99,13 @@ class LimboGame:
     def get_help_text() -> str:
         """Get help text"""
         return (
-            "**Como Jogar Limbo:**\n"
-            "1. Escolha um multiplicador alvo (ex: 2.0x)\n"
-            "2. Um resultado aleatório será gerado\n"
-            "3. Se o resultado for >= seu alvo, você ganha!\n"
-            "4. Quanto maior o alvo, maior o prêmio, menor a chance\n\n"
-            "**Exemplos:**\n"
-            "• Alvo 2.0x: ~50% de chance\n"
-            "• Alvo 10.0x: ~10% de chance\n"
-            "• Alvo 100.0x: ~1% de chance"
+            "**How to Play Limbo:**\n"
+            "1. Choose a target multiplier (e.g., 2.0x)\n"
+            "2. A random result will be generated\n"
+            "3. If result >= your target, you win!\n"
+            "4. Higher target = bigger prize, lower chance\n\n"
+            "**Examples:**\n"
+            "• Target 2.0x: ~50% chance\n"
+            "• Target 10.0x: ~10% chance\n"
+            "• Target 100.0x: ~1% chance"
         )

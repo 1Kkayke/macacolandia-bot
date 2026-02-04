@@ -9,11 +9,11 @@ class ScratchCardGame:
     
     # Prize pool with probabilities (muito mais difícil - house edge alto)
     PRIZES = [
-        {'multiplier': 0, 'label': 'Perdeu', 'emoji': '❌', 'weight': 70},  # 70% perder
-        {'multiplier': 0.5, 'label': 'Metade', 'emoji': '💸', 'weight': 15},  # 15% metade (perde metade)
-        {'multiplier': 1.0, 'label': 'Empate', 'emoji': '🤝', 'weight': 8},  # 8% empate
-        {'multiplier': 2.0, 'label': 'Dobro', 'emoji': '💰', 'weight': 4},  # 4% dobro
-        {'multiplier': 3.0, 'label': 'Triplo', 'emoji': '💎', 'weight': 1.8},  # 1.8% triplo
+        {'multiplier': 0, 'label': 'Lost', 'emoji': '❌', 'weight': 70},  # 70% lose
+        {'multiplier': 0.5, 'label': 'Half', 'emoji': '💸', 'weight': 15},  # 15% half (lose half)
+        {'multiplier': 1.0, 'label': 'Tie', 'emoji': '🤝', 'weight': 8},  # 8% tie
+        {'multiplier': 2.0, 'label': 'Double', 'emoji': '💰', 'weight': 4},  # 4% double
+        {'multiplier': 3.0, 'label': 'Triple', 'emoji': '💎', 'weight': 1.8},  # 1.8% triple
         {'multiplier': 5.0, 'label': 'x5', 'emoji': '🌟', 'weight': 0.8},  # 0.8% x5
         {'multiplier': 10.0, 'label': 'x10', 'emoji': '⭐', 'weight': 0.3},  # 0.3% x10
         {'multiplier': 25.0, 'label': 'x25', 'emoji': '🎊', 'weight': 0.08},  # 0.08% x25
@@ -83,7 +83,7 @@ class ScratchCardGame:
     @staticmethod
     def format_prizes_list() -> str:
         """Format list of possible prizes"""
-        prizes_text = "**Prêmios Possíveis:**\n"
+        prizes_text = "**Possible Prizes:**\n"
         for prize in ScratchCardGame.PRIZES:
             if prize['multiplier'] > 0:
                 prizes_text += f"{prize['emoji']} {prize['label']} - {prize['multiplier']}x\n"
@@ -94,7 +94,7 @@ class ScratchCardGame:
         """Get prize distribution info"""
         total_weight = sum(p['weight'] for p in ScratchCardGame.PRIZES)
         
-        text = "**Chances:**\n"
+        text = "**Odds:**\n"
         for prize in ScratchCardGame.PRIZES:
             if prize['multiplier'] >= 1.0:
                 chance = (prize['weight'] / total_weight) * 100

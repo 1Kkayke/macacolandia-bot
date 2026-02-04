@@ -16,68 +16,68 @@ class HeistGame:
         {
             'type': 'math',
             'emoji': '🧮',
-            'name': 'Matemática Rápida',
-            'difficulty': 'fácil'
+            'name': 'Quick Math',
+            'difficulty': 'easy'
         },
         {
             'type': 'emoji',
             'emoji': '🎯',
-            'name': 'Encontre o Emoji',
-            'difficulty': 'médio'
+            'name': 'Find the Emoji',
+            'difficulty': 'medium'
         },
         {
             'type': 'sequence',
             'emoji': '🔢',
-            'name': 'Sequência',
-            'difficulty': 'médio'
+            'name': 'Sequence',
+            'difficulty': 'medium'
         },
         {
             'type': 'word',
             'emoji': '📝',
-            'name': 'Palavra Embaralhada',
-            'difficulty': 'difícil'
+            'name': 'Scrambled Word',
+            'difficulty': 'hard'
         }
     ]
     
-    # Cooldown entre roubos (em segundos)
+    # Cooldown between heists (in seconds)
     COOLDOWN = 300  # 5 minutos
     DEFENSE_TIME = 15  # 15 segundos para defender
     
-    # Porcentagem do saldo que pode ser roubada
+    # Percentage that can be stolen
     MIN_STEAL_PERCENT = 0.05  # 5%
     MAX_STEAL_PERCENT = 0.15  # 15%
     
-    # Penalidades
+    # Penalties
     FAIL_PENALTY_PERCENT = 0.10  # 10% de penalidade se falhar
     
     @staticmethod
     def calculate_steal_amount(target_balance: int) -> int:
         """Calculate how much can be stolen"""
-        # Calcula percentual aleatório entre 5% e 15%
+        # Calculate random percentage between 5% and 15%
         percent = random.uniform(HeistGame.MIN_STEAL_PERCENT, HeistGame.MAX_STEAL_PERCENT)
         amount = int(target_balance * percent)
         
-        # Garante um mínimo baseado no saldo da vítima
+        # Ensure minimum based on victim balance
         if target_balance < 2000:
-            min_amount = 100  # Para saldos baixos
+            min_amount = 100  # For low balances
         elif target_balance < 10000:
-            min_amount = int(target_balance * 0.08)  # 8% para médio
+            min_amount = int(target_balance * 0.08)  # 8% for medium
         else:
-            min_amount = int(target_balance * 0.05)  # 5% para alto
+            min_amount = int(target_balance * 0.05)  # 5% for high
         
-        # Retorna o maior valor entre o calculado e o mínimo
+        # Return the larger of calculated and minimum
         final_amount = max(min_amount, amount)
-        print(f"[HEIST] Saldo vítima: {target_balance:,} | Percent: {percent:.1%} | Calculado: {amount:,} | Mínimo: {min_amount:,} | Final: {final_amount:,}")
+        print(f"[HEIST] Victim balance: {target_balance:,} | Percent: {percent:.1%} | Calculated: {amount:,} | Minimum: {min_amount:,} | Final: {final_amount:,}")
         return final_amount
     
     @staticmethod
     def can_rob(robber_balance: int, target_balance: int) -> Tuple[bool, str]:
         """Check if robbery is possible"""
         if target_balance < 500:
-            return False, "O alvo precisa ter pelo menos 500 moedas!"
+            return False, "Target must have at least 500 coins!"
         
         if robber_balance < 100:
-            return False, "Você precisa ter pelo menos 100 moedas para tentar roubar!"
+            return False, "You need at least 100 coins to attempt a heist!"
         
         return True, ""
     
@@ -105,7 +105,7 @@ class HeistGame:
             question = f"{a} - {b}"
             answer = str(a - b)
         
-        return f"Quanto é: **{question}**?", answer
+        return f"What is: **{question}**?", answer
     
     @staticmethod
     def generate_emoji_challenge() -> Tuple[str, str]:
@@ -123,7 +123,7 @@ class HeistGame:
         position = all_emojis.index(target) + 1
         emoji_line = ' '.join(all_emojis)
         
-        return f"Encontre a posição do {target}:\n{emoji_line}\n(Digite 1-9)", str(position)
+        return f"Find the position of {target}:\n{emoji_line}\n(Type 1-9)", str(position)
     
     @staticmethod
     def generate_sequence_challenge() -> Tuple[str, str]:
@@ -147,7 +147,7 @@ class HeistGame:
             start, step, sequence, answer = pattern
         
         seq_str = ' → '.join(map(str, sequence))
-        return f"Complete a sequência:\n**{seq_str} → ?**", str(answer)
+        return f"Complete the sequence:\n**{seq_str} → ?**", str(answer)
     
     @staticmethod
     def generate_word_challenge() -> Tuple[str, str]:
@@ -171,7 +171,7 @@ class HeistGame:
             random.shuffle(scrambled)
             scrambled_word = ''.join(scrambled)
         
-        return f"Desembaralhe a palavra {emoji}:\n**{scrambled_word}**", word
+        return f"Unscramble the word {emoji}:\n**{scrambled_word}**", word
     
     @staticmethod
     def generate_challenge() -> Tuple[dict, str, str]:
@@ -201,51 +201,51 @@ class HeistGame:
     def get_loot_description(amount: int) -> str:
         """Get descriptive text for loot amount"""
         if amount < 500:
-            return "migalhas"
+            return "scraps"
         elif amount < 1000:
-            return "um trocado"
+            return "pocket change"
         elif amount < 5000:
-            return "uma boa grana"
+            return "good money"
         elif amount < 10000:
-            return "uma fortuna"
+            return "a fortune"
         else:
-            return "o JACKPOT"
+            return "the JACKPOT"
     
     @staticmethod
     def get_success_messages() -> list:
         """Get random success messages"""
         return [
-            "conseguiu roubar",
-            "furtou",
-            "surrupiou",
-            "levou na malandragem",
-            "passou a perna e levou",
-            "roubou descaradamente",
-            "deu um golpe e pegou"
+            "managed to steal",
+            "stole",
+            "snatched",
+            "cleverly took",
+            "tricked and took",
+            "brazenly robbed",
+            "pulled a heist and got"
         ]
     
     @staticmethod
     def get_fail_messages() -> list:
         """Get random fail messages"""
         return [
-            "foi pego tentando roubar",
-            "se deu mal na tentativa de roubo",
-            "foi flagrado roubando",
-            "pisou na bola e foi pego",
-            "falhou miseravelmente ao tentar roubar",
-            "foi interceptado tentando furtar",
-            "tomou na cabeça tentando roubar"
+            "was caught trying to steal",
+            "failed the heist attempt",
+            "was caught stealing",
+            "messed up and got caught",
+            "miserably failed to steal",
+            "was intercepted trying to steal",
+            "got busted trying to steal"
         ]
     
     @staticmethod
     def get_defense_messages() -> list:
         """Get random defense success messages"""
         return [
-            "defendeu com sucesso",
-            "protegeu suas moedas",
-            "impediu o roubo",
-            "deu uma surra no ladrão",
-            "botou o ladrão pra correr",
-            "meteu o dedo na cara do ladrão",
-            "salvou suas moedas"
+            "successfully defended",
+            "protected their coins",
+            "stopped the robbery",
+            "beat up the thief",
+            "made the thief run",
+            "confronted the thief",
+            "saved their coins"
         ]
