@@ -61,7 +61,7 @@ class Games(commands.Cog):
     async def roulette(self, ctx, bet_amount: int, bet_type: str, bet_value: str):
         """
         Joga roleta
-        Uso: /roleta <valor> <tipo> <aposta>
+        Usage: /roulette <amount> <type> <bet>
         Tipos: numero (0-36), cor (vermelho/preto), paridade (par/impar), altura (baixo/alto)
         """
         if not await ensure_not_playing(ctx):
@@ -649,7 +649,7 @@ class Games(commands.Cog):
                 )
                 embed.add_field(
                     name='Crash Point',
-                    value=f'O jogo crashou em {crash_point:.2f}x',
+                    value=f'The game crashed at {crash_point:.2f}x',
                     inline=False
                 )
             else:
@@ -683,7 +683,7 @@ class Games(commands.Cog):
     @commands.command(name='double', aliases=['cor', 'color'])
     async def double(self, ctx, bet_amount: int, bet_color: str):
         """
-        Joga Double - aposta em cores
+        Play Double - bet on colors
         Uso: /double <valor> <cor>
         Cores: vermelho/red, preto/black, branco/white
         """
