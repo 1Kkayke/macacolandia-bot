@@ -1,4 +1,4 @@
-"""Memes and fun image commands cog"""
+"""Memes commands cog"""
 
 import discord
 from discord.ext import commands
@@ -6,45 +6,37 @@ from src.fun.memes import MemeManager
 
 
 class Memes(commands.Cog):
-    """Meme commands - funny images from the internet"""
-    
     def __init__(self, bot):
         self.bot = bot
         self.memes = MemeManager()
     
-    @commands.command(name='fato', aliases=['fact', 'curiosidade', 'fatos'])
+    @commands.command(name='fact', aliases=['facts'])
     async def fact(self, ctx, user: discord.Member = None):
-        """Compartilha uma curiosidade engraçada ou fato sobre um usuário"""
-        
+        """Share a random fact or roast"""
         if user is None:
-            # Fato aleatório normal
             fact = self.memes.get_random_fact()
-            
             embed = discord.Embed(
-                title='💡 Fato Aleatório (será?)',
+                title='💡 Random Fact',
                 description=fact,
                 color=discord.Color.blue()
             )
-            embed.set_footer(text='Será que é verdade? Vai saber né kkk 🤔')
+            embed.set_footer(text='Is it true? Who knows! 🤔')
         else:
-            # Fato engraçado/pesado sobre o usuário
             roast = self.memes.get_random_roast(user.display_name)
-            
             embed = discord.Embed(
-                title=f'🔥 Fato sobre o {user.display_name}',
+                title=f'🔥 Fact about {user.display_name}',
                 description=roast,
                 color=discord.Color.red()
             )
             embed.set_thumbnail(url=user.display_avatar.url)
-            embed.set_footer(text='É zueira caralho, relaxa! 😂')
+            embed.set_footer(text='Just kidding! 😂')
         
         await ctx.send(embed=embed)
     
-    @commands.command(name='meme', aliases=['randommeme', 'memealeatório', 'memealeat'])
+    @commands.command(name='meme', aliases=['randommeme'])
     async def random_meme(self, ctx):
-        """Envia um meme aleatório"""
+        """Send a random meme"""
         await ctx.typing()
-        
         meme = await self.memes.fetch_reddit_meme()
         
         if meme:
@@ -53,164 +45,155 @@ class Memes(commands.Cog):
                 color=discord.Color.gold()
             )
             embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • {meme["score"]} ⬆️ | Pegado da net')
+            embed.set_footer(text=f'r/{meme["subreddit"]} • {meme["score"]} ⬆️')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não achei meme agora não caralho! Tenta de novo.')
+            await ctx.send('❌ Couldn\'t fetch meme! Try again.')
     
-    @commands.command(name='memede2025', aliases=['meme2025', 'meme-2025', 'meme_2025'])
+    @commands.command(name='meme2025', aliases=['memede2025'])
     async def meme_2025(self, ctx):
-        """Envia um meme da moda em 2025"""
+        """Send a 2025 trending meme"""
         await ctx.typing()
-        
         meme = await self.memes.get_meme_by_category('2025')
         
         if meme:
             embed = discord.Embed(
-                title=f'🔥 Meme 2025: {meme["title"][:180]}',
-                description='Meme atualizado pra 2025 caralho!',
+                title=f'🔥 2025 Meme: {meme["title"][:180]}',
+                description='Trending meme!',
                 color=discord.Color.orange()
             )
             embed.set_image(url=meme['url'])
             embed.set_footer(text=f'r/{meme["subreddit"]} • Trending 2025 🚀')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não achei meme de 2025 não! Tenta /meme mano.')
+            await ctx.send('❌ Couldn\'t find 2025 meme! Try /meme.')
     
-    @commands.command(name='memedodia', aliases=['meme-do-dia', 'meme_do_dia', 'dailymeme'])
+    @commands.command(name='dailymeme', aliases=['memedodia'])
     async def meme_do_dia(self, ctx):
-        """Mostra o meme do dia"""
+        """Show meme of the day"""
         await ctx.typing()
-        
         meme = await self.memes.get_daily_meme()
         
         if meme:
             embed = discord.Embed(
-                title=f'📅 Meme do Dia: {meme["title"][:180]}',
-                description='O meme oficial de hoje caralho!',
+                title=f'📅 Meme of the Day: {meme["title"][:180]}',
+                description='Today\'s meme!',
                 color=discord.Color.purple()
             )
             embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • Meme do dia porra!')
+            embed.set_footer(text=f'r/{meme["subreddit"]}')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não achei o meme do dia não! Tenta /meme mano.')
+            await ctx.send('❌ Couldn\'t find daily meme! Try /meme.')
     
-    @commands.command(name='memedesucesso', aliases=['meme-sucesso', 'memesucesso'])
+    @commands.command(name='successmeme', aliases=['memedesucesso'])
     async def meme_sucesso(self, ctx):
-        """Mostra um meme de sucesso do momento"""
+        """Show a success meme"""
         await ctx.typing()
-        
         meme = await self.memes.get_meme_by_category('sucesso')
         
         if meme:
             embed = discord.Embed(
-                title=f'✨ Sucesso: {meme["title"][:180]}',
-                description='Meme motivacional pra tu se sentir bem!',
+                title=f'✨ Success: {meme["title"][:180]}',
+                description='Motivational meme!',
                 color=discord.Color.green()
             )
             embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • Motivação fdp! 💪')
+            embed.set_footer(text=f'r/{meme["subreddit"]} 💪')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não achei meme de sucesso não! Tenta /meme.')
+            await ctx.send('❌ Couldn\'t find success meme! Try /meme.')
     
-    @commands.command(name='memedefracasso', aliases=['meme-fracasso', 'memefracasso'])
+    @commands.command(name='failmeme', aliases=['memedefracasso'])
     async def meme_fracasso(self, ctx):
-        """Mostra um meme de fracasso do momento"""
+        """Show a fail meme"""
         await ctx.typing()
-        
         meme = await self.memes.get_meme_by_category('fracasso')
         
         if meme:
             embed = discord.Embed(
-                title=f'💀 Fracasso: {meme["title"][:180]}',
-                description='Quando tudo dá errado porra!',
+                title=f'💀 Fail: {meme["title"][:180]}',
+                description='When everything goes wrong!',
                 color=discord.Color.red()
             )
             embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • F no chat caralho 😅')
+            embed.set_footer(text=f'r/{meme["subreddit"]} 😅')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não achei meme de fracasso! Tenta /meme.')
+            await ctx.send('❌ Couldn\'t find fail meme! Try /meme.')
     
-    @commands.command(name='memedetroll', aliases=['meme-troll', 'troll'])
+    @commands.command(name='trollmeme', aliases=['memedetroll', 'troll'])
     async def meme_troll(self, ctx):
-        """Envia um meme de troll"""
+        """Send a troll meme"""
         await ctx.typing()
-        
         meme = await self.memes.get_meme_by_category('troll')
         
         if meme:
             embed = discord.Embed(
                 title=f'😈 Troll: {meme["title"][:180]}',
-                description='Trollagem pesada fdp!',
+                description='Trolling time!',
                 color=discord.Color.dark_red()
             )
             embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • Problemão? 😏')
+            embed.set_footer(text=f'r/{meme["subreddit"]} 😏')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não achei meme de troll! Tenta /meme.')
+            await ctx.send('❌ Couldn\'t find troll meme! Try /meme.')
     
-    @commands.command(name='memedezoacao', aliases=['meme-zoacao', 'zoacao', 'zoeira'])
+    @commands.command(name='jokememe', aliases=['memedezoacao', 'zoacao'])
     async def meme_zoacao(self, ctx):
-        """Envia um meme de zoação"""
+        """Send a joke meme"""
         await ctx.typing()
-        
         meme = await self.memes.get_meme_by_category('zoacao')
         
         if meme:
             embed = discord.Embed(
-                title=f'🤪 Zoação: {meme["title"][:180]}',
-                description='Zoeira não tem limites caralho!',
+                title=f'🤪 Joke: {meme["title"][:180]}',
+                description='Jokes have no limits!',
                 color=discord.Color.gold()
             )
             embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • É zueira porra! 😂')
+            embed.set_footer(text=f'r/{meme["subreddit"]} 😂')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não achei meme de zoação! Tenta /meme.')
+            await ctx.send('❌ Couldn\'t find joke meme! Try /meme.')
     
-    @commands.command(name='memebr', aliases=['meme-br', 'memebrasil'])
+    @commands.command(name='memebr', aliases=['brazilmeme'])
     async def meme_brasileiro(self, ctx):
-        """Envia um meme brasileiro"""
+        """Send a Brazilian meme"""
         await ctx.typing()
-        
         meme = await self.memes.get_brazilian_meme()
         
         if meme:
             embed = discord.Embed(
                 title=f'🇧🇷 {meme["title"][:200]}',
-                description='Meme brasileiro raiz caralho!',
+                description='Brazilian meme!',
                 color=discord.Color.green()
             )
             embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • Meme BR puro sangue porra!')
+            embed.set_footer(text=f'r/{meme["subreddit"]}')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não achei meme BR não! Tenta /meme.')
+            await ctx.send('❌ Couldn\'t find Brazilian meme! Try /meme.')
     
-    @commands.command(name='topmeme', aliases=['top-meme', 'memetop'])
+    @commands.command(name='topmeme')
     async def top_meme(self, ctx):
-        """Envia um dos memes mais votados de hoje"""
+        """Send a top voted meme"""
         await ctx.typing()
-        
         meme = await self.memes.get_top_meme()
         
         if meme:
             embed = discord.Embed(
                 title=f'🏆 Top Meme: {meme["title"][:180]}',
-                description='Um dos memes mais votado de hoje porra!',
+                description='One of today\'s top memes!',
                 color=discord.Color.gold()
             )
             embed.set_image(url=meme['url'])
-            embed.set_footer(text=f'r/{meme["subreddit"]} • {meme["score"]:,} ⬆️ • Top de hj caralho!')
+            embed.set_footer(text=f'r/{meme["subreddit"]} • {meme["score"]:,} ⬆️')
             await ctx.send(embed=embed)
         else:
-            await ctx.send('❌ Não consegui buscar top meme não! Tenta /meme.')
+            await ctx.send('❌ Couldn\'t fetch top meme! Try /meme.')
 
 
 async def setup(bot):
-    """Setup function to add the cog to the bot"""
     await bot.add_cog(Memes(bot))

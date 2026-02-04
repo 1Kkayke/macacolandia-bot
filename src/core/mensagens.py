@@ -1,130 +1,86 @@
-"""Mensagens casuais e brasileiras para o bot"""
+"""Random messages for the bot"""
 
 import random
 
 
 class MensagensCasuais:
-    """Mensagens com gírias e palavrões brasileiros"""
+    """Random casual messages"""
     
-    # Mensagens de erro
     APOSTA_MINIMA = [
-        '❌ Ó parceiro, aposta mínima é 10 conto! Bora caprichar!',
-        '❌ Eita porra, tem que ser no mínimo 10 moedas, mano!',
-        '❌ Calma lá, chefe! Mínimo é 10 🪙!',
-        '❌ Pô véi, aposta pelo menos 10 moedas aí!',
-        '❌ Negativo! Tem que ser 10 moedas no mínimo, brother!',
+        '❌ Minimum bet is 10 coins!',
+        '❌ You need to bet at least 10 coins!',
+        '❌ Minimum is 10 🪙!',
     ]
     
     SALDO_INSUFICIENTE = [
-        '❌ Tá liso, irmão! Vai ganhar umas moedas primeiro 💸',
-        '❌ Quebrado demais! Sem grana pra essa aposta não',
-        '❌ Porra, tá duro hein! Precisa de mais moeda aí',
-        '❌ Saldo zerado! Bora conseguir mais grana antes',
-        '❌ Eita, tá ralado! Sem bufunfa suficiente pra jogar',
+        '❌ Not enough coins! Get more first 💸',
+        '❌ Insufficient balance! Need more coins',
+        '❌ You\'re broke! Get more coins',
     ]
     
     ERRO_PROCESSAR = [
-        '❌ Deu ruim ao processar sua aposta, mano! Tenta de novo',
-        '❌ Eita porra, bugou aqui! Tenta aí outra vez',
-        '❌ Opa, deu treta pra processar! Vai de novo',
-        '❌ Porra, deu erro! Tenta mais uma vez aí',
+        '❌ Error processing bet! Try again',
+        '❌ Something went wrong! Try again',
     ]
     
     ESCOLHA_INVALIDA = [
-        '❌ Pô, essa escolha não rola não! Vê as opções direito',
-        '❌ Eita, escolha errada aí! Olha as opções de novo',
-        '❌ Ó, não é assim não! Escolhe direito, chefe',
-        '❌ Rapaz, essa opção não existe! Confere aí',
+        '❌ Invalid choice! Check the options',
+        '❌ Wrong choice! Check options again',
     ]
     
-    # Mensagens de vitória
     VITORIA = [
-        '🎉 BOOOOOA CARALHO! Ganhou!',
-        '🎉 PORRAAA MANO! Acertou em cheio!',
-        '🎉 FODA DEMAIS! Mandou bem pra caralho!',
-        '🎉 AEEEEE PORRA! Ganhou geral, monstro!',
-        '🎉 QUE ISSO IRMÃO! Lucrou legal!',
-        '🎉 SHOW DE BOLA! Arrebentou!',
-        '🎉 PUTA QUE PARIU! Que sorte fudida!',
-        '🎉 CARALHO VÉIO! Ficou rico!',
+        '🎉 You won!',
+        '🎉 Nice one! Winner!',
+        '🎉 Great job! You won!',
     ]
     
     VITORIA_GRANDE = [
-        '🎉💰 PORRAAAAAA! GANHOU PACA! Que tacada fudida!',
-        '🎉💰 MEU DEUS! Ganhou pra caralho, monstro!',
-        '🎉💰 HOLY SHIT! Ficou milionário agora!',
-        '🎉💰 PUTA MERDA! Que sorte absurda!',
-        '🎉💰 CARALHO! Lucro monstro, maluco!',
+        '🎉💰 HUGE WIN! Amazing!',
+        '🎉💰 JACKPOT! You\'re rich!',
     ]
     
-    # Mensagens de derrota
     DERROTA = [
-        '❌ Perdeu, fudeu mermão! F no chat',
-        '❌ Deu ruim, brother! Bora de novo',
-        '❌ Azarou legal hein! Foi mal',
-        '❌ Porra, não deu dessa vez! Tenta outra',
-        '❌ F! Perdeu tudo, parceiro',
-        '❌ Eita, se fudeu! Próxima vai',
-        '❌ Perdeu feio hein! Mas bora lá de novo',
+        '❌ You lost! Better luck next time',
+        '❌ Didn\'t win this time! Try again',
     ]
     
     DERROTA_GRANDE = [
-        '❌💀 CARALHO! Perdeu paca hein!',
-        '❌💀 EITA PORRA! Perdeu uma grana absurda!',
-        '❌💀 PUTA MERDA! Que azar fudido!',
-        '❌💀 MEU DEUS! Faliu de vez!',
+        '❌💀 Big loss! That hurts!',
+        '❌💀 Major loss! Ouch!',
     ]
     
-    # Mensagens de jogo em andamento
     GIRANDO = [
-        '🎰 Girando essa porra...',
-        '🎰 Rodando aí...',
-        '🎰 Vamo ver no que dá...',
-        '🎰 Segura aí que vai...',
-        '🎰 Ó o giro vindo...',
+        '🎰 Spinning...',
+        '🎰 Rolling...',
     ]
     
     PROCESSANDO = [
-        '⏳ Processando essa bagaça...',
-        '⏳ Calma aí que tá carregando...',
-        '⏳ Ó, já vai...',
-        '⏳ Aguenta os 10, mano...',
+        '⏳ Processing...',
+        '⏳ Loading...',
     ]
     
-    # Mensagens de empate
     EMPATE = [
-        '🤝 Empatou! Devolvo tua grana aí',
-        '🤝 Deu empate! Tá de volta a bufunfa',
-        '🤝 Empatô! Fica com tua grana aí',
+        '🤝 It\'s a tie! Money returned',
+        '🤝 Draw! You get your coins back',
     ]
     
-    # Mensagens de início de jogo
     INICIANDO = [
-        '🎮 Bora jogar essa porra!',
-        '🎮 Partiu jogo!',
-        '🎮 Vai começar! Segura aí',
-        '🎮 Vamo nessa!',
+        '🎮 Let\'s play!',
+        '🎮 Game starting!',
     ]
     
-    # Mensagens de timeout
     TIMEOUT = [
-        '⏰ Ó, passou do tempo! Encerrando aqui',
-        '⏰ Eita, demorou demais! Fechou',
-        '⏰ Tempo esgotado, chefe!',
-        '⏰ Cabou o tempo, parceiro!',
+        '⏰ Time\'s up!',
+        '⏰ Too slow! Game ended',
     ]
     
-    # Mensagens de conquista
     CONQUISTA = [
-        '🏆 CARALHO! Desbloqueou uma conquista!',
-        '🏆 BOOOA! Nova conquista!',
-        '🏆 FODA! Conquistou mais uma!',
-        '🏆 SHOW! Mais uma conquista desbloqueada!',
+        '🏆 Achievement unlocked!',
+        '🏆 New achievement!',
     ]
     
     @staticmethod
     def get_random(lista: list) -> str:
-        """Retorna uma mensagem aleatória da lista"""
         return random.choice(lista)
     
     @staticmethod

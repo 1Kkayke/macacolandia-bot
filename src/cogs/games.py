@@ -47,9 +47,9 @@ class Games(commands.Cog):
         """Check if user can afford the bet"""
         user = self.db.get_user(str(ctx.author.id), ctx.author.name)
         
-        # Verificar se está negativado
+        # Check if balance is negative
         if user['coins'] < 0:
-            await ctx.send(f'🚨 **TU TÁ DEVENDO CARALHO!**\nSaldo: **{user["coins"]:,} 🪙**\n\nPaga tuas dívida antes de jogar, caloteiro!')
+            await ctx.send(f'🚨 **YOU ARE IN DEBT!**\nBalance: **{user["coins"]:,} 🪙**\n\nPay your debts before playing!')
             return False
         
         if not self.economy.can_afford(str(ctx.author.id), ctx.author.name, amount):
@@ -61,7 +61,7 @@ class Games(commands.Cog):
     async def roulette(self, ctx, bet_amount: int, bet_type: str, bet_value: str):
         """
         Joga roleta
-        Uso: /roleta <valor> <tipo> <aposta>
+        Usage: /roulette <amount> <type> <bet>
         Tipos: numero (0-36), cor (vermelho/preto), paridade (par/impar), altura (baixo/alto)
         """
         if not await ensure_not_playing(ctx):
@@ -100,35 +100,35 @@ class Games(commands.Cog):
             
             # Create result embed
             embed = discord.Embed(
-                title=f'🎰 Roleta Europeia - {ctx.author.display_name}',
+                title=f'🎰 European Roulette - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
             color_emoji = {'vermelho': '🔴', 'preto': '⚫', 'verde': '🟢'}
             embed.add_field(
-                name='Resultado',
+                name='Result',
                 value=f'{color_emoji.get(color, "⚪")} **{number}** ({color})',
                 inline=False
             )
             
-            embed.add_field(name='Sua Aposta', value=f'{bet_type}: {bet_value}', inline=True)
-            embed.add_field(name='Valor', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Your Bet', value=f'{bet_type}: {bet_value}', inline=True)
+            embed.add_field(name='Amount', value=f'{bet_amount:,} 🪙', inline=True)
             
             if won:
                 embed.add_field(
-                    name='🎉 GANHOU!',
+                    name='🎉 WON!',
                     value=f'+{net_change:,} 🪙 (multiplicador: {multiplier}x)',
                     inline=False
                 )
             else:
                 embed.add_field(
-                    name='❌ Perdeu',
+                    name='❌ Lost',
                     value=f'{net_change:,} 🪙',
                     inline=False
                 )
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await ctx.send(embed=embed)
             
@@ -177,17 +177,17 @@ class Games(commands.Cog):
             
             # Create result embed
             embed = discord.Embed(
-                title=f'🎰 Caça-Níqueis - {ctx.author.display_name}',
+                title=f'🎰 Slot Machine - {ctx.author.display_name}',
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
             embed.add_field(
-                name='Resultado',
+                name='Result',
                 value=f'**{SlotsGame.format_reels(reels)}**',
                 inline=False
             )
             
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             
             if won:
                 embed.add_field(
@@ -203,7 +203,7 @@ class Games(commands.Cog):
                 )
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await ctx.send(embed=embed)
             
@@ -255,10 +255,10 @@ class Games(commands.Cog):
                         dice_emoji = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
                         result_text = f'{dice_emoji[roll-1]} **{roll}**'
                     else:
-                        await ctx.send('❌ Tipo de aposta inválido!')
+                        await ctx.send('❌ Invalid bet type!')
                         return
                 except ValueError:
-                    await ctx.send('❌ Tipo de aposta inválido!')
+                    await ctx.send('❌ Invalid bet type!')
                     return
             
             # Process bet
@@ -281,25 +281,25 @@ class Games(commands.Cog):
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
-            embed.add_field(name='Resultado', value=result_text, inline=False)
-            embed.add_field(name='Sua Aposta', value=bet_type, inline=True)
-            embed.add_field(name='Valor', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Result', value=result_text, inline=False)
+            embed.add_field(name='Your Bet', value=bet_type, inline=True)
+            embed.add_field(name='Amount', value=f'{bet_amount:,} 🪙', inline=True)
             
             if won:
                 embed.add_field(
-                    name='🎉 GANHOU!',
+                    name='🎉 WON!',
                     value=f'+{net_change:,} 🪙 ({multiplier}x)',
                     inline=False
                 )
             else:
                 embed.add_field(
-                    name='❌ Perdeu',
+                    name='❌ Lost',
                     value=f'{net_change:,} 🪙',
                     inline=False
                 )
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await ctx.send(embed=embed)
             
@@ -341,7 +341,7 @@ class Games(commands.Cog):
             
             embed.add_field(name='🎴 Sua Mão', value=game.get_player_hand_str(), inline=False)
             embed.add_field(name='🂠 Mão do Dealer', value=game.get_dealer_hand_str(hide_second=True), inline=False)
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             
             msg = await ctx.send(embed=embed)
             
@@ -438,14 +438,14 @@ class Games(commands.Cog):
             if result == 'player_blackjack':
                 embed.add_field(name='🎉 BLACKJACK!', value=f'+{net_change:,} 🪙', inline=False)
             elif result == 'player_win':
-                embed.add_field(name='🎉 VOCÊ GANHOU!', value=f'+{net_change:,} 🪙', inline=False)
+                embed.add_field(name='🎉 YOU WON!', value=f'+{net_change:,} 🪙', inline=False)
             elif result == 'dealer_win':
                 embed.add_field(name='❌ Dealer Ganhou', value=f'{net_change:,} 🪙', inline=False)
             elif result == 'push':
-                embed.add_field(name='🤝 Empate', value='Aposta devolvida', inline=False)
+                embed.add_field(name='🤝 Tie', value='Bet returned', inline=False)
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await msg.edit(embed=embed)
             
@@ -527,13 +527,13 @@ class Games(commands.Cog):
             )
             
             grid_display = TigrinhoGame.format_grid(grid)
-            embed.add_field(name='Resultado', value=f'```\n{grid_display}\n```', inline=False)
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Result', value=f'```\n{grid_display}\n```', inline=False)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             
             if won:
                 win_text = '\n'.join(win_descriptions)
                 embed.add_field(
-                    name='🎉 GANHOU!',
+                    name='🎉 WON!',
                     value=f'{win_text}\n\n**Total: +{net_change:,} 🪙 ({total_multiplier:.0f}x)**',
                     inline=False
                 )
@@ -545,7 +545,7 @@ class Games(commands.Cog):
                 )
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await msg.edit(embed=embed)
             
@@ -592,7 +592,7 @@ class Games(commands.Cog):
                 color=discord.Color.blue()
             )
             
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             embed.add_field(name='🎯 Meta', value=f'{target_multiplier:.2f}x', inline=True)
             
             msg = await ctx.send(embed=embed)
@@ -613,7 +613,7 @@ class Games(commands.Cog):
                     color=discord.Color.blue()
                 )
                 
-                embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+                embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
                 embed.add_field(name='🎯 Meta', value=f'{target_multiplier:.2f}x', inline=True)
                 
                 await msg.edit(embed=embed)
@@ -639,17 +639,17 @@ class Games(commands.Cog):
             if won:
                 embed = discord.Embed(
                     title=f'🚀 Crash - {ctx.author.display_name}',
-                    description=f'✅ Você sacou em **{target_multiplier:.2f}x**!',
+                    description=f'✅ You cashed out at **{target_multiplier:.2f}x**!',
                     color=discord.Color.green()
                 )
                 embed.add_field(
-                    name='🎉 GANHOU!',
+                    name='🎉 WON!',
                     value=f'+{net_change:,} 🪙 ({target_multiplier:.2f}x)',
                     inline=False
                 )
                 embed.add_field(
                     name='Crash Point',
-                    value=f'O jogo crashou em {crash_point:.2f}x',
+                    value=f'The game crashed at {crash_point:.2f}x',
                     inline=False
                 )
             else:
@@ -659,15 +659,15 @@ class Games(commands.Cog):
                     color=discord.Color.red()
                 )
                 embed.add_field(
-                    name='❌ Perdeu',
+                    name='❌ Lost',
                     value=f'{net_change:,} 🪙\nCrash antes do alvo {target_multiplier:.2f}x',
                     inline=False
                 )
             
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await msg.edit(embed=embed)
             
@@ -683,7 +683,7 @@ class Games(commands.Cog):
     @commands.command(name='double', aliases=['cor', 'color'])
     async def double(self, ctx, bet_amount: int, bet_color: str):
         """
-        Joga Double - aposta em cores
+        Play Double - bet on colors
         Uso: /double <valor> <cor>
         Cores: vermelho/red, preto/black, branco/white
         """
@@ -714,8 +714,8 @@ class Games(commands.Cog):
                 color=discord.Color.purple()
             )
             
-            embed.add_field(name='Sua Aposta', value=bet_color.title(), inline=True)
-            embed.add_field(name='Valor', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Your Bet', value=bet_color.title(), inline=True)
+            embed.add_field(name='Amount', value=f'{bet_amount:,} 🪙', inline=True)
             
             wheel_display = DoubleGame.format_wheel_animation()
             embed.add_field(name='Roleta', value=wheel_display, inline=False)
@@ -739,8 +739,8 @@ class Games(commands.Cog):
                     description='🎲 Girando a roleta...',
                     color=discord.Color.purple()
                 )
-                embed.add_field(name='Sua Aposta', value=bet_color.title(), inline=True)
-                embed.add_field(name='Valor', value=f'{bet_amount:,} 🪙', inline=True)
+                embed.add_field(name='Your Bet', value=bet_color.title(), inline=True)
+                embed.add_field(name='Amount', value=f'{bet_amount:,} 🪙', inline=True)
                 embed.add_field(name='Roleta', value=wheel_display, inline=False)
                 await msg.edit(embed=embed)
             
@@ -769,23 +769,23 @@ class Games(commands.Cog):
             )
             
             embed.add_field(
-                name='Resultado',
+                name='Result',
                 value=DoubleGame.format_result(result),
                 inline=False
             )
             
-            embed.add_field(name='Sua Aposta', value=bet_color.title(), inline=True)
-            embed.add_field(name='Valor', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Your Bet', value=bet_color.title(), inline=True)
+            embed.add_field(name='Amount', value=f'{bet_amount:,} 🪙', inline=True)
             
             if won:
                 embed.add_field(
-                    name='🎉 GANHOU!',
+                    name='🎉 WON!',
                     value=f'+{net_change:,} 🪙 ({multiplier:.0f}x)',
                     inline=False
                 )
             else:
                 embed.add_field(
-                    name='❌ Perdeu',
+                    name='❌ Lost',
                     value=f'{net_change:,} 🪙',
                     inline=False
                 )
@@ -798,7 +798,7 @@ class Games(commands.Cog):
             )
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await msg.edit(embed=embed)
             
@@ -851,7 +851,7 @@ class Games(commands.Cog):
             
             grid_display = game.format_grid()
             embed.add_field(name='Grade', value=f'```\n{grid_display}\n```', inline=False)
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             embed.add_field(name='Multiplicador Atual', value=f'{game.get_multiplier():.2f}x', inline=True)
             embed.add_field(name='Tiles Seguros Restantes', value=f'{game.get_safe_tiles_remaining()}', inline=True)
             
@@ -882,21 +882,21 @@ class Games(commands.Cog):
                         
                         embed = discord.Embed(
                             title=f'💣 Mines - {ctx.author.display_name}',
-                            description=f'✅ Você sacou com segurança!',
+                            description=f'✅ You cashed out safely!',
                             color=discord.Color.green()
                         )
                         
                         grid_display = game.format_grid(reveal_all=True)
                         embed.add_field(name='Grade Final', value=f'```\n{grid_display}\n```', inline=False)
                         embed.add_field(
-                            name='🎉 GANHOU!',
+                            name='🎉 WON!',
                             value=f'+{net_change:,} 🪙 ({multiplier:.2f}x)',
                             inline=False
                         )
                         embed.add_field(name='Tiles Revelados', value=f'{len(game.revealed)}/{game.safe_tiles}', inline=True)
                         
                         user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-                        embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                        embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
                         
                         await ctx.send(embed=embed)
                         break
@@ -931,20 +931,20 @@ class Games(commands.Cog):
                                 
                                 embed = discord.Embed(
                                     title=f'💣 Mines - {ctx.author.display_name}',
-                                    description='💥 Você acertou uma mina!',
+                                    description='💥 You hit a mine!',
                                     color=discord.Color.red()
                                 )
                                 
                                 grid_display = game.format_grid(reveal_all=True)
                                 embed.add_field(name='Grade Final', value=f'```\n{grid_display}\n```', inline=False)
                                 embed.add_field(
-                                    name='❌ Perdeu',
+                                    name='❌ Lost',
                                     value=f'{net_change:,} 🪙',
                                     inline=False
                                 )
                                 
                                 user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-                                embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                                embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
                                 
                                 await ctx.send(embed=embed)
                                 break
@@ -959,7 +959,7 @@ class Games(commands.Cog):
                                 
                                 grid_display = game.format_grid()
                                 embed.add_field(name='Grade', value=f'```\n{grid_display}\n```', inline=False)
-                                embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+                                embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
                                 embed.add_field(name='Multiplicador Atual', value=f'{current_multiplier:.2f}x', inline=True)
                                 embed.add_field(name='Tiles Seguros Restantes', value=f'{game.get_safe_tiles_remaining()}', inline=True)
                                 embed.add_field(
@@ -986,7 +986,7 @@ class Games(commands.Cog):
                                     
                                     embed = discord.Embed(
                                         title=f'💣 Mines - {ctx.author.display_name}',
-                                        description='🏆 Você revelou todos os tiles seguros!',
+                                        description='🏆 You revealed all safe tiles!',
                                         color=discord.Color.gold()
                                     )
                                     
@@ -999,7 +999,7 @@ class Games(commands.Cog):
                                     )
                                     
                                     user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-                                    embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                                    embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
                                     
                                     await ctx.send(embed=embed)
                                     break
@@ -1070,7 +1070,7 @@ class Games(commands.Cog):
             # Show flipping animation
             embed = discord.Embed(
                 title='🪙 Cara ou Coroa',
-                description='Girando a moeda...',
+                description='Flipping the coin...',
                 color=discord.Color.blue()
             )
             msg = await ctx.send(embed=embed)
@@ -1104,25 +1104,25 @@ class Games(commands.Cog):
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
-            embed.add_field(name='Resultado', value=CoinFlipGame.format_result(result), inline=False)
+            embed.add_field(name='Result', value=CoinFlipGame.format_result(result), inline=False)
             embed.add_field(name='Sua Escolha', value=choice.title(), inline=True)
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             
             if won:
                 embed.add_field(
-                    name='🎉 GANHOU!',
+                    name='🎉 WON!',
                     value=f'+{net_change:,} 🪙 ({multiplier}x)',
                     inline=False
                 )
             else:
                 embed.add_field(
-                    name='❌ Perdeu',
+                    name='❌ Lost',
                     value=f'{net_change:,} 🪙',
                     inline=False
                 )
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await msg.edit(embed=embed)
             
@@ -1189,8 +1189,8 @@ class Games(commands.Cog):
                 color=discord.Color.green() if won else discord.Color.red()
             )
             
-            embed.add_field(name='Resultado', value=WheelGame.format_result(segment), inline=False)
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Result', value=WheelGame.format_result(segment), inline=False)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             
             if won:
                 embed.add_field(
@@ -1206,7 +1206,7 @@ class Games(commands.Cog):
                 )
             
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             
             await msg.edit(embed=embed)
             
@@ -1237,11 +1237,11 @@ class Games(commands.Cog):
             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'plinko', won, multiplier)
             if not success: await ctx.send(MSG.erro_processar()); return
             embed = discord.Embed(title=f'🎯 Plinko - {ctx.author.display_name}', description=PlinkoGame.format_board(slot, risk), color=discord.Color.green() if won else discord.Color.red())
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             embed.add_field(name='Slot', value=f'**{slot}** ({multiplier}x)', inline=True)
-            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙', inline=False)
+            embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙', inline=False)
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
@@ -1267,11 +1267,11 @@ class Games(commands.Cog):
             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'limbo', won, multiplier)
             if not success: await ctx.send(MSG.erro_processar()); return
             embed = discord.Embed(title=f'🎲 Limbo - {ctx.author.display_name}', description=LimboGame.format_result(result, target, won), color=discord.Color.green() if won else discord.Color.red())
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
             embed.add_field(name='Alvo', value=f'{target}x', inline=True)
-            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
@@ -1299,10 +1299,10 @@ class Games(commands.Cog):
             embed = discord.Embed(title=f'🎫 Raspadinha - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
             embed.add_field(name='Cartão', value=ScratchCardGame.format_card_revealed(card, best_index), inline=False)
             embed.add_field(name='Prêmio', value=f'{best_prize["emoji"]} {best_prize["label"]}', inline=True)
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
-            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
@@ -1334,10 +1334,10 @@ class Games(commands.Cog):
             embed.add_field(name='Seus Números', value=KenoGame.format_numbers(numbers_list, drawn), inline=False)
             embed.add_field(name='Sorteados', value=KenoGame.format_numbers(drawn), inline=False)
             embed.add_field(name='Acertos', value=f'**{matches}/{len(numbers_list)}**', inline=True)
-            embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
-            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
+            embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
@@ -1367,10 +1367,10 @@ class Games(commands.Cog):
             embed.add_field(name='Jogador', value=BaccaratGame.format_hand(player_hand, player_value), inline=False)
             embed.add_field(name='Banca', value=BaccaratGame.format_hand(banker_hand, banker_value), inline=False)
             embed.add_field(name='Vencedor', value=winner.title(), inline=True)
-            embed.add_field(name='Sua Aposta', value=bet_type.title(), inline=True)
-            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            embed.add_field(name='Your Bet', value=bet_type.title(), inline=True)
+            embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
@@ -1399,9 +1399,9 @@ class Games(commands.Cog):
             embed.add_field(name='Carta Anterior', value=HiLoGame.format_card(current), inline=True)
             embed.add_field(name='Nova Carta', value=HiLoGame.format_card(next_card), inline=True)
             embed.add_field(name='Sua Escolha', value=guess.title(), inline=True)
-            embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+            embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
             await msg.edit(embed=embed)
             new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
             if new_achievements:
@@ -1434,9 +1434,9 @@ class Games(commands.Cog):
                         success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', True, multiplier)
                         embed = discord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='✅ Cash out!', color=discord.Color.green())
                         embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
-                        embed.add_field(name='🎉 GANHOU!', value=f'+{net_change:,} 🪙 ({multiplier:.2f}x)', inline=False)
+                        embed.add_field(name='🎉 WON!', value=f'+{net_change:,} 🪙 ({multiplier:.2f}x)', inline=False)
                         user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-                        embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                        embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
                         await ctx.send(embed=embed)
                         break
                     try:
@@ -1446,9 +1446,9 @@ class Games(commands.Cog):
                             success, net_change = self.economy.process_bet(str(ctx.author.id), ctx.author.name, bet_amount, 'tower', False, 0)
                             embed = discord.Embed(title=f'🗼 Tower - {ctx.author.display_name}', description='💥 Tile errado!', color=discord.Color.red())
                             embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
-                            embed.add_field(name='❌ Perdeu', value=f'{net_change:,} 🪙', inline=False)
+                            embed.add_field(name='❌ Lost', value=f'{net_change:,} 🪙', inline=False)
                             user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-                            embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                            embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
                             await ctx.send(embed=embed)
                             break
                         else:
@@ -1458,7 +1458,7 @@ class Games(commands.Cog):
                                 embed.add_field(name='Torre', value=f'```\n{game.format_tower(True)}\n```', inline=False)
                                 embed.add_field(name='🏆 VITÓRIA!', value=f'+{net_change:,} 🪙 ({current_mult:.2f}x)', inline=False)
                                 user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-                                embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                                embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
                                 await ctx.send(embed=embed)
                                 break
                             embed = discord.Embed(title='🗼 Tower', description=f'✅ Seguro! Nível {game.current_level}\n\nEscolha próximo tile ou `sair`', color=discord.Color.blue())
@@ -1521,11 +1521,11 @@ class Games(commands.Cog):
                 
                 embed = discord.Embed(title=f'🎰 Video Poker - {ctx.author.display_name}', color=discord.Color.green() if won else discord.Color.red())
                 embed.add_field(name='Mão Final', value=game.format_hand(show_held=True), inline=False)
-                embed.add_field(name='Resultado', value=hand_name, inline=True)
-                embed.add_field(name='Aposta', value=f'{bet_amount:,} 🪙', inline=True)
-                embed.add_field(name='🎉 GANHOU!' if won else '❌ Perdeu', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
+                embed.add_field(name='Result', value=hand_name, inline=True)
+                embed.add_field(name='Bet', value=f'{bet_amount:,} 🪙', inline=True)
+                embed.add_field(name='🎉 WON!' if won else '❌ Lost', value=f'{net_change:+,} 🪙' + (f' ({multiplier}x)' if won else ''), inline=False)
                 user = self.db.get_user(str(ctx.author.id), ctx.author.name)
-                embed.set_footer(text=f'Saldo atual: {user["coins"]:,} 🪙')
+                embed.set_footer(text=f'Current balance: {user["coins"]:,} 🪙')
                 await ctx.send(embed=embed)
                 
                 new_achievements = self.achievements.check_achievements(str(ctx.author.id), ctx.author.name)
@@ -1542,7 +1542,7 @@ class Games(commands.Cog):
         """Lista todos os jogos disponíveis"""
         embed = discord.Embed(
             title='🎰 Jogos de Cassino Disponíveis',
-            description='Teste sua sorte e ganhe moedas! 18 jogos disponíveis!',
+            description='Test your luck and win coins! 18 games available!',
             color=discord.Color.purple()
         )
         
@@ -1578,7 +1578,7 @@ class Games(commands.Cog):
         )
         
         embed.add_field(
-            name='🎰 Caça-Níqueis',
+            name='🎰 Slot Machine',
             value=f'`{PREFIX}slots <valor>`\nCombine 3 símbolos!',
             inline=True
         )
@@ -1656,21 +1656,21 @@ class Games(commands.Cog):
             inline=True
         )
         
-        embed.set_footer(text='Aposta mínima: 10 🪙 | Use /saldo para ver suas moedas')
+        embed.set_footer(text='Minimum bet: 10 🪙 | Use /balance to check your coins')
         
         await ctx.send(embed=embed)
 
     @commands.command(name='roubar', aliases=['rob', 'steal', 'heist'])
     async def heist(self, ctx, target: discord.Member):
         """
-        Tenta roubar moedas de outro jogador!
+        Try to steal coins from another player!
         O alvo tem 15 segundos para defender respondendo um desafio.
         Uso: /roubar @usuario
         """
         
         # Verificações básicas
         if target.id == ctx.author.id:
-            await ctx.send('❌ Você não pode roubar de si mesmo, seu maluco!')
+            await ctx.send('❌ You can\'t steal from yourself!')
             return
         
         if target.bot:
@@ -1687,13 +1687,13 @@ class Games(commands.Cog):
                 await ctx.send(f'⏰ Calma aí ladrão! Espera mais **{minutes}m {seconds}s** antes de tentar roubar de novo.')
                 return
         
-        # Verificar saldos
+        # Check balances
         robber = self.db.get_user(str(ctx.author.id), ctx.author.name)
         victim = self.db.get_user(str(target.id), target.name)
         
         # Verificar se o ladrão está negativado
         if robber['coins'] < 0:
-            await ctx.send(f'❌ Você está negativado! Pague suas dívidas primeiro (saldo: **{robber["coins"]:,} 🪙**)')
+            await ctx.send(f'❌ You are in debt! Pay off your debts first (balance: **{robber["coins"]:,} 🪙**)')
             return
         
         can_rob, error_msg = HeistGame.can_rob(robber['coins'], victim['coins'])
@@ -1705,7 +1705,7 @@ class Games(commands.Cog):
         steal_amount = HeistGame.calculate_steal_amount(victim['coins'])
         
         # Debug log
-        print(f"[ROUBO] Vítima: {target.name} | Saldo: {victim['coins']:,} | Valor roubado: {steal_amount:,}")
+        print(f"[HEIST] Victim: {target.name} | Balance: {victim['coins']:,} | Amount stolen: {steal_amount:,}")
         
         # Gerar desafio de defesa
         challenge_type, question, correct_answer = HeistGame.generate_challenge()
@@ -1797,7 +1797,7 @@ class Games(commands.Cog):
                 penalty_text = f'**{ctx.author.display_name}** pagou **{actual_penalty:,} 🪙** de multa!'
                 if went_negative:
                     new_balance = robber_balance - actual_penalty
-                    penalty_text += f'\n⚠️ **NEGATIVADO!** Saldo ficou em **{new_balance:,} 🪙**'
+                    penalty_text += f'\n⚠️ **IN DEBT!** Balance is now **{new_balance:,} 🪙**'
                 
                 embed.add_field(
                     name='💸 Penalidade do Ladrão',
@@ -1827,7 +1827,7 @@ class Games(commands.Cog):
                 
                 embed.add_field(
                     name='❌ Resposta Errada',
-                    value=f'Você disse: **{response.content}**\nCorreto era: **{correct_answer}**',
+                    value=f'You said: **{response.content}**\nCorrect was: **{correct_answer}**',
                     inline=False
                 )
                 

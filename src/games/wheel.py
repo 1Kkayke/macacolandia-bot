@@ -9,7 +9,7 @@ class WheelGame:
     
     # Wheel segments with multipliers and weights
     SEGMENTS = [
-        {'multiplier': 0, 'label': 'Perdeu', 'emoji': '❌', 'weight': 25},
+        {'multiplier': 0, 'label': 'Lost', 'emoji': '❌', 'weight': 25},
         {'multiplier': 0.5, 'label': 'Metade', 'emoji': '😐', 'weight': 20},
         {'multiplier': 1.2, 'label': '+20%', 'emoji': '🙂', 'weight': 18},
         {'multiplier': 1.5, 'label': '+50%', 'emoji': '😊', 'weight': 15},

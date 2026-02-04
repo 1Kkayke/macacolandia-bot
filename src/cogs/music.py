@@ -1,4 +1,4 @@
-"""Music commands cog - All music playback and queue management commands"""
+"""Music commands cog"""
 
 import discord
 from discord.ext import commands
@@ -7,30 +7,24 @@ from src.music.source import YTDLSource
 from src.music.queue import MusicQueue
 from src.config import PREFIX
 
-
-# Dictionary to store music queues for each guild
 music_queues = {}
 
 
 def get_queue(guild_id):
-    """Get or create a music queue for a guild"""
     if guild_id not in music_queues:
         music_queues[guild_id] = MusicQueue()
     return music_queues[guild_id]
 
 
 class Music(commands.Cog):
-    """Music playback commands"""
-    
     def __init__(self, bot):
         self.bot = bot
 
     async def play_next(self, ctx):
-        """Play the next song in the queue"""
         queue = get_queue(ctx.guild.id)
         
         if queue.is_empty():
-            await ctx.send(f'🎵 A fila acabou! Use `{PREFIX}play` para adicionar mais músicas.')
+            await ctx.send(f'🎵 Queue is empty! Use `{PREFIX}play` to add more songs.')
             return
 
         next_song = queue.get_next()
@@ -39,14 +33,14 @@ class Music(commands.Cog):
             if voice_client and voice_client.is_connected():
                 def after_playing(error):
                     if error:
-                        print(f'Erro ao reproduzir: {error}')
+                        print(f'Playback error: {error}')
                     asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop)
                 
                 voice_client.play(next_song, after=after_playing)
                 next_song.volume = queue.volume
                 
                 embed = discord.Embed(
-                    title='🎵 Tocando Agora',
+                    title='🎵 Now Playing',
                     description=f'[{next_song.title}]({next_song.data.get("webpage_url", "")})',
                     color=discord.Color.green()
                 )
@@ -54,23 +48,20 @@ class Music(commands.Cog):
                     embed.set_thumbnail(url=next_song.thumbnail)
                 if next_song.duration:
                     minutes, seconds = divmod(next_song.duration, 60)
-                    embed.add_field(name='Duração', value=f'{int(minutes)}:{int(seconds):02d}')
+                    embed.add_field(name='Duration', value=f'{int(minutes)}:{int(seconds):02d}')
                 embed.add_field(name='Volume', value=f'{int(queue.volume * 100)}%')
                 if next_song.requester:
-                    embed.set_footer(text=f'Pedido por {next_song.requester}')
+                    embed.set_footer(text=f'Requested by {next_song.requester}')
                 
                 await ctx.send(embed=embed)
 
-    @commands.command(name='play', aliases=['p', 'tocar'])
+    @commands.command(name='play', aliases=['p'])
     async def play(self, ctx, *, url_or_search: str):
-        """Toca uma música a partir de uma URL ou busca"""
-        
-        # Check if user is in a voice channel
+        """Play a song from URL or search"""
         if not ctx.author.voice:
-            await ctx.send('❌ Tu precisa tá num canal de voz porra!')
+            await ctx.send('❌ You need to be in a voice channel!')
             return
 
-        # Connect to voice channel if not connected
         if not ctx.voice_client:
             channel = ctx.author.voice.channel
             await channel.connect()
@@ -79,7 +70,6 @@ class Music(commands.Cog):
 
         async with ctx.typing():
             try:
-                # Add 'ytsearch:' prefix if it's not a URL
                 if not url_or_search.startswith('http'):
                     url_or_search = f'ytsearch:{url_or_search}'
                 
@@ -88,20 +78,19 @@ class Music(commands.Cog):
                 
                 queue = get_queue(ctx.guild.id)
                 
-                # If nothing is playing, play immediately
                 if not ctx.voice_client.is_playing():
                     queue.current = player
                     player.volume = queue.volume
                     
                     def after_playing(error):
                         if error:
-                            print(f'Erro ao reproduzir: {error}')
+                            print(f'Playback error: {error}')
                         asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop)
                     
                     ctx.voice_client.play(player, after=after_playing)
                     
                     embed = discord.Embed(
-                        title='🎵 Tocando Agora',
+                        title='🎵 Now Playing',
                         description=f'[{player.title}]({player.data.get("webpage_url", "")})',
                         color=discord.Color.green()
                     )
@@ -109,107 +98,105 @@ class Music(commands.Cog):
                         embed.set_thumbnail(url=player.thumbnail)
                     if player.duration:
                         minutes, seconds = divmod(player.duration, 60)
-                        embed.add_field(name='Duração', value=f'{int(minutes)}:{int(seconds):02d}')
+                        embed.add_field(name='Duration', value=f'{int(minutes)}:{int(seconds):02d}')
                     embed.add_field(name='Volume', value=f'{int(queue.volume * 100)}%')
-                    embed.set_footer(text=f'Pedido por {ctx.author.name}')
+                    embed.set_footer(text=f'Requested by {ctx.author.name}')
                     
                     await ctx.send(embed=embed)
                 else:
-                    # Add to queue
                     queue.add(player)
                     embed = discord.Embed(
-                        title='📋 Adicionado à Fila',
+                        title='📋 Added to Queue',
                         description=f'[{player.title}]({player.data.get("webpage_url", "")})',
                         color=discord.Color.orange()
                     )
                     if player.thumbnail:
                         embed.set_thumbnail(url=player.thumbnail)
-                    embed.add_field(name='Posição na fila', value=f'#{queue.size()}')
-                    embed.set_footer(text=f'Pedido por {ctx.author.name}')
+                    embed.add_field(name='Position', value=f'#{queue.size()}')
+                    embed.set_footer(text=f'Requested by {ctx.author.name}')
                     
                     await ctx.send(embed=embed)
                     
             except asyncio.TimeoutError:
-                await ctx.send('❌ Demorou demais pra buscar essa porra! Tenta de novo.')
+                await ctx.send('❌ Timed out! Try again.')
             except Exception as e:
                 error_msg = str(e).lower()
-                print(f'Erro ao carregar música: {str(e)}')
+                print(f'Error loading song: {str(e)}')
                 
                 if 'sign in' in error_msg or 'login' in error_msg or 'bot' in error_msg:
                     embed = discord.Embed(
-                        title='❌ YouTube Bloqueou!',
-                        description='O YouTube tá pedindo login ou detectou bot.',
+                        title='❌ YouTube Blocked!',
+                        description='YouTube is requesting login or detected bot.',
                         color=discord.Color.red()
                     )
                     embed.add_field(
-                        name='🔧 Soluções:',
+                        name='🔧 Solutions:',
                         value=(
-                            '**1. Tenta pesquisar em vez de URL:**\n'
-                            f'`{PREFIX}play nome da música`\n\n'
-                            '**2. Ou faça login no Chrome/Edge:**\n'
-                            '• Abra youtube.com no navegador\n'
-                            '• Faça login na sua conta\n'
-                            '• Reinicie o bot\n\n'
-                            '**3. Tenta outra música**'
+                            '**1. Try searching instead of URL:**\n'
+                            f'`{PREFIX}play song name`\n\n'
+                            '**2. Or login to Chrome/Edge:**\n'
+                            '• Open youtube.com in browser\n'
+                            '• Login to your account\n'
+                            '• Restart the bot\n\n'
+                            '**3. Try another song**'
                         ),
                         inline=False
                     )
-                    embed.set_footer(text='O bot tentará usar cookies do seu navegador automaticamente')
                     await ctx.send(embed=embed)
                 elif 'unavailable' in error_msg or 'not available' in error_msg:
-                    await ctx.send('❌ Essa música não tá disponível caralho! Tenta outra.')
+                    await ctx.send('❌ This song is unavailable! Try another.')
                 elif 'copyright' in error_msg:
-                    await ctx.send('❌ Essa música tem copyright bloqueado fdp! Tenta outra.')
+                    await ctx.send('❌ This song is blocked by copyright! Try another.')
                 else:
-                    await ctx.send(f'❌ Deu ruim ao carregar a música. Verifica a URL ou tenta outra busca mano.\n\n**Erro:** {str(e)[:150]}')
+                    await ctx.send(f'❌ Error loading song. Check the URL or try another search.\n\n**Error:** {str(e)[:150]}')
 
-    @commands.command(name='pause', aliases=['pausar'])
+    @commands.command(name='pause')
     async def pause(self, ctx):
-        """Pausa a música atual"""
+        """Pause current song"""
         if ctx.voice_client and ctx.voice_client.is_playing():
             ctx.voice_client.pause()
-            await ctx.send('⏸️ Pausei essa porra!')
+            await ctx.send('⏸️ Paused!')
         else:
-            await ctx.send('❌ Não tem nada tocando não caralho.')
+            await ctx.send('❌ Nothing is playing.')
 
-    @commands.command(name='resume', aliases=['retomar', 'continuar'])
+    @commands.command(name='resume')
     async def resume(self, ctx):
-        """Retoma a música pausada"""
+        """Resume paused song"""
         if ctx.voice_client and ctx.voice_client.is_paused():
             ctx.voice_client.resume()
-            await ctx.send('▶️ Despausei caralho!')
+            await ctx.send('▶️ Resumed!')
         else:
-            await ctx.send('❌ Não tem nada pausado não.')
+            await ctx.send('❌ Nothing is paused.')
 
-    @commands.command(name='stop', aliases=['parar'])
+    @commands.command(name='stop')
     async def stop(self, ctx):
-        """Para a música e limpa a fila"""
+        """Stop music and clear queue"""
         if ctx.voice_client:
             queue = get_queue(ctx.guild.id)
             queue.clear()
             ctx.voice_client.stop()
-            await ctx.send('⏹️ Parei tudo e limpei a fila caralho!')
+            await ctx.send('⏹️ Stopped and cleared queue!')
         else:
-            await ctx.send('❌ Eu nem tô no canal de voz fdp.')
+            await ctx.send('❌ Not in a voice channel.')
 
-    @commands.command(name='skip', aliases=['pular', 's'])
+    @commands.command(name='skip', aliases=['s'])
     async def skip(self, ctx):
-        """Pula para a próxima música"""
+        """Skip to next song"""
         if ctx.voice_client and ctx.voice_client.is_playing():
             ctx.voice_client.stop()
-            await ctx.send('⏭️ Pulei essa merda!')
+            await ctx.send('⏭️ Skipped!')
         else:
-            await ctx.send('❌ Não tem nada tocando porra.')
+            await ctx.send('❌ Nothing is playing.')
 
-    @commands.command(name='volume', aliases=['vol', 'v'])
+    @commands.command(name='volume', aliases=['vol'])
     async def volume(self, ctx, volume: int):
-        """Define o volume (0-100)"""
+        """Set volume (0-100)"""
         if not ctx.voice_client:
-            await ctx.send('❌ O bot não está em um canal de voz.')
+            await ctx.send('❌ Bot is not in a voice channel.')
             return
 
         if not 0 <= volume <= 100:
-            await ctx.send('❌ O volume deve estar entre 0 e 100!')
+            await ctx.send('❌ Volume must be between 0 and 100!')
             return
 
         queue = get_queue(ctx.guild.id)
@@ -218,13 +205,13 @@ class Music(commands.Cog):
         if ctx.voice_client.source:
             ctx.voice_client.source.volume = queue.volume
 
-        await ctx.send(f'🔊 Volume definido para {volume}%!')
+        await ctx.send(f'🔊 Volume set to {volume}%!')
 
-    @commands.command(name='volumeup', aliases=['volup', 'v+', 'aumentar'])
+    @commands.command(name='volumeup', aliases=['v+'])
     async def volume_up(self, ctx):
-        """Aumenta o volume em 10%"""
+        """Increase volume by 10%"""
         if not ctx.voice_client:
-            await ctx.send('❌ O bot não está em um canal de voz.')
+            await ctx.send('❌ Bot is not in a voice channel.')
             return
 
         queue = get_queue(ctx.guild.id)
@@ -234,13 +221,13 @@ class Music(commands.Cog):
         if ctx.voice_client.source:
             ctx.voice_client.source.volume = queue.volume
 
-        await ctx.send(f'🔊 Volume aumentado para {int(new_volume * 100)}%!')
+        await ctx.send(f'🔊 Volume increased to {int(new_volume * 100)}%!')
 
-    @commands.command(name='volumedown', aliases=['voldown', 'v-', 'diminuir'])
+    @commands.command(name='volumedown', aliases=['v-'])
     async def volume_down(self, ctx):
-        """Diminui o volume em 10%"""
+        """Decrease volume by 10%"""
         if not ctx.voice_client:
-            await ctx.send('❌ O bot não está em um canal de voz.')
+            await ctx.send('❌ Bot is not in a voice channel.')
             return
 
         queue = get_queue(ctx.guild.id)
@@ -250,25 +237,22 @@ class Music(commands.Cog):
         if ctx.voice_client.source:
             ctx.voice_client.source.volume = queue.volume
 
-        await ctx.send(f'🔊 Volume diminuído para {int(new_volume * 100)}%!')
+        await ctx.send(f'🔊 Volume decreased to {int(new_volume * 100)}%!')
 
-    @commands.command(name='queue', aliases=['q', 'fila'])
+    @commands.command(name='queue', aliases=['q'])
     async def queue_command(self, ctx):
-        """Mostra a fila de músicas"""
+        """Show music queue"""
         queue = get_queue(ctx.guild.id)
         
         if queue.current is None and queue.is_empty():
-            await ctx.send('📋 A fila está vazia!')
+            await ctx.send('📋 Queue is empty!')
             return
 
-        embed = discord.Embed(
-            title='📋 Fila de Músicas',
-            color=discord.Color.purple()
-        )
+        embed = discord.Embed(title='📋 Music Queue', color=discord.Color.purple())
 
         if queue.current:
             embed.add_field(
-                name='🎵 Tocando Agora',
+                name='🎵 Now Playing',
                 value=f'[{queue.current.title}]({queue.current.data.get("webpage_url", "")})',
                 inline=False
             )
@@ -279,28 +263,28 @@ class Music(commands.Cog):
                 queue_list.append(f'{i}. [{song.title}]({song.data.get("webpage_url", "")})')
             
             embed.add_field(
-                name=f'🎼 Próximas ({queue.size()} músicas)',
-                value='\n'.join(queue_list) if queue_list else 'Nenhuma música na fila',
+                name=f'🎼 Up Next ({queue.size()} songs)',
+                value='\n'.join(queue_list) if queue_list else 'No songs in queue',
                 inline=False
             )
             
             if queue.size() > 10:
-                embed.set_footer(text=f'E mais {queue.size() - 10} músicas...')
+                embed.set_footer(text=f'And {queue.size() - 10} more...')
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='nowplaying', aliases=['np', 'tocando', 'atual'])
+    @commands.command(name='nowplaying', aliases=['np'])
     async def now_playing(self, ctx):
-        """Mostra a música que está tocando agora"""
+        """Show currently playing song"""
         queue = get_queue(ctx.guild.id)
         
         if queue.current is None:
-            await ctx.send('❌ Nenhuma música está tocando no momento.')
+            await ctx.send('❌ No song is playing.')
             return
 
         song = queue.current
         embed = discord.Embed(
-            title='🎵 Tocando Agora',
+            title='🎵 Now Playing',
             description=f'[{song.title}]({song.data.get("webpage_url", "")})',
             color=discord.Color.green()
         )
@@ -310,46 +294,45 @@ class Music(commands.Cog):
         
         if song.duration:
             minutes, seconds = divmod(song.duration, 60)
-            embed.add_field(name='Duração', value=f'{int(minutes)}:{int(seconds):02d}')
+            embed.add_field(name='Duration', value=f'{int(minutes)}:{int(seconds):02d}')
         
         embed.add_field(name='Volume', value=f'{int(queue.volume * 100)}%')
         
         if song.requester:
-            embed.set_footer(text=f'Pedido por {song.requester}')
+            embed.set_footer(text=f'Requested by {song.requester}')
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='clear', aliases=['limpar', 'clearqueue'])
+    @commands.command(name='clear')
     async def clear_queue(self, ctx):
-        """Limpa a fila de músicas"""
+        """Clear the queue"""
         queue = get_queue(ctx.guild.id)
         queue.clear()
-        await ctx.send('🗑️ Fila limpa!')
+        await ctx.send('🗑️ Queue cleared!')
 
-    @commands.command(name='shuffle', aliases=['embaralhar', 'misturar'])
+    @commands.command(name='shuffle')
     async def shuffle_queue(self, ctx):
-        """Embaralha a fila de músicas"""
+        """Shuffle the queue"""
         queue = get_queue(ctx.guild.id)
         
         if queue.is_empty():
-            await ctx.send('❌ A fila está vazia!')
+            await ctx.send('❌ Queue is empty!')
             return
 
         queue.shuffle()
-        await ctx.send('🔀 Fila embaralhada!')
+        await ctx.send('🔀 Queue shuffled!')
 
-    @commands.command(name='leave', aliases=['disconnect', 'sair', 'desconectar'])
+    @commands.command(name='leave', aliases=['disconnect'])
     async def leave(self, ctx):
-        """Desconecta o bot do canal de voz"""
+        """Disconnect from voice channel"""
         if ctx.voice_client:
             queue = get_queue(ctx.guild.id)
             queue.clear()
             await ctx.voice_client.disconnect()
-            await ctx.send('👋 Desconectado do canal de voz!')
+            await ctx.send('👋 Disconnected from voice channel!')
         else:
-            await ctx.send('❌ O bot não está em um canal de voz.')
+            await ctx.send('❌ Bot is not in a voice channel.')
 
 
 async def setup(bot):
-    """Setup function to add the cog to the bot"""
     await bot.add_cog(Music(bot))

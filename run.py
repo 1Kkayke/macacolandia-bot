@@ -1,7 +1,5 @@
 """
-Entry point for Macacolândia Music Bot
-
-This script runs the bot from the src package.
+Entry point for the bot
 """
 
 if __name__ == '__main__':
